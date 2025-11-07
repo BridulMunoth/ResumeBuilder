@@ -1,5 +1,5 @@
-import Resume from "../models/Resume.model";
-import User from "../models/User";
+import Resume from "../models/Resume.model.js";
+import User from "../models/User.model.js";
 import bcrypt from 'bcrypt'
 
 const generateToken = (userId) => {

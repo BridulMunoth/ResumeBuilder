@@ -1,13 +1,13 @@
 import { json } from "express";
-import Resume from "../models/Resume.model";
-import imageKit from "../configs/imageKit";
+import Resume from "../models/Resume.model.js";
+import imagekit from "../configs/imageKit.js";
 import fs from "fs";
 
 // controller for Createing new Resume
 // POST: /api/resumes/create
 export const createResume = async (req, res) => {
     try {
-        const userId = req.user._id;
+        const userId = req.userId;
         const { title } = req.body;
 
         //create new resume
@@ -23,7 +23,7 @@ export const createResume = async (req, res) => {
 // DELETE: /api/resumes/delete
 export const deleteResume = async (req, res) => {
     try {
-        const userId = req.user._id;
+        const userId = req.userId;
         const { resumeId } = req.body;
 
         await Resume.findOneAndDelete({ userId, _id: resumeId });
@@ -39,7 +39,7 @@ export const deleteResume = async (req, res) => {
 // GET: /api/resumes/get
 export const getResumeById = async (req, res) => {
     try {
-        const userId = req.user._id;
+        const userId = req.userId;
         const { resumeId } = req.body;
 
         const resume = await Resume.findOne(
@@ -88,7 +88,7 @@ export const updateResume = async (req, res) => {
         if (image) {
 
             const imageBufferData = fs.createReadStream(image.path)
-            const response = await imageKit.files.upload({
+            const response = await imagekit.files.upload({
                 file: imageBufferData,
                 fileName: 'resume.png',
                 folder: 'user-resumes',
@@ -104,7 +104,7 @@ export const updateResume = async (req, res) => {
 
             console.log(response);
 
-            const resume = findByIdAndUpdate({ userId, _id: resumeId }, resumeDataCopy, { new: true });
+            const resume = await findByIdAndUpdate({ userId, _id: resumeId }, resumeDataCopy, { new: true });
 
 
             return res.status(200).json({ message: "Resume updated successfully", resume });

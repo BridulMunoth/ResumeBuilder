@@ -26,10 +26,11 @@ const UserSchema = new mongoose.Schema(
             match: [/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*\W).{8,20}$/,
                 "Password must be 8-20 characters with upper & lower case letters, a number, and a special character."],
             select: false  // Hides password from query results by default for security
-        }}, { timestamps: true })
+        }
+    }, { timestamps: true })
 
-userSchema.methods.comparePassword = function (password){
-    return bcrypt.compareSync(password,this.password)
+UserSchema.methods.comparePassword = function (password) {
+    return bcrypt.compareSync(password, this.password)
 }
 
 const User = mongoose.model("User", UserSchema)
