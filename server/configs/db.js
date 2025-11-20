@@ -9,7 +9,7 @@ const connectDB = async () => {
 
     // Get URI and project name
     let mongodbURI = process.env.MONGODB_URI;
-    const projectName = 'Resume Builder';
+    const projectName = 'ResumeBuilder';
 
     // Check if URI is set
     if (!mongodbURI) {

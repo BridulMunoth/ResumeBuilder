@@ -117,6 +117,7 @@ export const uploadResume = async (req, res) => {
                                 name: { type: String },
                                 type: { type: String },
                                 description: { type: String },
+                                link: { type: String },
                                 },
                             ],
                             education: [
