@@ -11,7 +11,7 @@ export const createResume = async (req, res) => {
         const { title } = req.body;
 
         //create new resume
-        const newResume = new Resume.create({ userId, title })
+        const newResume = await Resume.create({ userId, title })
         //return success response
         return res.status(201).json({ message: 'Resume created successfully', resume: newResume })
     } catch (error) {

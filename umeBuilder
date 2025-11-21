@@ -1,0 +1,138 @@
+warning: in the working copy of 'client/src/components/ResumePreview.jsx', LF will be replaced by CRLF the next time Git touches it
+[1mdiff --git a/client/src/components/ResumePreview.jsx b/client/src/components/ResumePreview.jsx[m
+[1mindex fcd0006..954747c 100644[m
+[1m--- a/client/src/components/ResumePreview.jsx[m
+[1m+++ b/client/src/components/ResumePreview.jsx[m
+[36m@@ -11,73 +11,73 @@[m [mimport ExecutiveTemplate from './templates/ExecutiveTemplate'[m
+ import ExecutiveImageTemplate from './templates/ExecutiveImageTemplate'[m
+ import TechnicalTemplate from './templates/TechnicalTemplate'[m
+ [m
+[31m-const ResumePreview = ({data, template, accentColor, classes = ""}) => {[m
+[31m-[m
+[31m-    const renderTemplate = ()=>{[m
+[31m-        switch(template) {[m
+[31m-            case "modern":[m
+[31m-                return <ModernTemplate data={data}  accentColor={accentColor}/>[m
+[31m-            case "minimal":[m
+[31m-                return <MinimalTemplate data={data}  accentColor={accentColor}/>[m
+[31m-            case "minimal-image":[m
+[31m-                return <MinimalImageTemplate data={data}  accentColor={accentColor}/>[m
+[31m-            case "professional":[m
+[31m-                return <ProfessionalTemplate data={data}  accentColor={accentColor}/>[m
+[31m-            case "professional-image":[m
+[31m-                return <ProfessionalImageTemplate data={data}  accentColor={accentColor}/>[m
+[31m-            case "creative":[m
+[31m-                return <CreativeTemplate data={data}  accentColor={accentColor}/>[m
+[31m-            case "creative-image":[m
+[31m-                return <CreativeImageTemplate data={data}  accentColor={accentColor}/>[m
+[31m-            case "executive":[m
+[31m-                return <ExecutiveTemplate data={data}  accentColor={accentColor}/>[m
+[31m-            case "executive-image":[m
+[31m-                return <ExecutiveImageTemplate data={data}  accentColor={accentColor}/>[m
+[31m-            case "technical":[m
+[31m-                return <TechnicalTemplate data={data}  accentColor={accentColor}/>[m
+[31m-[m
+[31m-            default:[m
+[31m-                return <ClassicTemplate data={data}  accentColor={accentColor}/>;[m
+[31m-        }[m
+[32m+[m[32mconst ResumePreview = ({ data, template, accentColor, classes = "" }) => {[m
+[32m+[m[32m  const renderTemplate = () => {[m
+[32m+[m[32m    switch (template) {[m
+[32m+[m[32m      case "modern":[m
+[32m+[m[32m        return <ModernTemplate data={data} accentColor={accentColor} />[m
+[32m+[m[32m      case "minimal":[m
+[32m+[m[32m        return <MinimalTemplate data={data} accentColor={accentColor} />[m
+[32m+[m[32m      case "minimal-image":[m
+[32m+[m[32m        return <MinimalImageTemplate data={data} accentColor={accentColor} />[m
+[32m+[m[32m      case "professional":[m
+[32m+[m[32m        return <ProfessionalTemplate data={data} accentColor={accentColor} />[m
+[32m+[m[32m      case "professional-image":[m
+[32m+[m[32m        return <ProfessionalImageTemplate data={data} accentColor={accentColor} />[m
+[32m+[m[32m      case "creative":[m
+[32m+[m[32m        return <CreativeTemplate data={data} accentColor={accentColor} />[m
+[32m+[m[32m      case "creative-image":[m
+[32m+[m[32m        return <CreativeImageTemplate data={data} accentColor={accentColor} />[m
+[32m+[m[32m      case "executive":[m
+[32m+[m[32m        return <ExecutiveTemplate data={data} accentColor={accentColor} />[m
+[32m+[m[32m      case "executive-image":[m
+[32m+[m[32m        return <ExecutiveImageTemplate data={data} accentColor={accentColor} />[m
+[32m+[m[32m      case "technical":[m
+[32m+[m[32m        return <TechnicalTemplate data={data} accentColor={accentColor} />[m
+[32m+[m[32m      default:[m
+[32m+[m[32m        return <ClassicTemplate data={data} accentColor={accentColor} />;[m
+     }[m
+[31m-     return ([m
+[32m+[m[32m  }[m
+[32m+[m
+[32m+[m[32m  return ([m
+     <div className='w-full bg-gray-100'>[m
+[31m-      <div id="resume-preview" className={"border border-gray-200 print:shadow-none print:border-none" + classes}>[m
+[32m+[m[32m      <div[m
+[32m+[m[32m        id="resume-preview"[m
+[32m+[m[32m        className={`border border-gray-200 print:shadow-none print:border-none ${classes}`}[m
+[32m+[m[32m      >[m
+         {renderTemplate()}[m
+       </div>[m
+ [m
+[31m-      <style jsx>[m
+[31m-        {`[m
+[31m-        @page{[m
+[31m-        size: letter;[m
+[31m-        margin: 0; [m
+[32m+[m[32m      <style>{`[m
+[32m+[m[32m        @page {[m
+[32m+[m[32m          size: letter;[m
+[32m+[m[32m          margin: 0;[m
+         }[m
+         @media print {[m
+[31m-        html, body {[m
+[31m-        widh: 8.5in;[m
+[31m-        height: 11in;[m
+[31m-        overflow: hidden;[m
+[31m-        }[m
+[31m-        body *{[m
+[31m-        visibility: hidden;[m
+[31m-        }[m
+[31m-        #resume-preview, #resume-preview *{[m
+[31m-        visibility: visible;[m
+[31m-        } [m
+[31m-        #resume-preview{[m
+[31m-        position: absolute;[m
+[31m-        left: 0;[m
+[31m-        top: 0;[m
+[31m-        width: 100%;[m
+[31m-        height: auto;[m
+[31m-        margin: 0;[m
+[31m-        paddomg: 0;[m
+[31m-        box-shadow: none !important;[m
+[31m-        border: none !important;[m
+[31m-        }[m
+[32m+[m[32m          html, body {[m
+[32m+[m[32m            width: 8.5in;[m
+[32m+[m[32m            height: 11in;[m
+[32m+[m[32m            overflow: hidden;[m
+[32m+[m[32m          }[m
+[32m+[m[32m          body * {[m
+[32m+[m[32m            visibility: hidden;[m
+[32m+[m[32m          }[m
+[32m+[m[32m          #resume-preview, #resume-preview * {[m
+[32m+[m[32m            visibility: visible;[m
+[32m+[m[32m          }[m
+[32m+[m[32m          #resume-preview {[m
+[32m+[m[32m            position: absolute;[m
+[32m+[m[32m            left: 0;[m
+[32m+[m[32m            top: 0;[m
+[32m+[m[32m            width: 100%;[m
+[32m+[m[32m            height: auto;[m
+[32m+[m[32m            margin: 0;[m
+[32m+[m[32m            padding: 0;[m
+[32m+[m[32m            box-shadow: none !important;[m
+[32m+[m[32m            border: none !important;[m
+[32m+[m[32m          }[m
+         }[m
+[31m-        `}[m
+[31m-      </style>[m
+[32m+[m[32m      `}</style>[m
+     </div>[m
+   )[m
+ }[m
