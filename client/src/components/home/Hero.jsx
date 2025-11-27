@@ -1,26 +1,20 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import {useSelector} from "react-redux";
+import { useSelector } from "react-redux";
 
 const Hero = () => {
   const { user } = useSelector((state) => state.auth);
   const [menuOpen, setMenuOpen] = React.useState(false);
+  const companyLogos = ["slack", "framer", "netflix", "google", "linkedin", "instagram", "facebook", "huawei", "miro", "airtable", "clickup"];
 
-  const logos = [
-    "https://saasly.prebuiltui.com/assets/companies-logo/instagram.svg",
-    "https://saasly.prebuiltui.com/assets/companies-logo/framer.svg",
-    "https://saasly.prebuiltui.com/assets/companies-logo/microsoft.svg",
-    "https://saasly.prebuiltui.com/assets/companies-logo/huawei.svg",
-    "https://saasly.prebuiltui.com/assets/companies-logo/walmart.svg",
-  ];
 
   return (
     <>
       <div className="min-h-screen pb-20">
         {/* Navbar */}
-        <nav className="z-50 flex items-center justify-between w-full py-4 px-6 md:px-16 lg:px-24 xl:px-40 text-sm">
+        <nav className="z-50 flex items-center justify-between w-full py-4 px-6 md:px-16 lg:px-24 xl:px-40 text-sm ">
           <a href="https://prebuiltui.com">
-            <img src="/logo.svg" alt="logo" className="h-11 w-auto" />
+            <img src="/logo.jpg" alt="logo" className="h-17 w-auto" />
           </a>
 
           <div className="hidden md:flex items-center gap-8 transition duration-500 text-slate-800">
@@ -33,7 +27,7 @@ const Hero = () => {
             <a href="#testimonial" className="hover:text-green-600 transition">
               Testimonial
             </a>
-            <a href="#cta" className="hover:text-green-600 transition">
+            <a href="#contact" className="hover:text-green-600 transition">
               Contact
             </a>
           </div>
@@ -82,9 +76,8 @@ const Hero = () => {
 
         {/* Mobile Menu */}
         <div
-          className={`fixed inset-0 z-[100] bg-black/40 text-black backdrop-blur flex flex-col items-center justify-center text-lg gap-8 md:hidden transition-transform duration-300 ${
-            menuOpen ? "translate-x-0" : "-translate-x-full"
-          }`}
+          className={`fixed inset-0 z-[100] bg-black/40 text-black backdrop-blur flex flex-col items-center justify-center text-lg gap-8 md:hidden transition-transform duration-300 ${menuOpen ? "translate-x-0" : "-translate-x-full"
+            }`}
         >
           <a href="/" className="text-white">
             Home
@@ -227,22 +220,34 @@ const Hero = () => {
           </div>
 
           <p className="py-6 text-slate-600 mt-14">
-            Trusting by leading brands, including
+            Trusted by leading brands, including
           </p>
 
-          <div
-            className="flex flex-wrap justify-between max-sm:justify-center gap-6 max-w-3xl w-full mx-auto py-4"
-            id="logo-container"
-          >
-            {logos.map((logo, index) => (
-              <img
-                key={index}
-                src={logo}
-                alt="logo"
-                className="h-6 w-auto max-w-xs"
-              />
-            ))}
+          <div className="relative mx-auto w-full max-w-5xl select-none overflow-hidden">
+            {/* left fade */}
+            <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-20 bg-gradient-to-r from-white to-transparent" />
+
+            {/* marquee */}
+            <div className="marquee-inner flex w-max">
+              {[0, 1].map(rep => (
+                <div className="flex" key={rep}>
+                  {companyLogos.map((company, index) => (
+                    <img
+                      key={`${rep}-${company}-${index}`}
+                      src={`https://raw.githubusercontent.com/prebuiltui/prebuiltui/main/assets/companyLogo/${company}.svg`}
+                      alt={company}
+                      className="h-10 mx-6 object-contain"
+                      draggable={false}
+                    />
+                  ))}
+                </div>
+              ))}
+            </div>
+
+            {/* right fade */}
+            <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-20 md:w-40 bg-gradient-to-l from-white to-transparent" />
           </div>
+
         </div>
       </div>
       <style>
@@ -252,6 +257,19 @@ const Hero = () => {
                     * {
                         font-family: 'Poppins', sans-serif;
                     }
+                        .marquee-inner {
+  animation: marquee 15s linear infinite;
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    /* move left by half, because we have 2 identical blocks */
+    transform: translateX(-50%);
+  }
+}
                 `}
       </style>
     </>

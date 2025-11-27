@@ -33,7 +33,7 @@ export const registerUser = async (req, res) => {
 
         return res.status(201).json({ message: 'User created Successfully', token, user: newUser })
     } catch (error) {
-        return res.status(400).json({ message: error.message });
+        return res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
 
@@ -59,7 +59,7 @@ export const loginUser = async (req, res) => {
         const token = generateToken(user._id)
         user.password = undefined;
 
-        return res.status(200).json({ message: 'User logedin Successfully', token, user })
+        return res.status(200).json({ message: 'User logged in successfully', token, user })
     } catch (error) {
         return res.status(500).json({ message: 'Server error', error: error.message });
     }
@@ -70,34 +70,29 @@ export const loginUser = async (req, res) => {
 //GET: /api/users/data
 
 export const getUserById = async (req, res) => {
-    try {
-        const userId = req.body;
+  try {
+    const userId = req.userId;  // <-- from middleware
 
-        // check if user exists
-        const user = await User.findById({ userId });
-        if (!user) {
-            return res.status(400).json({ message: 'User not found' });
-        }
-
-        // return user
-        user.password = undefined;
-        return res.status(200).json({ user })
-
-    } catch (error) {
-        return res.status(500).json({ message: 'Server error', error: error.message });
+    const user = await User.findById(userId).select('-password');
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
     }
 
+    return res.status(200).json({ user });
+  } catch (error) {
+    return res.status(500).json({ message: 'Server error', error: error.message });
+  }
 };
 
+// GET: /api/users/resumes
 // controller for getting user Resumes
-//GET: /api/users/resumes
 export const getUserResumes = async (req, res) => {
-    try {
-        const userId = req.user._id;
-        //return user resumes
-        const resumes = await Resume.find({ userId });
-        return res.status(200).json({ resumes });
-    } catch (error) {
-        return res.status(500).json({ message: 'Server error', error: error.message });
-    }
+  try {
+    const userId = req.userId;  // <-- from middleware
+
+    const resumes = await Resume.find({ userId });
+    return res.status(200).json({ resumes });
+  } catch (error) {
+    return res.status(500).json({ message: 'Server error', error: error.message });
+  }
 };

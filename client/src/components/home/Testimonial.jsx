@@ -8,21 +8,25 @@ const Testimonial = () => {
             image: 'https://images.unsplash.com/photo-1633332755192-727a05c4013d?q=80&w=200',
             name: 'Briar Martin',
             handle: '@neilstellar',
+            message: 'This resume builder helped me land my dream job! The templates are professional and the process was incredibly easy. I got multiple interview calls within a week of using this resume.'
         },
         {
             image: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=200',
             name: 'Avery Johnson',
             handle: '@averywrites',
+            message: 'As a recent graduate, I was struggling to make my resume stand out. This tool made it so simple to create a professional-looking resume that got me noticed by top companies.'
         },
         {
             image: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=200&auto=format&fit=crop&q=60',
             name: 'Jordan Lee',
             handle: '@jordantalks',
+            message: 'The ATS optimization feature is a game-changer! My resume now gets past automated systems and I\'ve been getting way more interview calls. Highly recommend to all job seekers!'
         },
         {
             image: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=200&auto=format&fit=crop&q=60',
-            name: 'Avery Johnson',
-            handle: '@averywrites',
+            name: 'Sarah Chen',
+            handle: '@sarahwritescode',
+            message: 'I love how intuitive and user-friendly this platform is. The design suggestions helped me create a resume that perfectly represents my professional journey. Got my dream job offer within 2 weeks!'
         },
     ];
      const CreateCard = ({ card }) => (
@@ -39,7 +43,7 @@ const Testimonial = () => {
                     <span className="text-xs text-slate-500">{card.handle}</span>
                 </div>
             </div>
-            <p className="text-sm py-4 text-gray-800">Radiant made undercutting all of our competitors an absolute breeze.</p>
+            <p className="text-sm py-4 text-gray-800">{card.message}</p>
         </div>
     );
 

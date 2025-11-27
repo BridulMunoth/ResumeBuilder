@@ -43,7 +43,7 @@ const Login = () => {
         <h1 className="text-gray-900 text-3xl mt-2 font-medium">
           {state === "login" ? "Login" : "Sign up"}
         </h1>
-        <p className="text-gray-500 text-sm mt-2">Please sign in to continue</p>
+        <p className="text-gray-500 text-sm mt-2">Please {state} to continue</p>
 
         {state !== "login" && (
           <div className="flex items-center mt-6 w-full bg-white border border-gray-300/80 h-12 rounded-full overflow-hidden pl-6 gap-2">
@@ -51,7 +51,7 @@ const Login = () => {
             <input
               type="text"
               name="fullname"
-              placeholder="Name"
+              placeholder="Full Name"
               className="border-none outline-none ring-0 w-full"
               value={formData.fullname}
               onChange={handleChange}

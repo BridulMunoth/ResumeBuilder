@@ -36,9 +36,10 @@ const ResumeBuilder = () => {
     _id: "",
     title: "",
     personal_info: {},
+    professional_summary:"",
     experience: [],
     education: [],
-    project: "",
+    project: [],
     skills: [],
     template: "classic",
     accent_color: "#3882F6",
@@ -108,7 +109,7 @@ const ResumeBuilder = () => {
               {/* progress bar using activeSectionIndex */}
               <hr className="absolute top-0 left-0 right-0 border-2 border-gray-200" />
               <hr
-                className="absolute top-0 left-0 h-1 bg-gradient-to-r from-green-500 to-green-600 border-none trransition-all duration-2000"
+                className="absolute top-0 left-0 h-1 bg-gradient-to-r from-green-500 to-green-600 border-none transition-all duration-2000"
                 style={{
                   width: `${
                     (activeSectionIndex * 100) / (sections.length - 1)

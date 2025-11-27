@@ -12,6 +12,10 @@ export const enhanceProfessionalSummary = async (req, res) => {
             return res.status(400).json({ message: "User content is required" });
         }
 
+        if (!process.env.OPENAI_API_KEY || !process.env.OPENAI_MODEL) {
+            return res.status(500).json({ message: "AI configuration is missing" });
+        }
+
         const response = await ai.chat.completions.create({
             model: process.env.OPENAI_MODEL,
             messages: [
@@ -31,7 +35,8 @@ export const enhanceProfessionalSummary = async (req, res) => {
 
         return res.status(200).json({ message: "Professional summary enhanced successfully", enchancedContent });
     } catch (error) {
-        return res.status(400).json({ message: error.message });
+        const message = error?.response?.data?.error?.message || error?.message || 'Something went wrong';
+        return res.status(400).json({ message });
     }
 }
 
@@ -44,6 +49,10 @@ export const enhanceJobDescription = async (req, res) => {
 
         if (!userContent) {
             return res.status(400).json({ message: "User content is required" });
+        }
+
+        if (!process.env.OPENAI_API_KEY || !process.env.OPENAI_MODEL) {
+            return res.status(500).json({ message: "AI configuration is missing" });
         }
 
         const response = await ai.chat.completions.create({
@@ -65,7 +74,8 @@ export const enhanceJobDescription = async (req, res) => {
 
         return res.status(200).json({ message: "Professional summary enhanced successfully", enchancedContent });
     } catch (error) {
-        return res.status(400).json({ message: error.message });
+        const message = error?.response?.data?.error?.message || error?.message || 'Something went wrong';
+        return res.status(400).json({ message });
     }
 }
 
@@ -79,6 +89,10 @@ export const uploadResume = async (req, res) => {
 
         if (!resumeText || !title || !userId) {
             return res.status(400).json({ message: "Missing required fields" });
+        }
+
+        if (!process.env.OPENAI_API_KEY || !process.env.OPENAI_MODEL) {
+            return res.status(500).json({ message: "AI configuration is missing" });
         }
 
         const response = await ai.chat.completions.create({
@@ -136,7 +150,7 @@ export const uploadResume = async (req, res) => {
                     content: `extract data from this Resume: ${resumeText}`,
                 },
             ],
-            response_format: { type: 'json-object' }
+            response_format: { type: 'json_object' }
         })
 
         const extractedData = response.choices[0].message.content;
@@ -150,6 +164,7 @@ export const uploadResume = async (req, res) => {
         const newResume = await Resume.create({ userId, title, ...parsedResumeData });
         res.status(201).json({ message: "Resume uploaded successfully", resumeId: newResume._id });
     } catch (error) {
-        return res.status(400).json({ message: error.message });
+        const message = error?.response?.data?.error?.message || error?.message || 'Something went wrong';
+        return res.status(400).json({ message });
     }
 }
