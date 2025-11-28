@@ -52,7 +52,7 @@ const PersonalInfoForm = ({ data, onChange, removeBackground, setRemoveBackgroun
       case "phone":
         // optional, but if entered then must be valid
         const digits = value.replace(/\D/g, "")
-        if (value && (digits.length < 7 || digits.length > 15)) {
+        if (value && (digits.length < 10 || digits.length > 15)) {
           error = "Enter a valid phone number."
         }
         break
