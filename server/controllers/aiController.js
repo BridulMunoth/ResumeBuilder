@@ -31,9 +31,9 @@ export const enhanceProfessionalSummary = async (req, res) => {
             ],
         })
 
-        const enchancedContent = response.choices[0].message.content;
+        const enhancedContent = response.choices[0].message.content;
 
-        return res.status(200).json({ message: "Professional summary enhanced successfully", enchancedContent });
+        return res.status(200).json({ message: "Professional summary enhanced successfully", enhancedContent });
     } catch (error) {
         const message = error?.response?.data?.error?.message || error?.message || 'Something went wrong';
         return res.status(400).json({ message });
@@ -70,9 +70,9 @@ export const enhanceJobDescription = async (req, res) => {
             ],
         })
 
-        const enchancedContent = response.choices[0].message.content;
+        const enhancedContent = response.choices[0].message.content;
 
-        return res.status(200).json({ message: "Professional summary enhanced successfully", enchancedContent });
+        return res.status(200).json({ message: "Professional summary enhanced successfully", enhancedContent });
     } catch (error) {
         const message = error?.response?.data?.error?.message || error?.message || 'Something went wrong';
         return res.status(400).json({ message });

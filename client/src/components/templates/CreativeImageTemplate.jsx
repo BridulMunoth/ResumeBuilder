@@ -119,7 +119,7 @@ const CreativeImageTemplate = ({ data, accentColor }) => {
                                     {data.experience.map((exp, index) => (
                                         <div key={index} className="relative pl-6">
                                             <div className="absolute left-0 top-2 w-3 h-3 rounded-full" style={{ backgroundColor: accentColor }}></div>
-                                            <div className="border-l-2 pl-4" style={{ borderColor: accentColor, opacity: 0.3 }}>
+                                            <div className="border-l-2 pl-4" style={{ borderColor: accentColor }}>
                                                 <div className="mb-2">
                                                     <h3 className="font-bold text-lg text-gray-900">{exp.position}</h3>
                                                     <p className="font-semibold text-sm" style={{ color: accentColor }}>
