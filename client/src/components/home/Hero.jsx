@@ -13,7 +13,7 @@ const Hero = () => {
       <div className="min-h-screen pb-20">
         {/* Navbar */}
         <nav className="z-50 flex items-center justify-between w-full py-4 px-6 md:px-16 lg:px-24 xl:px-40 text-sm ">
-          <a href="https://prebuiltui.com">
+          <a href="#">
             <img src="/logo.jpg" alt="logo" className="h-17 w-auto" />
           </a>
 

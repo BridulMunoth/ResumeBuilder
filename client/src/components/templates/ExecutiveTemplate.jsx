@@ -1,4 +1,4 @@
-import { Mail, Phone, MapPin, Linkedin, Globe, ExternalLink } from "lucide-react";
+import { Mail, Phone, MapPin, Linkedin, Globe, ExternalLink, Github, Calendar, Flag } from "lucide-react";
 
 const ExecutiveTemplate = ({ data, accentColor }) => {
     const formatDate = (dateStr) => {
@@ -49,15 +49,33 @@ const ExecutiveTemplate = ({ data, accentColor }) => {
                             </div>
                         )}
                         {data.personal_info?.linkedin && (
-                            <div className="flex items-center gap-2">
+                            <a href={data.personal_info.linkedin} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
                                 <Linkedin className="size-4" style={{ color: accentColor }} />
                                 <span className="text-gray-700 break-all text-xs">{data.personal_info.linkedin}</span>
-                            </div>
+                            </a>
                         )}
                         {data.personal_info?.website && (
-                            <div className="flex items-center gap-2">
+                            <a href={data.personal_info.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
                                 <Globe className="size-4" style={{ color: accentColor }} />
                                 <span className="text-gray-700 break-all text-xs">{data.personal_info.website}</span>
+                            </a>
+                        )}
+                        {data.personal_info?.github && (
+                            <a href={data.personal_info.github} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                                <Github className="size-4" style={{ color: accentColor }} />
+                                <span className="text-gray-700 break-all text-xs">{data.personal_info.github}</span>
+                            </a>
+                        )}
+                        {data.personal_info?.date_of_birth && (
+                            <div className="flex items-center gap-2">
+                                <Calendar className="size-4" style={{ color: accentColor }} />
+                                <span className="text-gray-700 text-xs">{data.personal_info.date_of_birth}</span>
+                            </div>
+                        )}
+                        {data.personal_info?.nationality && (
+                            <div className="flex items-center gap-2">
+                                <Flag className="size-4" style={{ color: accentColor }} />
+                                <span className="text-gray-700 text-xs">{data.personal_info.nationality}</span>
                             </div>
                         )}
                     </div>
@@ -92,14 +110,16 @@ const ExecutiveTemplate = ({ data, accentColor }) => {
                                         <div key={index} className="border-l-4 pl-6" style={{ borderColor: accentColor }}>
                                             <div className="flex justify-between items-start mb-2">
                                                 <div>
-                                                    <h3 className="text-xl font-bold text-gray-900">{exp.position}</h3>
+                                                    <h3 className="text-xl font-bold text-gray-900">{exp.title}</h3>
                                                     <p className="text-base font-semibold mt-1" style={{ color: accentColor }}>
                                                         {exp.company}
                                                     </p>
                                                 </div>
-                                                <span className="text-sm text-gray-600 font-medium whitespace-nowrap ml-4">
-                                                    {formatDate(exp.start_date)} - {exp.is_current ? "Present" : formatDate(exp.end_date)}
-                                                </span>
+                                                {([formatDate(exp.start_date), (exp.is_current ? 'Present' : formatDate(exp.end_date))].filter(Boolean).join(' - ') || null) && (
+                                                    <span className="text-sm text-gray-600 font-medium whitespace-nowrap ml-4">
+                                                        {[formatDate(exp.start_date), (exp.is_current ? 'Present' : formatDate(exp.end_date))].filter(Boolean).join(' - ')}
+                                                    </span>
+                                                )}
                                             </div>
                                             {exp.description && (
                                                 <div className="text-gray-700 leading-relaxed mt-3 whitespace-pre-line">
@@ -113,14 +133,14 @@ const ExecutiveTemplate = ({ data, accentColor }) => {
                         )}
 
                         {/* Projects */}
-                        {data.project && data.project.length > 0 && (
+                        {data.projects && data.projects.length > 0 && (
                             <section>
                                 <h2 className="text-lg font-bold mb-6 uppercase tracking-widest border-b-2 pb-2" style={{ borderColor: accentColor, color: accentColor }}>
                                     Key Achievements & Projects
                                 </h2>
 
                                 <div className="space-y-5">
-                                    {data.project.map((proj, index) => (
+                                    {data.projects.map((proj, index) => (
                                         <div key={index} className="pl-4 border-l-2 border-gray-300">
                                             <div className="flex items-center gap-2">
                                                 <h3 className="font-bold text-lg text-gray-900">{proj.name}</h3>
@@ -135,9 +155,9 @@ const ExecutiveTemplate = ({ data, accentColor }) => {
                                                     </a>
                                                 )}
                                             </div>
-                                            {proj.type && (
+                                            {(proj.type || proj.role) && (
                                                 <p className="text-sm mb-2 font-medium" style={{ color: accentColor }}>
-                                                    {proj.type}
+                                                    {[proj.type, proj.role].filter(Boolean).join(" • ")}
                                                 </p>
                                             )}
                                             {proj.description && (
@@ -170,12 +190,27 @@ const ExecutiveTemplate = ({ data, accentColor }) => {
                                             {edu.field && (
                                                 <p className="text-sm text-gray-600 mt-1">{edu.field}</p>
                                             )}
-                                            <p className="font-semibold text-sm mt-2" style={{ color: accentColor }}>
-                                                {edu.institution}
+                                            <p className="font-semibold text-sm mt-2 flex items-center gap-2" style={{ color: accentColor }}>
+                                                <span>{edu.institution}</span>
+                                                {edu.link && (
+                                                    <a
+                                                        href={edu.link}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="text-gray-400 hover:text-gray-600 transition-colors"
+                                                        title="Open link"
+                                                    >
+                                                        <ExternalLink size={12} />
+                                                    </a>
+                                                )}
                                             </p>
                                             <div className="flex justify-between items-center mt-2 text-xs text-gray-600">
-                                                <span>{formatDate(edu.graduation_date)}</span>
-                                                {edu.gpa && <span className="font-medium">GPA: {edu.gpa}</span>}
+                                                {([formatDate(edu.start_date), (edu.is_current ? 'Present' : formatDate(edu.end_date || edu.graduation_date))].filter(Boolean).join(' - ') || null) && (
+                                                    <span>{[formatDate(edu.start_date), (edu.is_current ? 'Present' : formatDate(edu.end_date || edu.graduation_date))].filter(Boolean).join(' - ')}</span>
+                                                )}
+                                                {(edu.grade || edu.gpa || edu.percentage || edu.score) && (
+                                                    <span className="font-medium">Grade: {edu.grade || edu.gpa || edu.percentage || edu.score}</span>
+                                                )}
                                             </div>
                                         </div>
                                     ))}
@@ -194,7 +229,7 @@ const ExecutiveTemplate = ({ data, accentColor }) => {
                                     {data.skills.map((skill, index) => (
                                         <div key={index} className="flex items-center gap-2">
                                             <div className="w-2 h-2 rounded-full" style={{ backgroundColor: accentColor }}></div>
-                                            <span className="text-sm text-gray-700">{skill}</span>
+                                            <span className="text-sm text-gray-700">{skill?.name}</span>
                                         </div>
                                     ))}
                                 </div>

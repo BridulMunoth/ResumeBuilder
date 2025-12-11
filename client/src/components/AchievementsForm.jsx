@@ -1,31 +1,22 @@
-import { ClipboardList, Plus, Trash2, Lightbulb } from "lucide-react";
+import { Trophy, Plus, Trash2, Lightbulb } from "lucide-react";
 import React, { useState } from "react";
 import TipsPanel from "./TipsPanel";
 
-const ProjectForm = ({ data = [], onChange }) => {
+const AchievementsForm = ({ data = [], onChange }) => {
   const [showTips, setShowTips] = useState(false);
 
-  const addProject = () => {
-    const newProject = {
-      name: "",
-      role: "",
-      type: "",
-      description: "",
-      technologies: "",   // <-- string in the form
-      link: "",
-      start_date: "",
-      end_date: "",
-      highlights: "",     // <-- string in the form
-    };
-    onChange([...(data || []), newProject]);
+  const addItem = () => {
+    onChange([
+      ...(data || []),
+      { title: "", issuer: "", date: "", description: "", link: "" },
+    ]);
   };
 
-  const removeProject = (index) => {
-    const updated = (data || []).filter((_, i) => i !== index);
-    onChange(updated);
+  const removeItem = (index) => {
+    onChange((data || []).filter((_, i) => i !== index));
   };
 
-  const updateProject = (index, field, value) => {
+  const updateItem = (index, field, value) => {
     const updated = [...(data || [])];
     updated[index][field] = value;
     onChange(updated);
@@ -44,12 +35,12 @@ const ProjectForm = ({ data = [], onChange }) => {
         <div className="space-y-1">
           <h3 className="flex items-center gap-2 text-lg font-semibold text-slate-900">
             <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-400 via-sky-500 to-indigo-500 shadow-[0_8px_20px_rgba(56,189,248,0.55)] ring-2 ring-white/80">
-              <ClipboardList className="h-4 w-4 text-white" />
+              <Trophy className="h-4 w-4 text-white" />
             </span>
-            Projects
+            Achievements & Awards
           </h3>
           <p className="text-sm text-slate-600">
-            Showcase academic, personal, and freelance projects.
+            Highlight notable achievements, prizes, and recognitions.
           </p>
         </div>
 
@@ -66,14 +57,14 @@ const ProjectForm = ({ data = [], onChange }) => {
 
           <button
             type="button"
-            onClick={addProject}
+            onClick={addItem}
             className="inline-flex items-center gap-2 rounded-xl 
                        bg-emerald-50 border border-emerald-300/70 
                        px-5 py-2.5 text-sm font-medium text-emerald-700
                        hover:bg-emerald-100 transition"
           >
             <Plus className="h-4 w-4" />
-            Add project
+            Add achievement
           </button>
         </div>
       </div>
@@ -81,18 +72,18 @@ const ProjectForm = ({ data = [], onChange }) => {
       {/* EMPTY STATE */}
       {(data || []).length === 0 ? (
         <div className="rounded-3xl border border-dashed border-slate-200/90 bg-gradient-to-b from-sky-50/95 via-white/95 to-indigo-50/90 py-10 text-center shadow-[0_16px_38px_rgba(15,23,42,0.08)] backdrop-blur-xl">
-          <ClipboardList className="mx-auto mb-3 h-10 w-10 text-slate-300" />
+          <Trophy className="mx-auto mb-3 h-10 w-10 text-slate-300" />
           <p className="text-sm font-medium text-slate-800">
-            No projects added yet.
+            No achievements added yet.
           </p>
           <p className="mt-1 text-xs text-slate-500">
-            Click <span className="font-semibold">“Add project”</span> to get
-            started.
+            Click <span className="font-semibold">“Add achievement”</span> to
+            highlight your wins.
           </p>
         </div>
       ) : (
         <div className="space-y-6">
-          {(data || []).map((project, index) => (
+          {(data || []).map((item, index) => (
             <div
               key={index}
               className="rounded-3xl border border-white/80 bg-white/90 p-6 shadow-[0_20px_50px_rgba(15,23,42,0.14)] backdrop-blur-2xl space-y-6"
@@ -101,15 +92,15 @@ const ProjectForm = ({ data = [], onChange }) => {
               <div className="flex items-start justify-between gap-4">
                 <div className="space-y-1">
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-500">
-                    Project #{index + 1}
+                    Achievement #{index + 1}
                   </p>
-                  {(project.name || project.role) && (
+                  {(item.title || item.issuer) && (
                     <p className="text-sm font-semibold text-slate-900">
-                      {project.name || "Project name not set"}
-                      {project.role && (
+                      {item.title || "Achievement title not set"}
+                      {item.issuer && (
                         <span className="text-slate-500">
                           {" "}
-                          · {project.role}
+                          · {item.issuer}
                         </span>
                       )}
                     </p>
@@ -118,12 +109,12 @@ const ProjectForm = ({ data = [], onChange }) => {
 
                 <button
                   type="button"
-                  onClick={() => removeProject(index)}
+                  onClick={() => removeItem(index)}
                   className="inline-flex h-8 w-8 items-center justify-center 
                              rounded-xl bg-rose-50 border border-rose-300/70 
                              text-rose-600 hover:bg-rose-100 transition"
-                  aria-label="Remove project"
-                  title="Remove project"
+                  aria-label="Remove achievement"
+                  title="Remove achievement"
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
@@ -134,64 +125,49 @@ const ProjectForm = ({ data = [], onChange }) => {
 
               {/* BODY */}
               <div className="space-y-6">
-                {/* Name / Role / Type */}
-                <div className="grid gap-4 md:grid-cols-3">
-                  <div className="space-y-1.5 md:col-span-1">
+                {/* Title / Issuer */}
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-1.5">
                     <label className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
-                      Project name
+                      Title
                     </label>
                     <input
-                      value={project.name || ""}
+                      value={item.title || ""}
                       onChange={(e) =>
-                        updateProject(index, "name", e.target.value)
+                        updateItem(index, "title", e.target.value)
                       }
                       type="text"
-                      placeholder="e.g., JobGeni – Job search site"
+                      placeholder="e.g., 1st Prize – WebWorks Expo"
                       className={baseInputClass}
                     />
                   </div>
 
-                  <div className="space-y-1.5 md:col-span-1">
+                  <div className="space-y-1.5">
                     <label className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
-                      Role
+                      Issuer / organization
                     </label>
                     <input
-                      value={project.role || ""}
+                      value={item.issuer || ""}
                       onChange={(e) =>
-                        updateProject(index, "role", e.target.value)
+                        updateItem(index, "issuer", e.target.value)
                       }
                       type="text"
-                      placeholder="e.g., Frontend Developer, Team Lead"
-                      className={baseInputClass}
-                    />
-                  </div>
-
-                  <div className="space-y-1.5 md:col-span-1">
-                    <label className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
-                      Project type
-                    </label>
-                    <input
-                      value={project.type || ""}
-                      onChange={(e) =>
-                        updateProject(index, "type", e.target.value)
-                      }
-                      type="text"
-                      placeholder="e.g., Academic, Personal, Freelance"
+                      placeholder="e.g., College name, Company, Event"
                       className={baseInputClass}
                     />
                   </div>
                 </div>
 
-                {/* Dates */}
+                {/* Date / Link */}
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-1.5">
                     <label className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
-                      Start date
+                      Date
                     </label>
                     <input
-                      value={project.start_date || ""}
+                      value={item.date || ""}
                       onChange={(e) =>
-                        updateProject(index, "start_date", e.target.value)
+                        updateItem(index, "date", e.target.value)
                       }
                       type="month"
                       className={baseInputClass}
@@ -200,14 +176,15 @@ const ProjectForm = ({ data = [], onChange }) => {
 
                   <div className="space-y-1.5">
                     <label className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
-                      End date
+                      Link (proof / article)
                     </label>
                     <input
-                      value={project.end_date || ""}
+                      value={item.link || ""}
                       onChange={(e) =>
-                        updateProject(index, "end_date", e.target.value)
+                        updateItem(index, "link", e.target.value)
                       }
-                      type="month"
+                      type="url"
+                      placeholder="Certificate, article, or portfolio link"
                       className={baseInputClass}
                     />
                   </div>
@@ -216,65 +193,16 @@ const ProjectForm = ({ data = [], onChange }) => {
                 {/* Description */}
                 <div className="space-y-2.5">
                   <label className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
-                    Project description
+                    Short description
                   </label>
                   <textarea
-                    rows={4}
-                    value={project.description || ""}
+                    value={item.description || ""}
                     onChange={(e) =>
-                      updateProject(index, "description", e.target.value)
+                      updateItem(index, "description", e.target.value)
                     }
-                    placeholder="Explain what the project does, who it's for, and what you contributed."
-                    className={`${baseInputClass} min-h-[130px] resize-none align-top`}
-                  />
-                </div>
-
-                {/* Tech + Link */}
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
-                      Technologies (comma separated)
-                    </label>
-                    <input
-                      value={project.technologies || ""}  // <-- plain string
-                      onChange={(e) =>
-                        updateProject(index, "technologies", e.target.value)
-                      }
-                      type="text"
-                      placeholder="e.g., React, Node.js, MongoDB, Tailwind"
-                      className={baseInputClass}
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
-                      Project link (live / GitHub)
-                    </label>
-                    <input
-                      value={project.link || ""}
-                      onChange={(e) =>
-                        updateProject(index, "link", e.target.value)
-                      }
-                      type="url"
-                      placeholder="Live demo or repository URL"
-                      className={baseInputClass}
-                    />
-                  </div>
-                </div>
-
-                {/* Highlights */}
-                <div className="space-y-2.5">
-                  <label className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
-                    Highlights (one per line)
-                  </label>
-                  <textarea
                     rows={3}
-                    value={project.highlights || ""}  // <-- plain string
-                    onChange={(e) =>
-                      updateProject(index, "highlights", e.target.value)
-                    }
-                    placeholder="e.g., Handled 5,000+ monthly visitors; Implemented responsive UI; Integrated payment gateway"
                     className={`${baseInputClass} min-h-[110px] resize-none align-top`}
+                    placeholder="Explain what this achievement was for and what made it significant."
                   />
                 </div>
               </div>
@@ -286,22 +214,21 @@ const ProjectForm = ({ data = [], onChange }) => {
       <TipsPanel
         open={showTips}
         onClose={() => setShowTips(false)}
-        title="Project Tips"
+        title="Achievement Tips"
         sections={[
           {
-            heading: "What to highlight",
+            heading: "What stands out",
             points: [
-              "State your role, tech stack, and the problem your project solves.",
-              "Mention users, scale, or impact if possible.",
-              "Link to GitHub or live demo so employers can explore.",
+              "Quantify rank or scale (e.g., 1st out of 120 teams).",
+              "Mention level: college, state, national, or international.",
+              "Link to proof (certificate, article, event page) when possible.",
             ],
           },
           {
-            heading: "Good structure",
+            heading: "How to phrase",
             points: [
-              "1–2 lines: What the project is.",
-              "2–3 lines: What you did specifically.",
-              "1 line: Result or measurable impact.",
+              "Keep the title short and powerful.",
+              "Use the description for 1–2 lines of context and impact.",
             ],
           },
         ]}
@@ -310,4 +237,4 @@ const ProjectForm = ({ data = [], onChange }) => {
   );
 };
 
-export default ProjectForm;
+export default AchievementsForm;

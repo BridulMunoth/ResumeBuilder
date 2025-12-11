@@ -1,4 +1,4 @@
-import { Mail, Phone, MapPin, Linkedin, Globe, ExternalLink } from "lucide-react";
+import { Mail, Phone, MapPin, Linkedin, Globe, ExternalLink, Github, Calendar, Flag } from "lucide-react";
 
 const ExecutiveImageTemplate = ({ data, accentColor }) => {
     const formatDate = (dateStr) => {
@@ -72,15 +72,33 @@ const ExecutiveImageTemplate = ({ data, accentColor }) => {
                             </div>
                         )}
                         {data.personal_info?.linkedin && (
-                            <div className="flex items-center gap-2">
+                            <a href={data.personal_info.linkedin} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
                                 <Linkedin className="size-4" style={{ color: accentColor }} />
                                 <span className="text-gray-700 break-all text-xs">{data.personal_info.linkedin}</span>
-                            </div>
+                            </a>
                         )}
                         {data.personal_info?.website && (
-                            <div className="flex items-center gap-2">
+                            <a href={data.personal_info.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
                                 <Globe className="size-4" style={{ color: accentColor }} />
                                 <span className="text-gray-700 break-all text-xs">{data.personal_info.website}</span>
+                            </a>
+                        )}
+                        {data.personal_info?.github && (
+                            <a href={data.personal_info.github} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                                <Github className="size-4" style={{ color: accentColor }} />
+                                <span className="text-gray-700 break-all text-xs">{data.personal_info.github}</span>
+                            </a>
+                        )}
+                        {data.personal_info?.date_of_birth && (
+                            <div className="flex items-center gap-2">
+                                <Calendar className="size-4" style={{ color: accentColor }} />
+                                <span className="text-gray-700 text-xs">{data.personal_info.date_of_birth}</span>
+                            </div>
+                        )}
+                        {data.personal_info?.nationality && (
+                            <div className="flex items-center gap-2">
+                                <Flag className="size-4" style={{ color: accentColor }} />
+                                <span className="text-gray-700 text-xs">{data.personal_info.nationality}</span>
                             </div>
                         )}
                     </div>
@@ -115,14 +133,16 @@ const ExecutiveImageTemplate = ({ data, accentColor }) => {
                                         <div key={index} className="border-l-4 pl-6" style={{ borderColor: accentColor }}>
                                             <div className="flex justify-between items-start mb-2">
                                                 <div>
-                                                    <h3 className="text-xl font-bold text-gray-900">{exp.position}</h3>
+                                                    <h3 className="text-xl font-bold text-gray-900">{exp.title || exp.position}</h3>
                                                     <p className="text-base font-semibold mt-1" style={{ color: accentColor }}>
                                                         {exp.company}
                                                     </p>
                                                 </div>
-                                                <span className="text-sm text-gray-600 font-medium whitespace-nowrap ml-4">
-                                                    {formatDate(exp.start_date)} - {exp.is_current ? "Present" : formatDate(exp.end_date)}
-                                                </span>
+                                                {([formatDate(exp.start_date), (exp.is_current ? 'Present' : formatDate(exp.end_date))].filter(Boolean).join(' - ') || null) && (
+                                                    <span className="text-sm text-gray-600 font-medium whitespace-nowrap ml-4">
+                                                        {[formatDate(exp.start_date), (exp.is_current ? 'Present' : formatDate(exp.end_date))].filter(Boolean).join(' - ')}
+                                                    </span>
+                                                )}
                                             </div>
                                             {exp.description && (
                                                 <div className="text-gray-700 leading-relaxed mt-3 whitespace-pre-line">
@@ -193,12 +213,27 @@ const ExecutiveImageTemplate = ({ data, accentColor }) => {
                                             {edu.field && (
                                                 <p className="text-sm text-gray-600 mt-1">{edu.field}</p>
                                             )}
-                                            <p className="font-semibold text-sm mt-2" style={{ color: accentColor }}>
-                                                {edu.institution}
+                                            <p className="font-semibold text-sm mt-2 flex items-center gap-2" style={{ color: accentColor }}>
+                                                <span>{edu.institution}</span>
+                                                {edu.link && (
+                                                    <a
+                                                        href={edu.link}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="text-gray-400 hover:text-gray-600 transition-colors"
+                                                        title="Open link"
+                                                    >
+                                                        <ExternalLink size={12} />
+                                                    </a>
+                                                )}
                                             </p>
                                             <div className="flex justify-between items-center mt-2 text-xs text-gray-600">
-                                                <span>{formatDate(edu.graduation_date)}</span>
-                                                {edu.gpa && <span className="font-medium">GPA: {edu.gpa}</span>}
+                                                {([formatDate(edu.start_date), (edu.is_current ? 'Present' : formatDate(edu.end_date || edu.graduation_date))].filter(Boolean).join(' - ') || null) && (
+                                                    <span>{[formatDate(edu.start_date), (edu.is_current ? 'Present' : formatDate(edu.end_date || edu.graduation_date))].filter(Boolean).join(' - ')}</span>
+                                                )}
+                                                {(edu.grade || edu.gpa || edu.percentage || edu.score) && (
+                                                    <span className="font-medium">Grade: {edu.grade || edu.gpa || edu.percentage || edu.score}</span>
+                                                )}
                                             </div>
                                         </div>
                                     ))}
@@ -207,18 +242,42 @@ const ExecutiveImageTemplate = ({ data, accentColor }) => {
                         )}
 
                         {/* Skills */}
-                        {data.skills && data.skills.length > 0 && (
+                        {(data.skills_detailed && data.skills_detailed.length > 0) || (data.skills && data.skills.length > 0) ? (
                             <section>
                                 <h2 className="text-lg font-bold mb-4 uppercase tracking-widest border-b-2 pb-2" style={{ borderColor: accentColor, color: accentColor }}>
                                     Core Competencies
                                 </h2>
 
-                                <div className="space-y-2">
-                                    {data.skills.map((skill, index) => (
-                                        <div key={index} className="flex items-center gap-2">
-                                            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: accentColor }}></div>
-                                            <span className="text-sm text-gray-700">{skill}</span>
-                                        </div>
+                                <div className="flex flex-wrap gap-2">
+                                    {(data.skills_detailed?.length ? data.skills_detailed : (data.skills || []).map(s=>({name:s}))).map((s, index) => (
+                                        <span key={index} className="inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-800 ring-1 ring-gray-200">
+                                            <span className="font-medium">{s.name}</span>
+                                            {s.category && (
+                                                <span className="rounded bg-white px-1.5 py-0.5 text-[10px] ring-1 ring-gray-300 text-gray-600">{s.category}</span>
+                                            )}
+                                            {s.level && (
+                                                <span className="rounded px-1.5 py-0.5 text-[10px]" style={{backgroundColor: accentColor + '22', color: accentColor}}>{s.level}</span>
+                                            )}
+                                        </span>
+                                    ))}
+                                </div>
+                            </section>
+                        ) : null}
+
+                        {/* Languages */}
+                        {Array.isArray(data.languages) && data.languages.length > 0 && (
+                            <section>
+                                <h2 className="text-lg font-bold mb-4 uppercase tracking-widest border-b-2 pb-2" style={{ borderColor: accentColor, color: accentColor }}>
+                                    Languages
+                                </h2>
+                                <div className="flex flex-wrap gap-2">
+                                    {data.languages.map((lang, idx) => (
+                                        <span key={idx} className="inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-800 ring-1 ring-gray-200">
+                                            <span className="font-medium">{lang?.name}</span>
+                                            {lang?.proficiency && (
+                                                <span className="rounded px-1.5 py-0.5 text-[10px]" style={{backgroundColor: accentColor + '22', color: accentColor}}>{lang.proficiency}</span>
+                                            )}
+                                        </span>
                                     ))}
                                 </div>
                             </section>

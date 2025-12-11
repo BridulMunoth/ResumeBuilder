@@ -1,4 +1,4 @@
-import { Mail, Phone, MapPin, Linkedin, Globe, ExternalLink } from "lucide-react";
+import { Mail, Phone, MapPin, Linkedin, Globe, ExternalLink, Github } from "lucide-react";
 
 const ModernTemplate = ({ data, accentColor }) => {
 	const formatDate = (dateStr) => {
@@ -49,6 +49,12 @@ const ModernTemplate = ({ data, accentColor }) => {
 							<span className="break-all text-xs">{data.personal_info.website.split("https://")[1] ? data.personal_info.website.split("https://")[1] : data.personal_info.website}</span>
 						</a>
 					)}
+					{data.personal_info?.github && (
+						<a target="_blank" href={data.personal_info?.github} className="flex items-center gap-2">
+							<Github className="size-4" />
+							<span className="break-all text-xs">{data.personal_info.github}</span>
+						</a>
+					)}
 				</div>
 			</header>
 
@@ -76,7 +82,7 @@ const ModernTemplate = ({ data, accentColor }) => {
 
 									<div className="flex justify-between items-start mb-2">
 										<div>
-											<h3 className="text-xl font-medium text-gray-900">{exp.position}</h3>
+											<h3 className="text-xl font-medium text-gray-900">{exp.title || exp.position}</h3>
 											<p className="font-medium" style={{ color: accentColor }}>{exp.company}</p>
 										</div>
 										<div className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded">
@@ -149,7 +155,20 @@ const ModernTemplate = ({ data, accentColor }) => {
 										<h3 className="font-semibold text-gray-900">
 											{edu.degree} {edu.field && `in ${edu.field}`}
 										</h3>
-										<p style={{ color: accentColor }}>{edu.institution}</p>
+										<p style={{ color: accentColor }} className="flex items-center gap-2">
+								<span>{edu.institution}</span>
+								{edu.link && (
+									<a
+										href={edu.link}
+										target="_blank"
+										rel="noopener noreferrer"
+										className="text-gray-400 hover:text-gray-600 transition-colors"
+										title="Open link"
+									>
+										<ExternalLink size={12} />
+									</a>
+								)}
+							</p>
 										<div className="flex justify-between items-center text-sm text-gray-600">
 											<span>{formatDate(edu.graduation_date)}</span>
 											{edu.gpa && <span>GPA: {edu.gpa}</span>}

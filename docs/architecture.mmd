@@ -1,0 +1,37 @@
+flowchart LR
+  subgraph Client[Client (React + Vite + Redux)]
+    UI[Forms, Preview, Templates]
+    APIClient[Axios]
+    UI --> APIClient
+  end
+
+  subgraph Server[Server (Node.js + Express)]
+    Routes[/Routes/]
+    Controllers[/Controllers/]
+    Middleware[Auth Middleware (JWT protect)]
+    Multer[Multer Upload]
+    ImageKitCfg[ImageKit Client]
+    OpenAIClient[OpenAI Client]
+    Routes --> Controllers
+    Routes --> Middleware
+  end
+
+  subgraph DB[MongoDB (Mongoose)]
+    Users[(users)]
+    Resumes[(resumes)]
+  end
+
+  subgraph ExternalServices[External Services]
+    ImageKit[ImageKit]
+    OpenAI[OpenAI API]
+  end
+
+  APIClient -->|HTTP JSON| Routes
+  Controllers --> Users
+  Controllers --> Resumes
+  Controllers -->|file stream| Multer
+  Multer --> ImageKit
+  Controllers <---> OpenAIClient
+  OpenAIClient --> OpenAI
+  Server <-->|Mongoose| DB
+  Client --> Server

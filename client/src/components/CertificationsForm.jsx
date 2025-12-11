@@ -1,31 +1,28 @@
-import { ClipboardList, Plus, Trash2, Lightbulb } from "lucide-react";
+import { Award, Plus, Trash2, Lightbulb } from "lucide-react";
 import React, { useState } from "react";
 import TipsPanel from "./TipsPanel";
 
-const ProjectForm = ({ data = [], onChange }) => {
+const CertificationsForm = ({ data = [], onChange }) => {
   const [showTips, setShowTips] = useState(false);
 
-  const addProject = () => {
-    const newProject = {
+  const addCertification = () => {
+    const newItem = {
       name: "",
-      role: "",
-      type: "",
-      description: "",
-      technologies: "",   // <-- string in the form
+      issuer: "",
+      issue_date: "",
+      expiry_date: "",
+      credential_id: "",
+      credential_url: "",
       link: "",
-      start_date: "",
-      end_date: "",
-      highlights: "",     // <-- string in the form
     };
-    onChange([...(data || []), newProject]);
+    onChange([...(data || []), newItem]);
   };
 
-  const removeProject = (index) => {
-    const updated = (data || []).filter((_, i) => i !== index);
-    onChange(updated);
+  const removeCertification = (index) => {
+    onChange((data || []).filter((_, i) => i !== index));
   };
 
-  const updateProject = (index, field, value) => {
+  const updateCertification = (index, field, value) => {
     const updated = [...(data || [])];
     updated[index][field] = value;
     onChange(updated);
@@ -44,12 +41,12 @@ const ProjectForm = ({ data = [], onChange }) => {
         <div className="space-y-1">
           <h3 className="flex items-center gap-2 text-lg font-semibold text-slate-900">
             <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-400 via-sky-500 to-indigo-500 shadow-[0_8px_20px_rgba(56,189,248,0.55)] ring-2 ring-white/80">
-              <ClipboardList className="h-4 w-4 text-white" />
+              <Award className="h-4 w-4 text-white" />
             </span>
-            Projects
+            Certifications & Courses
           </h3>
           <p className="text-sm text-slate-600">
-            Showcase academic, personal, and freelance projects.
+            Add professional certifications, online courses, and credentials.
           </p>
         </div>
 
@@ -66,14 +63,14 @@ const ProjectForm = ({ data = [], onChange }) => {
 
           <button
             type="button"
-            onClick={addProject}
+            onClick={addCertification}
             className="inline-flex items-center gap-2 rounded-xl 
                        bg-emerald-50 border border-emerald-300/70 
                        px-5 py-2.5 text-sm font-medium text-emerald-700
                        hover:bg-emerald-100 transition"
           >
             <Plus className="h-4 w-4" />
-            Add project
+            Add certification
           </button>
         </div>
       </div>
@@ -81,18 +78,18 @@ const ProjectForm = ({ data = [], onChange }) => {
       {/* EMPTY STATE */}
       {(data || []).length === 0 ? (
         <div className="rounded-3xl border border-dashed border-slate-200/90 bg-gradient-to-b from-sky-50/95 via-white/95 to-indigo-50/90 py-10 text-center shadow-[0_16px_38px_rgba(15,23,42,0.08)] backdrop-blur-xl">
-          <ClipboardList className="mx-auto mb-3 h-10 w-10 text-slate-300" />
+          <Award className="mx-auto mb-3 h-10 w-10 text-slate-300" />
           <p className="text-sm font-medium text-slate-800">
-            No projects added yet.
+            No certifications added yet.
           </p>
           <p className="mt-1 text-xs text-slate-500">
-            Click <span className="font-semibold">“Add project”</span> to get
-            started.
+            Click <span className="font-semibold">“Add certification”</span> to
+            get started.
           </p>
         </div>
       ) : (
         <div className="space-y-6">
-          {(data || []).map((project, index) => (
+          {(data || []).map((cert, index) => (
             <div
               key={index}
               className="rounded-3xl border border-white/80 bg-white/90 p-6 shadow-[0_20px_50px_rgba(15,23,42,0.14)] backdrop-blur-2xl space-y-6"
@@ -101,15 +98,15 @@ const ProjectForm = ({ data = [], onChange }) => {
               <div className="flex items-start justify-between gap-4">
                 <div className="space-y-1">
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-500">
-                    Project #{index + 1}
+                    Certification #{index + 1}
                   </p>
-                  {(project.name || project.role) && (
+                  {(cert.name || cert.issuer) && (
                     <p className="text-sm font-semibold text-slate-900">
-                      {project.name || "Project name not set"}
-                      {project.role && (
+                      {cert.name || "Certification title not set"}
+                      {cert.issuer && (
                         <span className="text-slate-500">
                           {" "}
-                          · {project.role}
+                          · {cert.issuer}
                         </span>
                       )}
                     </p>
@@ -118,12 +115,12 @@ const ProjectForm = ({ data = [], onChange }) => {
 
                 <button
                   type="button"
-                  onClick={() => removeProject(index)}
+                  onClick={() => removeCertification(index)}
                   className="inline-flex h-8 w-8 items-center justify-center 
                              rounded-xl bg-rose-50 border border-rose-300/70 
                              text-rose-600 hover:bg-rose-100 transition"
-                  aria-label="Remove project"
-                  title="Remove project"
+                  aria-label="Remove certification"
+                  title="Remove certification"
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
@@ -134,64 +131,49 @@ const ProjectForm = ({ data = [], onChange }) => {
 
               {/* BODY */}
               <div className="space-y-6">
-                {/* Name / Role / Type */}
-                <div className="grid gap-4 md:grid-cols-3">
-                  <div className="space-y-1.5 md:col-span-1">
+                {/* Name / Issuer */}
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-1.5">
                     <label className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
-                      Project name
+                      Certification / course name
                     </label>
                     <input
-                      value={project.name || ""}
+                      value={cert.name || ""}
                       onChange={(e) =>
-                        updateProject(index, "name", e.target.value)
+                        updateCertification(index, "name", e.target.value)
                       }
                       type="text"
-                      placeholder="e.g., JobGeni – Job search site"
+                      placeholder="e.g., AWS Certified Cloud Practitioner"
                       className={baseInputClass}
                     />
                   </div>
 
-                  <div className="space-y-1.5 md:col-span-1">
+                  <div className="space-y-1.5">
                     <label className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
-                      Role
+                      Issuer
                     </label>
                     <input
-                      value={project.role || ""}
+                      value={cert.issuer || ""}
                       onChange={(e) =>
-                        updateProject(index, "role", e.target.value)
+                        updateCertification(index, "issuer", e.target.value)
                       }
                       type="text"
-                      placeholder="e.g., Frontend Developer, Team Lead"
-                      className={baseInputClass}
-                    />
-                  </div>
-
-                  <div className="space-y-1.5 md:col-span-1">
-                    <label className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
-                      Project type
-                    </label>
-                    <input
-                      value={project.type || ""}
-                      onChange={(e) =>
-                        updateProject(index, "type", e.target.value)
-                      }
-                      type="text"
-                      placeholder="e.g., Academic, Personal, Freelance"
+                      placeholder="e.g., Coursera, Udemy, AWS"
                       className={baseInputClass}
                     />
                   </div>
                 </div>
 
-                {/* Dates */}
+                {/* Issue / Expiry dates */}
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-1.5">
                     <label className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
-                      Start date
+                      Issue date
                     </label>
                     <input
-                      value={project.start_date || ""}
+                      value={cert.issue_date || ""}
                       onChange={(e) =>
-                        updateProject(index, "start_date", e.target.value)
+                        updateCertification(index, "issue_date", e.target.value)
                       }
                       type="month"
                       className={baseInputClass}
@@ -200,12 +182,12 @@ const ProjectForm = ({ data = [], onChange }) => {
 
                   <div className="space-y-1.5">
                     <label className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
-                      End date
+                      Expiry date (if any)
                     </label>
                     <input
-                      value={project.end_date || ""}
+                      value={cert.expiry_date || ""}
                       onChange={(e) =>
-                        updateProject(index, "end_date", e.target.value)
+                        updateCertification(index, "expiry_date", e.target.value)
                       }
                       type="month"
                       className={baseInputClass}
@@ -213,68 +195,60 @@ const ProjectForm = ({ data = [], onChange }) => {
                   </div>
                 </div>
 
-                {/* Description */}
-                <div className="space-y-2.5">
-                  <label className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
-                    Project description
-                  </label>
-                  <textarea
-                    rows={4}
-                    value={project.description || ""}
-                    onChange={(e) =>
-                      updateProject(index, "description", e.target.value)
-                    }
-                    placeholder="Explain what the project does, who it's for, and what you contributed."
-                    className={`${baseInputClass} min-h-[130px] resize-none align-top`}
-                  />
-                </div>
-
-                {/* Tech + Link */}
+                {/* Credential ID / URL */}
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-1.5">
                     <label className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
-                      Technologies (comma separated)
+                      Credential ID
                     </label>
                     <input
-                      value={project.technologies || ""}  // <-- plain string
+                      value={cert.credential_id || ""}
                       onChange={(e) =>
-                        updateProject(index, "technologies", e.target.value)
+                        updateCertification(
+                          index,
+                          "credential_id",
+                          e.target.value
+                        )
                       }
                       type="text"
-                      placeholder="e.g., React, Node.js, MongoDB, Tailwind"
+                      placeholder="e.g., ABCD-1234-XYZ"
                       className={baseInputClass}
                     />
                   </div>
 
                   <div className="space-y-1.5">
                     <label className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
-                      Project link (live / GitHub)
+                      Credential URL
                     </label>
                     <input
-                      value={project.link || ""}
+                      value={cert.credential_url || ""}
                       onChange={(e) =>
-                        updateProject(index, "link", e.target.value)
+                        updateCertification(
+                          index,
+                          "credential_url",
+                          e.target.value
+                        )
                       }
                       type="url"
-                      placeholder="Live demo or repository URL"
+                      placeholder="Verification / certificate URL"
                       className={baseInputClass}
                     />
                   </div>
                 </div>
 
-                {/* Highlights */}
-                <div className="space-y-2.5">
+                {/* Extra Link */}
+                <div className="space-y-1.5">
                   <label className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
-                    Highlights (one per line)
+                    Additional link (optional)
                   </label>
-                  <textarea
-                    rows={3}
-                    value={project.highlights || ""}  // <-- plain string
+                  <input
+                    value={cert.link || ""}
                     onChange={(e) =>
-                      updateProject(index, "highlights", e.target.value)
+                      updateCertification(index, "link", e.target.value)
                     }
-                    placeholder="e.g., Handled 5,000+ monthly visitors; Implemented responsive UI; Integrated payment gateway"
-                    className={`${baseInputClass} min-h-[110px] resize-none align-top`}
+                    type="url"
+                    placeholder="Portfolio, course page, or related link"
+                    className={baseInputClass}
                   />
                 </div>
               </div>
@@ -286,22 +260,21 @@ const ProjectForm = ({ data = [], onChange }) => {
       <TipsPanel
         open={showTips}
         onClose={() => setShowTips(false)}
-        title="Project Tips"
+        title="Certification Tips"
         sections={[
           {
-            heading: "What to highlight",
+            heading: "What to add",
             points: [
-              "State your role, tech stack, and the problem your project solves.",
-              "Mention users, scale, or impact if possible.",
-              "Link to GitHub or live demo so employers can explore.",
+              "Include issuer and credential URL for verification.",
+              "Show issue date and expiry if applicable.",
+              "Prioritize certifications relevant to your target role.",
             ],
           },
           {
-            heading: "Good structure",
+            heading: "How to order",
             points: [
-              "1–2 lines: What the project is.",
-              "2–3 lines: What you did specifically.",
-              "1 line: Result or measurable impact.",
+              "List latest or most advanced credentials first.",
+              "Group similar platforms (e.g., AWS, Azure, GCP).",
             ],
           },
         ]}
@@ -310,4 +283,4 @@ const ProjectForm = ({ data = [], onChange }) => {
   );
 };
 
-export default ProjectForm;
+export default CertificationsForm;

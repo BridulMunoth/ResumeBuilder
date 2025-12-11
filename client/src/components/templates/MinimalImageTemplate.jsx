@@ -1,4 +1,4 @@
-import { Mail, Phone, MapPin, ExternalLink } from "lucide-react";
+import { Mail, Phone, MapPin, ExternalLink, Linkedin, Globe, Github } from "lucide-react";
 
 const MinimalImageTemplate = ({ data, accentColor }) => {
     const formatDate = (dateStr) => {
@@ -67,6 +67,24 @@ const MinimalImageTemplate = ({ data, accentColor }) => {
                                     <span>{data.personal_info.location}</span>
                                 </div>
                             )}
+                            {data.personal_info?.linkedin && (
+                                <a href={data.personal_info.linkedin} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                                    <Linkedin size={14} style={{ color: accentColor }} />
+                                    <span className="break-all text-xs">{data.personal_info.linkedin}</span>
+                                </a>
+                            )}
+                            {data.personal_info?.website && (
+                                <a href={data.personal_info.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                                    <Globe size={14} style={{ color: accentColor }} />
+                                    <span className="break-all text-xs">{data.personal_info.website}</span>
+                                </a>
+                            )}
+                            {data.personal_info?.github && (
+                                <a href={data.personal_info.github} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                                    <Github size={14} style={{ color: accentColor }} />
+                                    <span className="break-all text-xs">{data.personal_info.github}</span>
+                                </a>
+                            )}
                         </div>
                     </section>
 
@@ -79,8 +97,21 @@ const MinimalImageTemplate = ({ data, accentColor }) => {
                             <div className="space-y-4 text-sm">
                                 {data.education.map((edu, index) => (
                                     <div key={index}>
-                                        <p className="font-semibold uppercase">{edu.degree}</p>
-                                        <p className="text-zinc-600">{edu.institution}</p>
+                                        <p className="font-semibold uppercase">{edu.level || edu.program || edu.degree}</p>
+                                        <p className="text-zinc-600 flex items-center gap-2">
+                                            <span>{edu.institution}</span>
+                                            {edu.link && (
+                                                <a
+                                                    href={edu.link}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-zinc-400 hover:text-zinc-600 transition-colors"
+                                                    title="Open link"
+                                                >
+                                                    <ExternalLink size={12} />
+                                                </a>
+                                            )}
+                                        </p>
                                         <p className="text-xs text-zinc-500">
                                             {formatDate(edu.graduation_date)}
                                         </p>
@@ -98,7 +129,7 @@ const MinimalImageTemplate = ({ data, accentColor }) => {
                             </h2>
                             <ul className="space-y-1 text-sm">
                                 {data.skills.map((skill, index) => (
-                                    <li key={index}>{skill}</li>
+                                    <li key={index}>{skill?.name}</li>
                                 ))}
                             </ul>
                         </section>
@@ -131,7 +162,7 @@ const MinimalImageTemplate = ({ data, accentColor }) => {
                                     <div key={index}>
                                         <div className="flex justify-between items-center">
                                             <h3 className="font-semibold text-zinc-900">
-                                                {exp.position}
+                                                {exp.title}
                                             </h3>
                                             <span className="text-xs text-zinc-500">
                                                 {formatDate(exp.start_date)} -{" "}
@@ -155,13 +186,13 @@ const MinimalImageTemplate = ({ data, accentColor }) => {
                     )}
 
                     {/* Projects */}
-                    {data.project && data.project.length > 0 && (
+                    {data.projects && data.projects.length > 0 && (
                         <section>
                             <h2 className="text-sm uppercase tracking-widest font-semibold" style={{ color: accentColor }}>
                                 PROJECTS
                             </h2>
                             <div className="space-y-4">
-                                {data.project.map((project, index) => (
+                                {data.projects.map((project, index) => (
                                     <div key={index}>
                                         <div className="flex items-center gap-2 mt-3">
                                             <h3 className="text-md font-medium text-zinc-800">{project.name}</h3>

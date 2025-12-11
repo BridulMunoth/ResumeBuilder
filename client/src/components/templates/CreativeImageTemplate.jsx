@@ -1,4 +1,4 @@
-import { Mail, Phone, MapPin, Linkedin, Globe, ExternalLink } from "lucide-react";
+import { Mail, Phone, MapPin, Linkedin, Globe, ExternalLink, Github } from "lucide-react";
 
 const CreativeImageTemplate = ({ data, accentColor }) => {
     const formatDate = (dateStr) => {
@@ -73,16 +73,22 @@ const CreativeImageTemplate = ({ data, accentColor }) => {
                         </div>
                     )}
                     {data.personal_info?.linkedin && (
-                        <div className="flex items-center gap-2">
+                        <a href={data.personal_info.linkedin} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
                             <Linkedin className="size-4" style={{ color: accentColor }} />
                             <span className="text-gray-700 break-all text-xs">{data.personal_info.linkedin}</span>
-                        </div>
+                        </a>
                     )}
                     {data.personal_info?.website && (
-                        <div className="flex items-center gap-2">
+                        <a href={data.personal_info.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
                             <Globe className="size-4" style={{ color: accentColor }} />
                             <span className="text-gray-700 break-all text-xs">{data.personal_info.website}</span>
-                        </div>
+                        </a>
+                    )}
+                    {data.personal_info?.github && (
+                        <a href={data.personal_info.github} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                            <Github className="size-4" style={{ color: accentColor }} />
+                            <span className="text-gray-700 break-all text-xs">{data.personal_info.github}</span>
+                        </a>
                     )}
                 </div>
 
@@ -121,13 +127,15 @@ const CreativeImageTemplate = ({ data, accentColor }) => {
                                             <div className="absolute left-0 top-2 w-3 h-3 rounded-full" style={{ backgroundColor: accentColor }}></div>
                                             <div className="border-l-2 pl-4" style={{ borderColor: accentColor }}>
                                                 <div className="mb-2">
-                                                    <h3 className="font-bold text-lg text-gray-900">{exp.position}</h3>
+                                                    <h3 className="font-bold text-lg text-gray-900">{exp.title}</h3>
                                                     <p className="font-semibold text-sm" style={{ color: accentColor }}>
                                                         {exp.company}
                                                     </p>
-                                                    <p className="text-xs text-gray-500 mt-1">
-                                                        {formatDate(exp.start_date)} - {exp.is_current ? "Present" : formatDate(exp.end_date)}
-                                                    </p>
+                                                    {([formatDate(exp.start_date), (exp.is_current ? 'Present' : formatDate(exp.end_date))].filter(Boolean).join(' - ') || null) && (
+                                                        <p className="text-xs text-gray-500 mt-1">
+                                                            {[formatDate(exp.start_date), (exp.is_current ? 'Present' : formatDate(exp.end_date))].filter(Boolean).join(' - ')}
+                                                        </p>
+                                                    )}
                                                 </div>
                                                 {exp.description && (
                                                     <div className="text-gray-700 text-sm leading-relaxed whitespace-pre-line">
@@ -142,7 +150,7 @@ const CreativeImageTemplate = ({ data, accentColor }) => {
                         )}
 
                         {/* Projects */}
-                        {data.project && data.project.length > 0 && (
+                        {data.projects && data.projects.length > 0 && (
                             <section>
                                 <div className="flex items-center gap-3 mb-6">
                                     <div className="h-1 w-12" style={{ backgroundColor: accentColor }}></div>
@@ -152,7 +160,7 @@ const CreativeImageTemplate = ({ data, accentColor }) => {
                                 </div>
 
                                 <div className="space-y-5">
-                                    {data.project.map((proj, index) => (
+                                    {data.projects.map((proj, index) => (
                                         <div key={index} className="border-l-4 pl-4" style={{ borderColor: accentColor }}>
                                             <div className="flex items-center gap-2">
                                                 <h3 className="font-bold text-gray-900">{proj.name}</h3>
@@ -205,12 +213,27 @@ const CreativeImageTemplate = ({ data, accentColor }) => {
                                             {edu.field && (
                                                 <p className="text-sm text-gray-600 mb-1">{edu.field}</p>
                                             )}
-                                            <p className="font-semibold text-sm mb-2" style={{ color: accentColor }}>
-                                                {edu.institution}
+                                            <p className="font-semibold text-sm mb-2 flex items-center gap-2" style={{ color: accentColor }}>
+                                                <span>{edu.institution}</span>
+                                                {edu.link && (
+                                                    <a
+                                                        href={edu.link}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="text-gray-400 hover:text-gray-600 transition-colors"
+                                                        title="Open link"
+                                                    >
+                                                        <ExternalLink size={12} />
+                                                    </a>
+                                                )}
                                             </p>
                                             <div className="flex justify-between items-center text-xs text-gray-600">
-                                                <span>{formatDate(edu.graduation_date)}</span>
-                                                {edu.gpa && <span>GPA: {edu.gpa}</span>}
+                                                {([formatDate(edu.start_date), (edu.is_current ? 'Present' : formatDate(edu.end_date || edu.graduation_date))].filter(Boolean).join(' - ') || null) && (
+                                                    <span>{[formatDate(edu.start_date), (edu.is_current ? 'Present' : formatDate(edu.end_date || edu.graduation_date))].filter(Boolean).join(' - ')}</span>
+                                                )}
+                                                {(edu.grade || edu.gpa || edu.percentage || edu.score) && (
+                                                    <span>Grade: {edu.grade || edu.gpa || edu.percentage || edu.score}</span>
+                                                )}
                                             </div>
                                         </div>
                                     ))}

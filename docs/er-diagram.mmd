@@ -1,0 +1,117 @@
+erDiagram
+  USER ||--o{ RESUME : "has many"
+  USER {
+    ObjectId _id PK
+    string fullname
+    string email
+    string password
+    date createdAt
+    date updatedAt
+  }
+
+  RESUME {
+    ObjectId _id PK
+    ObjectId userId FK
+    string title
+    boolean public
+    string template
+    string accent_color
+    string professional_summary
+    string headline
+    string target_role
+    object personal_info
+    string[] hobbies
+    date createdAt
+    date updatedAt
+  }
+
+  %% Embedded subdocuments in RESUME
+  RESUME ||--o{ SKILL : embedded
+  SKILL {
+    string name
+    string level
+    string category
+  }
+
+  RESUME ||--o{ EXPERIENCE : embedded
+  EXPERIENCE {
+    string title
+    string company
+    string employment_type
+    string location
+    string start_date
+    string end_date
+    boolean is_current
+    string description
+    string[] achievements
+    string[] technologies
+    string link
+  }
+
+  RESUME ||--o{ PROJECT : embedded
+  PROJECT {
+    string name
+    string role
+    string type
+    string description
+    string[] technologies
+    string link
+    string start_date
+    string end_date
+    string[] highlights
+  }
+
+  RESUME ||--o{ EDUCATION : embedded
+  EDUCATION {
+    string school
+    string degree
+    string location
+    string start_date
+    string end_date
+    string description
+    string link
+  }
+
+  RESUME ||--o{ CERTIFICATION : embedded
+  CERTIFICATION {
+    string name
+    string issuer
+    string issue_date
+    string expiry_date
+    string credential_id
+    string credential_url
+    string link
+  }
+
+  RESUME ||--o{ LANGUAGE : embedded
+  LANGUAGE {
+    string name
+    string proficiency
+  }
+
+  RESUME ||--o{ ACHIEVEMENT : embedded
+  ACHIEVEMENT {
+    string title
+    string issuer
+    string date
+    string description
+    string link
+  }
+
+  RESUME ||--o{ VOLUNTEER : embedded
+  VOLUNTEER {
+    string role
+    string organization
+    string location
+    string start_date
+    string end_date
+    string description
+    string link
+  }
+
+  RESUME ||--o{ CUSTOM_SECTION : embedded
+  CUSTOM_SECTION {
+    string title
+    string[] items
+    string link
+  }

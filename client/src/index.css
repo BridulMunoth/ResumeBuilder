@@ -17,3 +17,34 @@
      @apply outline-none focus:ring border border-gray-300 focus:ring-blue-500 focus:border-blue-500 rounded-lg resize-none;
     }
 }
+
+@keyframes dropdownIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes dropdownOut {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+}
+
+/* Radix select content animation (slide + fade) */
+.radix-select-content[data-state="open"] {
+  animation: dropdownIn 0.16s ease-out forwards;
+}
+
+.radix-select-content[data-state="closed"] {
+  animation: dropdownOut 0.12s ease-in forwards;
+}

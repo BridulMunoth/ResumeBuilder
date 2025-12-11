@@ -1,4 +1,4 @@
-import { Mail, Phone, MapPin, Linkedin, Globe, ExternalLink } from "lucide-react";
+import { Mail, Phone, MapPin, Linkedin, Globe, ExternalLink, Github } from "lucide-react";
 
 const ProfessionalImageTemplate = ({ data, accentColor }) => {
     const formatDate = (dateStr) => {
@@ -65,16 +65,22 @@ const ProfessionalImageTemplate = ({ data, accentColor }) => {
                                 </div>
                             )}
                             {data.personal_info?.linkedin && (
-                                <div className="flex items-start gap-2">
+                                <a href={data.personal_info.linkedin} target="_blank" rel="noopener noreferrer" className="flex items-start gap-2">
                                     <Linkedin className="size-3 mt-0.5 flex-shrink-0" style={{ color: accentColor }} />
                                     <span className="text-gray-700 break-all text-xs">{data.personal_info.linkedin}</span>
-                                </div>
+                                </a>
                             )}
                             {data.personal_info?.website && (
-                                <div className="flex items-start gap-2">
+                                <a href={data.personal_info.website} target="_blank" rel="noopener noreferrer" className="flex items-start gap-2">
                                     <Globe className="size-3 mt-0.5 flex-shrink-0" style={{ color: accentColor }} />
                                     <span className="text-gray-700 break-all text-xs">{data.personal_info.website}</span>
-                                </div>
+                                </a>
+                            )}
+                            {data.personal_info?.github && (
+                                <a href={data.personal_info.github} target="_blank" rel="noopener noreferrer" className="flex items-start gap-2">
+                                    <Github className="size-3 mt-0.5 flex-shrink-0" style={{ color: accentColor }} />
+                                    <span className="text-gray-700 break-all text-xs">{data.personal_info.github}</span>
+                                </a>
                             )}
                         </div>
                     </section>
@@ -88,7 +94,7 @@ const ProfessionalImageTemplate = ({ data, accentColor }) => {
                             <div className="space-y-2">
                                 {data.skills.map((skill, index) => (
                                     <div key={index} className="text-xs text-gray-700">
-                                        • {skill}
+                                        • {skill?.name}
                                     </div>
                                 ))}
                             </div>
@@ -110,12 +116,27 @@ const ProfessionalImageTemplate = ({ data, accentColor }) => {
                                         {edu.field && (
                                             <p className="text-xs text-gray-600 mb-1">{edu.field}</p>
                                         )}
-                                        <p className="text-xs font-medium mb-1" style={{ color: accentColor }}>
-                                            {edu.institution}
+                                        <p className="text-xs font-medium mb-1 flex items-center gap-2" style={{ color: accentColor }}>
+                                            <span>{edu.institution}</span>
+                                            {edu.link && (
+                                                <a
+                                                    href={edu.link}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                                                    title="Open link"
+                                                >
+                                                    <ExternalLink size={12} />
+                                                </a>
+                                            )}
                                         </p>
                                         <div className="flex justify-between items-center text-xs text-gray-600">
-                                            <span>{formatDate(edu.graduation_date)}</span>
-                                            {edu.gpa && <span>GPA: {edu.gpa}</span>}
+                                            {([formatDate(edu.start_date), (edu.is_current ? 'Present' : formatDate(edu.end_date || edu.graduation_date))].filter(Boolean).join(' - ') || null) && (
+                                                <span>{[formatDate(edu.start_date), (edu.is_current ? 'Present' : formatDate(edu.end_date || edu.graduation_date))].filter(Boolean).join(' - ')}</span>
+                                            )}
+                                            {(edu.grade || edu.gpa || edu.percentage || edu.score) && (
+                                                <span>Grade: {edu.grade || edu.gpa || edu.percentage || edu.score}</span>
+                                            )}
                                         </div>
                                     </div>
                                 ))}
@@ -160,14 +181,16 @@ const ProfessionalImageTemplate = ({ data, accentColor }) => {
                                     <div key={index}>
                                         <div className="flex justify-between items-start mb-1">
                                             <div>
-                                                <h3 className="font-bold text-gray-900">{exp.position}</h3>
+                                                <h3 className="font-bold text-gray-900">{exp.title}</h3>
                                                 <p className="text-sm font-medium" style={{ color: accentColor }}>
                                                     {exp.company}
                                                 </p>
                                             </div>
-                                            <span className="text-xs text-gray-600 font-medium">
-                                                {formatDate(exp.start_date)} - {exp.is_current ? "Present" : formatDate(exp.end_date)}
-                                            </span>
+                                            {([formatDate(exp.start_date), (exp.is_current ? 'Present' : formatDate(exp.end_date))].filter(Boolean).join(' - ') || null) && (
+                                                <span className="text-xs text-gray-600 font-medium">
+                                                    {[formatDate(exp.start_date), (exp.is_current ? 'Present' : formatDate(exp.end_date))].filter(Boolean).join(' - ')}
+                                                </span>
+                                            )}
                                         </div>
                                         {exp.description && (
                                             <div className="text-gray-700 text-sm leading-relaxed mt-2 whitespace-pre-line">
@@ -181,14 +204,14 @@ const ProfessionalImageTemplate = ({ data, accentColor }) => {
                     )}
 
                     {/* Projects */}
-                    {data.project && data.project.length > 0 && (
+                    {data.projects && data.projects.length > 0 && (
                         <section>
                             <h2 className="text-lg font-bold mb-4 uppercase tracking-wide" style={{ color: accentColor }}>
                                 Key Projects
                             </h2>
 
                             <div className="space-y-4">
-                                {data.project.map((proj, index) => (
+                                {data.projects.map((proj, index) => (
                                     <div key={index}>
                                         <div className="flex items-center gap-2">
                                             <h3 className="font-semibold text-gray-900">{proj.name}</h3>

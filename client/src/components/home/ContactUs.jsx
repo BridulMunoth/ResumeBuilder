@@ -2,11 +2,14 @@ import { Mail } from 'lucide-react'
 import React from 'react'
 import Title from './Title'
 import BridulImage from '../../assets/Team/Bridul.jpg'
+import NileshImage from '../../assets/Team/Nilesh.jpg'
+import YgpImage from '../../assets/Team/Ygp.jpg'
 
 const ContactUs = () => {
   return (
     <div id="contact" className="flex flex-col items-center my-10 scroll-mt-12">
-      <div className="flex items-center gap-2 text-sm text-green-600 bg-green-400/10 rounded-full px-6 py-1.5">
+      {/* Pill Badge */}
+      <div className="flex items-center gap-2 text-sm text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-6 py-1.5 shadow-[0_0_25px_rgba(16,185,129,0.35)]">
         <Mail width={14} />
         <span>Contact Us</span>
       </div>
@@ -16,34 +19,42 @@ const ContactUs = () => {
         description="The people behind the product, passionate about what they do."
       />
 
-      <div className="flex flex-wrap items-center justify-center gap-6 mt-12">
+      <div className="mt-12 flex flex-wrap justify-center gap-8 md:flex-nowrap">
         {/* CARD 1 */}
-        <div className="max-w-80 bg-black text-white rounded-2xl">
-          <div className="relative -mt-px overflow-hidden rounded-2xl">
+        <div className="w-80 rounded-3xl bg-gradient-to-b from-zinc-900 via-black to-zinc-950 text-white shadow-[0_18px_45px_rgba(0,0,0,0.7)] overflow-hidden group transition-all duration-300 hover:-translate-y-3 hover:shadow-[0_25px_70px_rgba(0,0,0,0.9)] border border-white/5">
+          {/* Image */}
+          <div className="relative h-[270px] overflow-hidden">
             <img
               src={BridulImage}
               alt="Bridul R Munoth"
-              className="h-[270px] w-full rounded-2xl hover:scale-105 transition-all duration-300 object-cover object-top"
+              className="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-110"
             />
-            <div className="absolute bottom-0 z-10 h-60 w-full bg-gradient-to-t pointer-events-none from-black to-transparent" />
+            {/* Dark gradient overlay */}
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black via-black/10 to-transparent opacity-85 group-hover:opacity-95 transition-opacity duration-300" />
           </div>
-          <div className="px-4 pb-6 text-center">
-            <p className="mt-4 text-lg">Bridul R Munoth</p>
-            <p className="text-sm font-medium bg-gradient-to-r from-[#8B5CF6] via-[#9938CA] to-[#E0724A] text-transparent bg-clip-text">
-              Backend Developer and Integrator 
-            </p>
 
-            {/* social icons */}
-            <div className="mt-4 flex items-center justify-center gap-4 text-xl">
+          {/* Content (fixed height so all cards equal) */}
+          <div className="flex h-[170px] flex-col items-center justify-between px-5 pb-6 pt-4 text-center">
+            <div>
+              <p className="text-lg font-semibold tracking-wide">
+                Bridul R Munoth
+              </p>
+              <p className="mt-1 text-sm font-medium bg-gradient-to-r from-[#8B5CF6] via-[#9938CA] to-[#E0724A] bg-clip-text text-transparent">
+                Backend Developer and Integrator
+              </p>
+            </div>
+
+            {/* Social Icons */}
+            <div className="mt-3 flex items-center justify-center gap-4 text-xl">
               {/* Instagram */}
               <a
-                href="#"
-                className="hover:scale-110 transition-transform"
+                href="https://www.instagram.com/bridul_jain/#"
+                className="rounded-full bg-white/5 p-2 hover:bg-white/15 hover:scale-110 transition-transform duration-200"
                 aria-label="Instagram"
               >
                 <svg
-                  width="22"
-                  height="22"
+                  width="20"
+                  height="20"
                   viewBox="0 0 24 24"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
@@ -56,15 +67,16 @@ const ContactUs = () => {
                   <circle cx="16.35" cy="7.65" r="0.9" fill="white" />
                 </svg>
               </a>
+
               {/* LinkedIn */}
               <a
-                href="#"
-                className="hover:scale-110 transition-transform"
+                href="https://linkedin.com/in/bridul-munoth-5883bb321"
+                className="rounded-full bg-white/5 p-2 hover:bg-white/15 hover:scale-110 transition-transform duration-200"
                 aria-label="LinkedIn"
               >
                 <svg
-                  width="22"
-                  height="22"
+                  width="20"
+                  height="20"
                   viewBox="0 0 24 24"
                   xmlns="http://www.w3.org/2000/svg"
                 >
@@ -75,15 +87,16 @@ const ContactUs = () => {
                   />
                 </svg>
               </a>
+
               {/* GitHub */}
               <a
-                href="#"
-                className="hover:scale-110 transition-transform"
+                href="https://github.com/BridulMunoth"
+                className="rounded-full bg-white/5 p-2 hover:bg-white/15 hover:scale-110 transition-transform duration-200"
                 aria-label="GitHub"
               >
                 <svg
-                  width="22"
-                  height="22"
+                  width="20"
+                  height="20"
                   viewBox="0 0 24 24"
                   xmlns="http://www.w3.org/2000/svg"
                 >
@@ -99,31 +112,36 @@ const ContactUs = () => {
         </div>
 
         {/* CARD 2 */}
-        <div className="max-w-80 bg-black text-white rounded-2xl">
-          <div className="relative -mt-px overflow-hidden rounded-2xl">
+        <div className="w-80 rounded-3xl bg-gradient-to-b from-zinc-900 via-black to-zinc-950 text-white shadow-[0_18px_45px_rgba(0,0,0,0.7)] overflow-hidden group transition-all duration-300 hover:-translate-y-3 hover:shadow-[0_25px_70px_rgba(0,0,0,0.9)] border border-white/5">
+          <div className="relative h-[270px] overflow-hidden">
             <img
-              src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=600"
+              src={NileshImage}
               alt="Nilesh Madiwal"
-              className="h-[270px] w-full rounded-2xl hover:scale-105 transition-all duration-300 object-cover object-top"
+              className="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-110"
             />
-            <div className="absolute bottom-0 z-10 h-60 w-full bg-gradient-to-t pointer-events-none from-black to-transparent" />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black via-black/10 to-transparent opacity-85 group-hover:opacity-95 transition-opacity duration-300" />
           </div>
-          <div className="px-4 pb-6 text-center">
-            <p className="mt-4 text-lg">Nilesh Madiwal</p>
-            <p className="text-sm font-medium bg-gradient-to-r from-[#8B5CF6] via-[#9938CA] to-[#E0724A] text-transparent bg-clip-text">
-              Frontend Developer
-            </p>
 
-            <div className="mt-4 flex items-center justify-center gap-4 text-xl">
+          <div className="flex h-[170px] flex-col items-center justify-between px-5 pb-6 pt-4 text-center">
+            <div>
+              <p className="text-lg font-semibold tracking-wide">
+                Nilesh Madiwal
+              </p>
+              <p className="mt-1 text-sm font-medium bg-gradient-to-r from-[#8B5CF6] via-[#9938CA] to-[#E0724A] bg-clip-text text-transparent">
+                Frontend Developer
+              </p>
+            </div>
+
+            <div className="mt-3 flex items-center justify-center gap-4 text-xl">
               {/* Instagram */}
               <a
                 href="#"
-                className="hover:scale-110 transition-transform"
+                className="rounded-full bg-white/5 p-2 hover:bg-white/15 hover:scale-110 transition-transform duration-200"
                 aria-label="Instagram"
               >
                 <svg
-                  width="22"
-                  height="22"
+                  width="20"
+                  height="20"
                   viewBox="0 0 24 24"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
@@ -136,15 +154,16 @@ const ContactUs = () => {
                   <circle cx="16.35" cy="7.65" r="0.9" fill="white" />
                 </svg>
               </a>
+
               {/* LinkedIn */}
               <a
                 href="#"
-                className="hover:scale-110 transition-transform"
+                className="rounded-full bg-white/5 p-2 hover:bg-white/15 hover:scale-110 transition-transform duration-200"
                 aria-label="LinkedIn"
               >
                 <svg
-                  width="22"
-                  height="22"
+                  width="20"
+                  height="20"
                   viewBox="0 0 24 24"
                   xmlns="http://www.w3.org/2000/svg"
                 >
@@ -155,15 +174,16 @@ const ContactUs = () => {
                   />
                 </svg>
               </a>
+
               {/* GitHub */}
               <a
                 href="#"
-                className="hover:scale-110 transition-transform"
+                className="rounded-full bg-white/5 p-2 hover:bg-white/15 hover:scale-110 transition-transform duration-200"
                 aria-label="GitHub"
               >
                 <svg
-                  width="22"
-                  height="22"
+                  width="20"
+                  height="20"
                   viewBox="0 0 24 24"
                   xmlns="http://www.w3.org/2000/svg"
                 >
@@ -179,31 +199,36 @@ const ContactUs = () => {
         </div>
 
         {/* CARD 3 */}
-        <div className="max-w-80 bg-black text-white rounded-2xl">
-          <div className="relative -mt-px overflow-hidden rounded-2xl">
+        <div className="w-80 rounded-3xl bg-gradient-to-b from-zinc-900 via-black to-zinc-950 text-white shadow-[0_18px_45px_rgba(0,0,0,0.7)] overflow-hidden group transition-all duration-300 hover:-translate-y-3 hover:shadow-[0_25px_70px_rgba(0,0,0,0.9)] border border-white/5">
+          <div className="relative h-[270px] overflow-hidden">
             <img
-              src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=600&h=600&auto=format&fit=crop"
+              src={YgpImage}
               alt="Yogesh G Poojar"
-              className="h-[270px] w-full rounded-2xl hover:scale-105 transition-all duration-300 object-cover object-top"
+              className="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-110"
             />
-            <div className="absolute bottom-0 z-10 h-60 w-full bg-gradient-to-t pointer-events-none from-black to-transparent" />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black via-black/10 to-transparent opacity-85 group-hover:opacity-95 transition-opacity duration-300" />
           </div>
-          <div className="px-4 pb-6 text-center">
-            <p className="mt-4 text-lg">Yogesh G Poojar</p>
-            <p className="text-sm font-medium bg-gradient-to-r from-[#8B5CF6] via-[#9938CA] to-[#E0724A] text-transparent bg-clip-text">
-              Content Marketing
-            </p>
 
-            <div className="mt-4 flex items-center justify-center gap-4 text-xl">
+          <div className="flex h-[170px] flex-col items-center justify-between px-5 pb-6 pt-4 text-center">
+            <div>
+              <p className="text-lg font-semibold tracking-wide">
+                Yogesh G Poojar
+              </p>
+              <p className="mt-1 text-sm font-medium bg-gradient-to-r from-[#8B5CF6] via-[#9938CA] to-[#E0724A] bg-clip-text text-transparent">
+                Content Marketing
+              </p>
+            </div>
+
+            <div className="mt-3 flex items-center justify-center gap-4 text-xl">
               {/* Instagram */}
               <a
-                href="#"
-                className="hover:scale-110 transition-transform"
+                href="https://www.instagram.com/callmeyogesh1359?igsh=cnhoaTZtbTE0bGh4"
+                className="rounded-full bg-white/5 p-2 hover:bg-white/15 hover:scale-110 transition-transform duration-200"
                 aria-label="Instagram"
               >
                 <svg
-                  width="22"
-                  height="22"
+                  width="20"
+                  height="20"
                   viewBox="0 0 24 24"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
@@ -216,15 +241,16 @@ const ContactUs = () => {
                   <circle cx="16.35" cy="7.65" r="0.9" fill="white" />
                 </svg>
               </a>
+
               {/* LinkedIn */}
               <a
-                href="#"
-                className="hover:scale-110 transition-transform"
+                href="https://www.linkedin.com/in/yogesh-poojar-95b788333?utm_source=share_via&utm_content=profile&utm_medium=member_android"
+                className="rounded-full bg-white/5 p-2 hover:bg-white/15 hover:scale-110 transition-transform duration-200"
                 aria-label="LinkedIn"
               >
                 <svg
-                  width="22"
-                  height="22"
+                  width="20"
+                  height="20"
                   viewBox="0 0 24 24"
                   xmlns="http://www.w3.org/2000/svg"
                 >
@@ -235,15 +261,16 @@ const ContactUs = () => {
                   />
                 </svg>
               </a>
+
               {/* GitHub */}
               <a
                 href="#"
-                className="hover:scale-110 transition-transform"
+                className="rounded-full bg-white/5 p-2 hover:bg-white/15 hover:scale-110 transition-transform duration-200"
                 aria-label="GitHub"
               >
                 <svg
-                  width="22"
-                  height="22"
+                  width="20"
+                  height="20"
                   viewBox="0 0 24 24"
                   xmlns="http://www.w3.org/2000/svg"
                 >

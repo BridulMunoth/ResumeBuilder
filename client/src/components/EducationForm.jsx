@@ -1,123 +1,380 @@
-import { GraduationCap, Plus, Trash2 } from "lucide-react";
-import React from "react";
+import { GraduationCap, Plus, Trash2, Lightbulb } from "lucide-react";
+import React, { useState } from "react";
+import TipsPanel from "./TipsPanel";
 
-const EducationForm = ({ data, onChange }) => {
+const EducationForm = ({ data = [], onChange }) => {
+  const [showTips, setShowTips] = useState(false);
+
   const addEducation = () => {
     const newEducation = {
-      institution: "",
+      school: "",
       degree: "",
       field: "",
-      graduation_date: "",
-      gpa: "",
+      location: "",
+      start_date: "",
+      end_date: "",
+      is_current: false,
+      description: "",
+      link: "",
+      grade: "",
     };
-    onChange([...data, newEducation]);
+    onChange([...(data || []), newEducation]);
   };
 
   const removeEducation = (index) => {
-    const updated = data.filter((_, i) => i !== index);
+    const updated = (data || []).filter((_, i) => i !== index);
     onChange(updated);
   };
 
   const updateEducation = (index, field, value) => {
-    const updated = [...data];
+    const updated = [...(data || [])];
+
+    // Special handling for description so spaces & newlines are preserved
+    if (field === "description") {
+      const desc = String(value ?? "");
+      const pursuingPattern = /\(?\s*pursu(?:ing)?\s*\)?/gi;
+
+      // Detect "pursuing" and mark as current
+      if (pursuingPattern.test(desc)) {
+        updated[index].is_current = true;
+      }
+
+      // Remove the word "pursuing" but DO NOT trim spaces/newlines
+      const cleaned = desc.replace(pursuingPattern, "");
+      updated[index].description = cleaned;
+
+      onChange(updated);
+      return;
+    }
+
+    // Normal fields
     updated[index][field] = value;
     onChange(updated);
   };
 
+  // spacious glassy inputs (same system as ExperienceForm)
+  const baseInputClass =
+    "w-full rounded-2xl border border-white/80 bg-white/95 px-3.5 py-3 text-sm " +
+    "text-slate-900 placeholder:text-slate-400 shadow-[0_10px_26px_rgba(15,23,42,0.08)] " +
+    "backdrop-blur-xl focus:border-sky-500 focus:ring-2 focus:ring-sky-400/60 " +
+    "outline-none transition";
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="flex items-center gap-2 text-lg font-semibold text-gray-900">
-            Education{" "}
+      {/* HEADER */}
+      <div className="flex items-start justify-between gap-4 rounded-3xl bg-gradient-to-r from-sky-50 via-white to-indigo-50/80 px-5 py-4 shadow-[0_12px_30px_rgba(15,23,42,0.08)] border border-white/80">
+        <div className="space-y-1">
+          <h3 className="flex items-center gap-2 text-lg font-semibold text-slate-900">
+            <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-400 via-sky-500 to-indigo-500 shadow-[0_8px_20px_rgba(56,189,248,0.55)] ring-2 ring-white/80">
+              <GraduationCap className="h-4 w-4 text-white" />
+            </span>
+            Education
           </h3>
-          <p className="text-sm text-gray-500">Add your Education Details</p>
+          <p className="text-sm text-slate-600">
+            Add your academic background, from school to university.
+          </p>
         </div>
-        <button
-          onClick={addEducation}
-          className="flex items-center gap-2 px-3 py-1 text-sm bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors"
-        >
-          <Plus className="size-4" />
-          Add Education
-        </button>
+
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setShowTips(true)}
+            aria-label="Get tips"
+            title="Get tips"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-yellow-300/80 bg-yellow-50/90 text-yellow-600 shadow-[0_0_10px_rgba(250,204,21,0.35)] backdrop-blur-md transition hover:bg-yellow-100"
+          >
+            <Lightbulb className="h-4 w-4" />
+          </button>
+
+          {/* pastel add button */}
+          <button
+            type="button"
+            onClick={addEducation}
+            className="inline-flex items-center gap-2 rounded-xl 
+                       bg-emerald-50 border border-emerald-300/70 
+                       px-5 py-2.5 text-sm font-medium text-emerald-700
+                       hover:bg-emerald-100 transition"
+          >
+            <Plus className="h-4 w-4" />
+            Add education
+          </button>
+        </div>
       </div>
 
-      {data.length === 0 ? (
-        <div className="text-center py-8 text-gray-500">
-          <GraduationCap className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-          <p>No Education added yet.</p>
-          <p className="text-sm">Click "Add Education" to get started.</p>
+      {/* EMPTY STATE */}
+      {(data || []).length === 0 ? (
+        <div className="rounded-3xl border border-dashed border-slate-200/90 bg-gradient-to-b from-sky-50/95 via-white/95 to-indigo-50/90 py-10 text-center shadow-[0_16px_38px_rgba(15,23,42,0.08)] backdrop-blur-xl">
+          <GraduationCap className="mx-auto mb-3 h-10 w-10 text-slate-300" />
+          <p className="text-sm font-medium text-slate-800">
+            No education added yet.
+          </p>
+          <p className="mt-1 text-xs text-slate-500">
+            Click <span className="font-semibold">“Add education”</span> to
+            start with your latest degree.
+          </p>
         </div>
       ) : (
-        <div className="space-y-4">
-          {data.map((education, index) => (
+        <div className="space-y-6">
+          {(data || []).map((education, index) => (
             <div
               key={index}
-              className="p-4 border border-gray-200 rounded-lg space-y-3"
+              className="rounded-3xl border border-white/80 bg-white/90 p-6 shadow-[0_20px_50px_rgba(15,23,42,0.14)] backdrop-blur-2xl space-y-6"
             >
-              <div className="flex justify-between items-start">
-                <h4>Education #{index + 1}</h4>
+              {/* CARD HEADER */}
+              <div className="flex items-start justify-between gap-4">
+                <div className="space-y-1">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-500">
+                    Education #{index + 1}
+                  </p>
+                  {(education.degree || education.school) && (
+                    <p className="text-sm font-semibold text-slate-900">
+                      {education.degree || "Degree not set"}
+                      {education.school && (
+                        <span className="text-slate-500">
+                          {" "}
+                          · {education.school}
+                        </span>
+                      )}
+                    </p>
+                  )}
+                </div>
+
+                {/* delete button */}
                 <button
+                  type="button"
                   onClick={() => removeEducation(index)}
-                  className="text-red-500 hover:text-red-700 transition-colors"
+                  className="inline-flex h-8 w-8 items-center justify-center 
+                             rounded-xl bg-rose-50 border border-rose-300/70 
+                             text-rose-600 hover:bg-rose-100 transition"
+                  aria-label="Remove education"
+                  title="Remove education"
                 >
-                  <Trash2 className="size-4" />
+                  <Trash2 className="h-4 w-4" />
                 </button>
               </div>
-              <div className="grid md:grid-cols-2 gap-3">
-                <input
-                  value={education.institution || ""}
-                  onChange={(e) =>
-                    updateEducation(index, "institution", e.target.value)
-                  }
-                  type="text"
-                  placeholder="Institution Name"
-                  className="px-3 py-2 text-sm "
-                />
 
-                <input
-                  value={education.degree || ""}
-                  onChange={(e) =>
-                    updateEducation(index, "degree", e.target.value)
-                  }
-                  type="text"
-                  placeholder="Degree"
-                  className="px-3 py-2 text-sm "
-                />
+              {/* divider */}
+              <div className="h-px w-full bg-gradient-to-r from-transparent via-sky-100 to-transparent" />
 
-                <input
-                  value={education.field || ""}
-                  onChange={(e) =>
-                    updateEducation(index, "field", e.target.value)
-                  }
-                  type="text"
-                  placeholder="Field of Study"
-                  className="px-3 py-2 text-sm"
-                />
-                <input
-                  value={education.graduation_date || ""}
-                  onChange={(e) =>
-                    updateEducation(index, "graduation_date", e.target.value)
-                  }
-                  type="month"
-                  className="px-3 py-2 text-sm"
-                />
+              {/* BODY */}
+              <div className="space-y-6">
+                {/* DEGREE + FIELD */}
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
+                      Degree
+                    </label>
+                    <input
+                      value={
+                        education.degree ||
+                        [education.level, education.program, education.field]
+                          .filter(Boolean)
+                          .join(" ") ||
+                        ""
+                      }
+                      onChange={(e) =>
+                        updateEducation(index, "degree", e.target.value)
+                      }
+                      type="text"
+                      placeholder="e.g., BCA, B.Tech in CSE"
+                      className={baseInputClass}
+                    />
+                  </div>
 
-                <input
-                  value={education.gpa || ""}
-                  onChange={(e) =>
-                    updateEducation(index, "gpa", e.target.value)
-                  }
-                  type="text"
-                  placeholder="GPA (Optional)"
-                  className="px-3 py-2 text-sm"
-                />
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
+                      Field of study
+                    </label>
+                    <input
+                      value={education.field || ""}
+                      onChange={(e) =>
+                        updateEducation(index, "field", e.target.value)
+                      }
+                      type="text"
+                      placeholder="e.g., Computer Science, Mechanical Engineering"
+                      className={baseInputClass}
+                    />
+                  </div>
+                </div>
+
+                {/* SCHOOL + LINK */}
+                <div className="grid gap-4 md:grid-cols-3">
+                  <div className="space-y-1.5 md:col-span-2">
+                    <label className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
+                      School / University
+                    </label>
+                    <input
+                      value={education.school || education.institution || ""}
+                      onChange={(e) =>
+                        updateEducation(index, "school", e.target.value)
+                      }
+                      type="text"
+                      placeholder="e.g., XYZ College of Engineering"
+                      className={baseInputClass}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
+                      Link (opt)
+                    </label>
+                    <input
+                      value={education.link || ""}
+                      onChange={(e) =>
+                        updateEducation(index, "link", e.target.value)
+                      }
+                      type="url"
+                      placeholder="College / program reference link"
+                      className={baseInputClass}
+                    />
+                  </div>
+                </div>
+
+                {/* GRADE */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
+                    Grade / Percentage / GPA
+                  </label>
+                  <input
+                    value={
+                      education.grade ||
+                      education.gpa ||
+                      education.percentage ||
+                      ""
+                    }
+                    onChange={(e) =>
+                      updateEducation(index, "grade", e.target.value)
+                    }
+                    type="text"
+                    placeholder="e.g., 8.5 CGPA / 86%"
+                    className={baseInputClass}
+                  />
+                </div>
+
+                {/* DATES + LOCATION + CURRENTLY STUDYING */}
+                <div className="grid gap-4 md:grid-cols-3">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
+                      Start date
+                    </label>
+                    <input
+                      value={education.start_date || ""}
+                      onChange={(e) =>
+                        updateEducation(index, "start_date", e.target.value)
+                      }
+                      type="month"
+                      className={baseInputClass}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
+                        End date
+                      </label>
+                      <input
+                        value={
+                          education.end_date || education.graduation_date || ""
+                        }
+                        onChange={(e) =>
+                          updateEducation(index, "end_date", e.target.value)
+                        }
+                        type="month"
+                        disabled={!!education.is_current}
+                        className={`${baseInputClass} disabled:bg-slate-100/80 disabled:text-slate-400`}
+                      />
+                    </div>
+
+                    <label className="inline-flex items-center gap-2 text-xs font-medium text-slate-600">
+                      <div className="relative inline-flex items-center">
+                        <input
+                          type="checkbox"
+                          checked={!!education.is_current}
+                          onChange={(e) =>
+                            updateEducation(
+                              index,
+                              "is_current",
+                              e.target.checked
+                            )
+                          }
+                          className="peer sr-only"
+                        />
+                        <div className="h-5 w-9 rounded-full bg-slate-300/80 shadow-inner transition-colors duration-200 peer-checked:bg-emerald-500/90" />
+                        <span className="pointer-events-none absolute left-1 top-[3px] h-3 w-3 rounded-full bg-white shadow-[0_4px_10px_rgba(15,23,42,0.25)] transition-transform duration-200 ease-in-out peer-checked:translate-x-4" />
+                      </div>
+                      Currently studying
+                    </label>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
+                      Location
+                    </label>
+                    <input
+                      value={
+                        education.location || education.board_university || ""
+                      }
+                      onChange={(e) =>
+                        updateEducation(index, "location", e.target.value)
+                      }
+                      type="text"
+                      placeholder="City, Country"
+                      className={baseInputClass}
+                    />
+                  </div>
+                </div>
+
+                {/* DIVIDER */}
+                <div className="h-px w-full bg-gradient-to-r from-transparent via-slate-100 to-transparent" />
+
+                {/* DESCRIPTION */}
+                <div className="space-y-2.5">
+                  <label className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
+                    Description / Highlights
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={education.description || ""}
+                    onChange={(e) =>
+                      updateEducation(index, "description", e.target.value)
+                    }
+                    className={`${baseInputClass} min-h-[120px] resize-none align-top`}
+                    placeholder="Activities, societies, key subjects, scholarships, and achievements"
+                  />
+                  <p className="text-[11px] text-slate-400">
+                    Tip: If you type &quot;pursuing&quot; here, we&apos;ll
+                    automatically mark this as current.
+                  </p>
+                </div>
               </div>
-              
             </div>
           ))}
         </div>
       )}
+
+      {/* TIPS PANEL */}
+      <TipsPanel
+        open={showTips}
+        onClose={() => setShowTips(false)}
+        title="Education Tips"
+        sections={[
+          {
+            heading: "What to include",
+            points: [
+              "List your most recent or most relevant education first.",
+              "Include program, field, institution, board/university, and location.",
+              "Add your score (GPA/%) only if it strengthens your profile.",
+            ],
+          },
+          {
+            heading: "Description ideas",
+            points: [
+              "Mention key subjects, academic projects, or research topics.",
+              "Add leadership roles in clubs, committees, or student bodies.",
+              "Highlight scholarships, awards, or academic achievements.",
+            ],
+          },
+        ]}
+      />
     </div>
   );
 };
