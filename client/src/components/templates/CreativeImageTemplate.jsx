@@ -1,13 +1,53 @@
-import { Mail, Phone, MapPin, Linkedin, Globe, ExternalLink, Github } from "lucide-react";
+import React from "react";
+import { Mail, Phone, MapPin, Linkedin, Globe, ExternalLink, Github, Calendar, Flag } from "lucide-react";
 
-const CreativeImageTemplate = ({ data, accentColor }) => {
+const CreativeImageTemplate = ({ data, accentColor, formatting }) => {
+    const {
+        layout = { columns: 2 },
+        spacing = {
+            font_size: 10.5,
+            line_height: 1.5,
+            margin_horizontal: 10,
+            margin_vertical: 10,
+            section_spacing: 6,
+        },
+        colors = {
+            primary: "#111827",
+            secondary: "#4B5563",
+            accent: accentColor || "#8B5CF6", // Violet default for creative
+            text: "#374151",
+            background: "#FFFFFF",
+        },
+        section_order = [],
+        section_visibility = {},
+        section_titles = {},
+    } = formatting || {};
+
+    const getSectionTitle = (id, defaultTitle) => section_titles[id] || defaultTitle;
+    const isVisible = (id) => section_visibility[id] !== false;
+
+    // Safe date formatter
     const formatDate = (dateStr) => {
         if (!dateStr) return "";
-        const [year, month] = dateStr.split("-");
-        return new Date(year, month - 1).toLocaleDateString("en-US", {
-            year: "numeric",
-            month: "short"
-        });
+        const d = new Date(dateStr);
+        if (Number.isNaN(d.getTime())) return "";
+        return d.toLocaleDateString("en-US", { year: "numeric", month: "short" });
+    };
+
+    const formatDateRange = (start, end, isCurrent) => {
+        const startText = formatDate(start);
+        const endText = isCurrent ? "Present" : formatDate(end);
+        if (!startText && !endText) return "";
+        if (!startText) return endText;
+        if (!endText) return startText;
+        return `${startText} - ${endText}`;
+    };
+
+    const getList = (item) => {
+        if (!item) return [];
+        if (Array.isArray(item)) return item;
+        if (typeof item === 'string') return item.split(',').map(i => i.trim()).filter(Boolean);
+        return [];
     };
 
     const getImageSrc = () => {
@@ -15,20 +55,382 @@ const CreativeImageTemplate = ({ data, accentColor }) => {
         if (typeof data.personal_info.image === 'string') {
             return data.personal_info.image;
         }
-        if (typeof data.personal_info.image === 'object') {
-            return URL.createObjectURL(data.personal_info.image);
+        if (typeof data.personal_info.image === 'object') { // File object
+             try {
+                return URL.createObjectURL(data.personal_info.image);
+            } catch (e) {
+                return null;
+            }
         }
         return null;
     };
 
+    // Styling
+    const containerStyle = {
+        fontFamily: "'Poppins', 'Inter', sans-serif",
+        color: colors.text,
+        backgroundColor: colors.background,
+        fontSize: `${spacing.font_size}pt`,
+        lineHeight: spacing.line_height,
+    };
+
+    const contentPadding = {
+        padding: `${spacing.margin_vertical}mm ${spacing.margin_horizontal}mm`,
+    };
+
+    const sectionHeadingStyle = {
+        color: colors.accent,
+        fontWeight: "bold",
+        textTransform: "uppercase",
+        letterSpacing: "0.05em",
+        fontSize: "1.1em",
+    };
+
+    const sectionContainerStyle = {
+        marginBottom: `${spacing.section_spacing}mm`,
+    };
+
+    // Group skills logic
+    const skillsArray = Array.isArray(data?.skills)
+        ? data.skills.map((s) => (typeof s === "string" ? { name: s } : s)).filter((s) => s && s.name)
+        : [];
+    const groupedSkills = skillsArray.reduce((acc, s) => {
+        const cat = (s.category || "Other").trim() || "Other";
+        if (!acc[cat]) acc[cat] = [];
+        acc[cat].push(s);
+        return acc;
+    }, {});
+    const groupedEntries = Object.entries(groupedSkills).sort(([a], [b]) => a.localeCompare(b));
+
+    // Renderers
+    const renderSkills = () => {
+         if (!data.skills || data.skills.length === 0 || !isVisible("skills")) return null;
+         return (
+            <section style={sectionContainerStyle}>
+                <div className="flex items-center gap-3 mb-3">
+                    <div className="h-1 w-8" style={{ backgroundColor: colors.accent }}></div>
+                    <h2 style={sectionHeadingStyle}>{getSectionTitle("skills", "Skills")}</h2>
+                </div>
+                <div className="space-y-3">
+                    {groupedEntries.map(([category, items]) => (
+                        <div key={category}>
+                             {category !== "Other" && (
+                                <h3 className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: colors.secondary }}>
+                                    {category}
+                                </h3>
+                            )}
+                            <div className="flex flex-wrap gap-2">
+                                {items.map((s, idx) => (
+                                    <span key={idx} className="px-2 py-1 text-xs font-medium rounded text-white" style={{ backgroundColor: colors.accent }}>
+                                        {s.name}{s.level ? ` (${s.level})` : ""}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </section>
+         );
+    };
+
+    const renderEducation = () => (
+        data.education && data.education.length > 0 && isVisible("education") && (
+            <section style={sectionContainerStyle}>
+                 <div className="flex items-center gap-3 mb-3">
+                    <div className="h-1 w-8" style={{ backgroundColor: colors.accent }}></div>
+                    <h2 style={sectionHeadingStyle}>{getSectionTitle("education", "Education")}</h2>
+                </div>
+                <div className="space-y-4">
+                    {data.education.map((edu, index) => (
+                        <div key={index} className="bg-gray-50 p-3 rounded-lg border-l-4" style={{ borderColor: colors.accent }}>
+                            <h3 className="font-bold text-sm" style={{ color: colors.primary }}>{edu.degree}</h3>
+                            {edu.field && <p className="text-xs mb-1" style={{ color: colors.secondary }}>{edu.field}</p>}
+                            <p className="text-xs font-semibold mb-1" style={{ color: colors.accent }}>{edu.institution}</p>
+                            <div className="text-xs text-gray-500">
+                                {formatDateRange(edu.start_date, edu.end_date, edu.is_current)}
+                            </div>
+                            {(edu.grade || edu.gpa) && <div className="text-xs mt-1">Grade: {edu.grade || edu.gpa}</div>}
+                        </div>
+                    ))}
+                </div>
+            </section>
+        )
+    );
+
+    const renderExperience = () => (
+        data.experience && data.experience.length > 0 && isVisible("experience") && (
+            <section style={sectionContainerStyle}>
+                 <div className="flex items-center gap-3 mb-3">
+                    <div className="h-1 w-8" style={{ backgroundColor: colors.accent }}></div>
+                    <h2 style={sectionHeadingStyle}>{getSectionTitle("experience", "Experience")}</h2>
+                </div>
+                <div className="space-y-5">
+                    {data.experience.map((exp, index) => {
+                        const techList = getList(exp.technologies);
+                        return (
+                             <div key={index} className="relative pl-4 border-l-2" style={{ borderColor: colors.accent }}>
+                                <div className="mb-1">
+                                    <h3 className="font-bold text-lg" style={{ color: colors.primary }}>{exp.title}</h3>
+                                    <div className="flex justify-between items-baseline">
+                                        <p className="font-semibold text-sm" style={{ color: colors.accent }}>{exp.company}</p>
+                                        <span className="text-xs text-gray-500 font-mono">
+                                            {formatDateRange(exp.start_date, exp.end_date, exp.is_current)}
+                                        </span>
+                                    </div>
+                                    {exp.location && <p className="text-xs text-gray-400">{exp.location}</p>}
+                                </div>
+                                {exp.description && (
+                                    <div className="text-sm leading-relaxed whitespace-pre-line mb-2">
+                                        {exp.description}
+                                    </div>
+                                )}
+                                {techList.length > 0 && (
+                                    <div className="flex flex-wrap gap-1">
+                                        {techList.map((tech, i) => (
+                                            <span key={i} className="text-[10px] px-1.5 py-0.5 rounded border border-gray-200 text-gray-600 bg-white">
+                                                {tech}
+                                            </span>
+                                        ))}
+                                    </div>
+                                )}
+                             </div>
+                        );
+                    })}
+                </div>
+            </section>
+        )
+    );
+
+    const renderProjects = () => (
+        data.projects && data.projects.length > 0 && isVisible("projects") && (
+             <section style={sectionContainerStyle}>
+                <div className="flex items-center gap-3 mb-3">
+                    <div className="h-1 w-8" style={{ backgroundColor: colors.accent }}></div>
+                    <h2 style={sectionHeadingStyle}>{getSectionTitle("projects", "Projects")}</h2>
+                </div>
+                <div className="space-y-4">
+                    {data.projects.map((proj, index) => {
+                        const techList = getList(proj.technologies);
+                        return (
+                            <div key={index}>
+                                <div className="flex justify-between items-start">
+                                    <div className="flex items-center gap-2">
+                                        <h3 className="font-bold text-base" style={{ color: colors.primary }}>{proj.name}</h3>
+                                        {proj.link && <a href={proj.link} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-600"><ExternalLink size={14} /></a>}
+                                    </div>
+                                    <span className="text-xs text-gray-500">{formatDateRange(proj.start_date, proj.end_date, proj.is_current)}</span>
+                                </div>
+                                {(proj.role || proj.type) && <p className="text-xs font-medium mb-1" style={{ color: colors.accent }}>{[proj.role, proj.type].filter(Boolean).join(" • ")}</p>}
+                                {proj.description && <p className="text-sm leading-relaxed mb-2">{proj.description}</p>}
+                                {techList.length > 0 && (
+                                    <div className="flex flex-wrap gap-1">
+                                        {techList.map((tech, i) => (
+                                            <span key={i} className="text-[10px] px-1.5 py-0.5 rounded border border-gray-200 text-gray-600 bg-white">
+                                                {tech}
+                                            </span>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })}
+                </div>
+             </section>
+        )
+    );
+     const renderCertifications = () => (
+        data.certifications && data.certifications.length > 0 && isVisible("certifications") && (
+             <section style={sectionContainerStyle}>
+                <div className="flex items-center gap-3 mb-3">
+                    <div className="h-1 w-8" style={{ backgroundColor: colors.accent }}></div>
+                    <h2 style={sectionHeadingStyle}>{getSectionTitle("certifications", "Certifications")}</h2>
+                </div>
+                 <ul className="space-y-2 text-sm">
+                    {data.certifications.map((c, i) => (
+                        <li key={i} className="flex flex-col">
+                             <span className="font-medium" style={{ color: colors.primary }}>{c.name || c}</span>
+                             <div className="flex justify-between text-xs text-gray-500">
+                                {c.issuer && <span>{c.issuer}</span>}
+                                {c.date && <span>{formatDate(c.date)}</span>}
+                             </div>
+                        </li>
+                    ))}
+                 </ul>
+            </section>
+        )
+    );
+
+    const renderLanguages = () => (
+        data.languages && data.languages.length > 0 && isVisible("languages") && (
+             <section style={sectionContainerStyle}>
+                 <div className="flex items-center gap-3 mb-3">
+                    <div className="h-1 w-8" style={{ backgroundColor: colors.accent }}></div>
+                    <h2 style={sectionHeadingStyle}>{getSectionTitle("languages", "Languages")}</h2>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                    {data.languages.map((lang, index) => (
+                         <div key={index} className="flex flex-col">
+                            <span className="font-medium text-sm" style={{ color: colors.primary }}>
+                                {typeof lang === 'string' ? lang : (lang.name || lang.language)}
+                            </span>
+                            {(lang.proficiency || lang.level) && (
+                                <span className="text-xs text-gray-500">{lang.proficiency || lang.level}</span>
+                            )}
+                         </div>
+                    ))}
+                </div>
+            </section>
+        )
+    );
+
+    const renderAchievements = () => (
+        data.achievements && data.achievements.length > 0 && isVisible("achievements") && (
+             <section style={sectionContainerStyle}>
+                 <div className="flex items-center gap-3 mb-3">
+                    <div className="h-1 w-8" style={{ backgroundColor: colors.accent }}></div>
+                    <h2 style={sectionHeadingStyle}>{getSectionTitle("achievements", "Achievements")}</h2>
+                </div>
+                <ul className="space-y-2 text-sm">
+                    {data.achievements.map((item, index) => (
+                        <li key={index}>
+                             {typeof item === 'string' ? item : (
+                                <div>
+                                    <span className="font-semibold" style={{ color: colors.primary }}>{item.title}</span>
+                                    {item.date && <span className="opacity-70 ml-1 text-xs">({formatDate(item.date)})</span>}
+                                    {item.description && <p className="text-xs mt-0.5 opacity-90">{item.description}</p>}
+                                </div>
+                            )}
+                        </li>
+                    ))}
+                </ul>
+            </section>
+        )
+    );
+
+    const renderVolunteer = () => (
+         data.volunteer_experience && data.volunteer_experience.length > 0 && isVisible("volunteer") && (
+            <section style={sectionContainerStyle}>
+                 <div className="flex items-center gap-3 mb-3">
+                    <div className="h-1 w-8" style={{ backgroundColor: colors.accent }}></div>
+                    <h2 style={sectionHeadingStyle}>{getSectionTitle("volunteer", "Volunteer")}</h2>
+                </div>
+                 <div className="space-y-3">
+                    {data.volunteer_experience.map((vol, index) => (
+                        <div key={index}>
+                            <h3 className="font-semibold text-sm" style={{ color: colors.primary }}>{vol.role}</h3>
+                            <p className="text-xs mb-1" style={{ color: colors.secondary }}>{vol.organization}</p>
+                            <p className="text-[10px] text-gray-400 mb-1">
+                                {formatDateRange(vol.start_date, vol.end_date, vol.is_current)}
+                            </p>
+                             {vol.description && <p className="text-xs opacity-90 leading-relaxed">{vol.description}</p>}
+                        </div>
+                    ))}
+                </div>
+            </section>
+        )
+    );
+
+    const renderHobbies = () => (
+        data.hobbies && data.hobbies.length > 0 && isVisible("hobbies") && (
+            <section style={sectionContainerStyle}>
+                 <div className="flex items-center gap-3 mb-3">
+                    <div className="h-1 w-8" style={{ backgroundColor: colors.accent }}></div>
+                    <h2 style={sectionHeadingStyle}>{getSectionTitle("hobbies", "Interests")}</h2>
+                </div>
+                <p className="text-sm">{data.hobbies.join(", ")}</p>
+            </section>
+        )
+    );
+
+    const renderCustomSection = (section) => {
+        if (!section || !section.items || section.items.length === 0 || !isVisible(section.id)) return null;
+        return (
+            <section key={section.id} style={sectionContainerStyle}>
+                 <div className="flex items-center gap-3 mb-3">
+                    <div className="h-1 w-8" style={{ backgroundColor: colors.accent }}></div>
+                    <h2 style={sectionHeadingStyle}>{section.title}</h2>
+                </div>
+                <div className="space-y-3">
+                    {section.items.map((item, i) => (
+                        <div key={i}>
+                            <div className="flex justify-between items-start">
+                                <h3 className="font-bold text-sm" style={{ color: colors.primary }}>{item.title}</h3>
+                                {item.date && <div className="text-[10px] text-gray-500">{item.date}</div>}
+                            </div>
+                            {item.subtitle && <p className="text-[10px] italic" style={{ color: colors.accent }}>{item.subtitle}</p>}
+                            {item.description && <p className="text-sm leading-relaxed mt-1">{item.description}</p>}
+                        </div>
+                    ))}
+                </div>
+            </section>
+        );
+    };
+
+    const renderSummary = () => (
+        isVisible("summary") && data.professional_summary && (
+            <section className="mb-8" style={{ marginBottom: `${spacing.section_spacing}mm` }}>
+                <div className="flex items-center gap-3 mb-4">
+                    <div className="h-1 w-16" style={{ backgroundColor: colors.accent }}></div>
+                    <h2 className="text-2xl font-bold uppercase tracking-wider" style={{ color: colors.accent }}>
+                        {getSectionTitle("summary", "About")}
+                    </h2>
+                    <div className="flex-1 h-1" style={{ backgroundColor: colors.accent }}></div>
+                </div>
+                <p className="text-lg leading-relaxed pl-2 md:pl-20 border-l-4 md:border-l-0 border-transparent">
+                    {data.professional_summary}
+                </p>
+            </section>
+        )
+    );
+
+
+    // Component Routing
+     const renderSection = (id) => {
+        if (id.startsWith("custom_")) {
+            const sectionId = id.replace("custom_", "");
+            const section = data.custom_sections?.find(s => s.id === sectionId);
+            return renderCustomSection(section);
+        }
+
+        switch(id) {
+            case "education": return renderEducation();
+            case "skills": return renderSkills();
+            case "summary": return renderSummary();
+            case "experience": return renderExperience();
+            case "projects": return renderProjects();
+            case "certifications": return renderCertifications();
+            case "languages": return renderLanguages();
+            case "achievements": return renderAchievements();
+            case "volunteer": return renderVolunteer();
+            case "hobbies": return renderHobbies();
+            default: return null;
+        }
+    };
+
+    // Layout
+    const defaultOrder = ["skills", "education", "languages", "hobbies", "summary", "experience", "projects", "certifications", "achievements", "volunteer"];
+    let finalOrder = section_order.length > 0 ? section_order : defaultOrder;
+    const customSectionIds = data.custom_sections?.map(s => `custom_${s.id}`) || [];
+    const allIds = [...defaultOrder, ...customSectionIds];
+    const missingSections = allIds.filter(id => !finalOrder.includes(id));
+    finalOrder = [...finalOrder, ...missingSections];
+
+    const defaultLeftIds = ["experience", "projects", "volunteer"];
+    const mainIds = ["experience", "projects", "volunteer", "summary"];
+    const sideIds = ["education", "skills", "certifications", "languages", "achievements", "hobbies", ...customSectionIds];
+    
+    const currentMainIds = finalOrder.filter(id => defaultLeftIds.includes(id));
+    const currentSideIds = finalOrder.filter(id => !defaultLeftIds.includes(id) && id !== "summary" && id !== "personal");
+
+
     return (
-        <div className="max-w-5xl mx-auto bg-white text-gray-900">
-            {/* Creative Header with Image */}
-            <div className="relative">
-                <div className="h-40" style={{ backgroundColor: accentColor, opacity: 0.9 }}></div>
+        <div className="bg-white min-h-[1000px]" style={containerStyle}>
+             {/* Header */}
+             <div className="relative">
+                <div className="h-40" style={{ backgroundColor: colors.accent, opacity: 0.9 }}></div>
                 <div className="absolute inset-0 flex items-center justify-center gap-8 px-10">
-                    {/* Profile Image */}
-                    {getImageSrc() && (
+                     {/* Image */}
+                     {getImageSrc() && (
                         <div className="flex-shrink-0">
                             <img 
                                 src={getImageSrc()} 
@@ -37,9 +439,8 @@ const CreativeImageTemplate = ({ data, accentColor }) => {
                             />
                         </div>
                     )}
-                    
                     <div className="text-center flex-1">
-                        <h1 className="text-5xl font-bold text-white mb-2 tracking-tight">
+                        <h1 className="text-4xl md:text-5xl font-bold text-white mb-2 tracking-tight">
                             {data.personal_info?.full_name || "Your Name"}
                         </h1>
                         {data.personal_info?.profession && (
@@ -51,225 +452,37 @@ const CreativeImageTemplate = ({ data, accentColor }) => {
                 </div>
             </div>
 
-            <div className="p-10">
-                {/* Contact Info Bar */}
-                <div className="flex flex-wrap justify-center gap-6 mb-10 pb-6 border-b-2 border-gray-200 text-sm">
-                    {data.personal_info?.email && (
-                        <div className="flex items-center gap-2">
-                            <Mail className="size-4" style={{ color: accentColor }} />
-                            <span className="text-gray-700">{data.personal_info.email}</span>
-                        </div>
-                    )}
-                    {data.personal_info?.phone && (
-                        <div className="flex items-center gap-2">
-                            <Phone className="size-4" style={{ color: accentColor }} />
-                            <span className="text-gray-700">{data.personal_info.phone}</span>
-                        </div>
-                    )}
-                    {data.personal_info?.location && (
-                        <div className="flex items-center gap-2">
-                            <MapPin className="size-4" style={{ color: accentColor }} />
-                            <span className="text-gray-700">{data.personal_info.location}</span>
-                        </div>
-                    )}
-                    {data.personal_info?.linkedin && (
-                        <a href={data.personal_info.linkedin} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
-                            <Linkedin className="size-4" style={{ color: accentColor }} />
-                            <span className="text-gray-700 break-all text-xs">{data.personal_info.linkedin}</span>
-                        </a>
-                    )}
-                    {data.personal_info?.website && (
-                        <a href={data.personal_info.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
-                            <Globe className="size-4" style={{ color: accentColor }} />
-                            <span className="text-gray-700 break-all text-xs">{data.personal_info.website}</span>
-                        </a>
-                    )}
-                    {data.personal_info?.github && (
-                        <a href={data.personal_info.github} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
-                            <Github className="size-4" style={{ color: accentColor }} />
-                            <span className="text-gray-700 break-all text-xs">{data.personal_info.github}</span>
-                        </a>
-                    )}
+            <div style={contentPadding}>
+                {/* Contact Bar */}
+                <div className="flex flex-wrap justify-center gap-6 mb-8 pb-6 border-b-2 border-gray-100 text-sm">
+                     {data.personal_info?.email && <div className="flex items-center gap-2"><Mail className="size-4" style={{ color: colors.accent }} /> <span>{data.personal_info.email}</span></div>}
+                     {data.personal_info?.phone && <div className="flex items-center gap-2"><Phone className="size-4" style={{ color: colors.accent }} /> <span>{data.personal_info.phone}</span></div>}
+                     {data.personal_info?.location && <div className="flex items-center gap-2"><MapPin className="size-4" style={{ color: colors.accent }} /> <span>{data.personal_info.location}</span></div>}
+                     {data.personal_info?.linkedin && <a href={data.personal_info.linkedin} className="flex items-center gap-2 hover:underline"><Linkedin className="size-4" style={{ color: colors.accent }} /><span className="break-all">{data.personal_info.linkedin}</span></a>}
+                     {data.personal_info?.website && <a href={data.personal_info.website} className="flex items-center gap-2 hover:underline"><Globe className="size-4" style={{ color: colors.accent }} /><span className="break-all">{data.personal_info.website}</span></a>}
+                     {data.personal_info?.github && <a href={data.personal_info.github} className="flex items-center gap-2 hover:underline"><Github className="size-4" style={{ color: colors.accent }} /><span className="break-all">{data.personal_info.github}</span></a>}
                 </div>
 
-                {/* Professional Summary */}
-                {data.professional_summary && (
-                    <section className="mb-10">
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className="h-1 w-16" style={{ backgroundColor: accentColor }}></div>
-                            <h2 className="text-2xl font-bold uppercase tracking-wider" style={{ color: accentColor }}>
-                                About
-                            </h2>
-                            <div className="flex-1 h-1" style={{ backgroundColor: accentColor, opacity: 0.3 }}></div>
+                {/* Summary */}
+                {renderSection("summary")}
+
+                {layout.columns === 1 ? (
+                     <div className="space-y-6">
+                         {finalOrder.filter(id => id !== "summary" && id !== "personal").map(id => renderSection(id))}
+                     </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                        <div className="space-y-8">
+                             {currentMainIds.map(id => renderSection(id))}
                         </div>
-                        <p className="text-gray-700 leading-relaxed text-lg pl-20">
-                            {data.professional_summary}
-                        </p>
-                    </section>
+                        <div className="space-y-8">
+                            {currentSideIds.map(id => renderSection(id))}
+                        </div>
+                    </div>
                 )}
-
-                <div className="grid grid-cols-2 gap-10">
-                    {/* Left Column */}
-                    <div className="space-y-8">
-                        {/* Experience */}
-                        {data.experience && data.experience.length > 0 && (
-                            <section>
-                                <div className="flex items-center gap-3 mb-6">
-                                    <div className="h-1 w-12" style={{ backgroundColor: accentColor }}></div>
-                                    <h2 className="text-xl font-bold uppercase tracking-wide" style={{ color: accentColor }}>
-                                        Experience
-                                    </h2>
-                                </div>
-
-                                <div className="space-y-6">
-                                    {data.experience.map((exp, index) => (
-                                        <div key={index} className="relative pl-6">
-                                            <div className="absolute left-0 top-2 w-3 h-3 rounded-full" style={{ backgroundColor: accentColor }}></div>
-                                            <div className="border-l-2 pl-4" style={{ borderColor: accentColor }}>
-                                                <div className="mb-2">
-                                                    <h3 className="font-bold text-lg text-gray-900">{exp.title}</h3>
-                                                    <p className="font-semibold text-sm" style={{ color: accentColor }}>
-                                                        {exp.company}
-                                                    </p>
-                                                    {([formatDate(exp.start_date), (exp.is_current ? 'Present' : formatDate(exp.end_date))].filter(Boolean).join(' - ') || null) && (
-                                                        <p className="text-xs text-gray-500 mt-1">
-                                                            {[formatDate(exp.start_date), (exp.is_current ? 'Present' : formatDate(exp.end_date))].filter(Boolean).join(' - ')}
-                                                        </p>
-                                                    )}
-                                                </div>
-                                                {exp.description && (
-                                                    <div className="text-gray-700 text-sm leading-relaxed whitespace-pre-line">
-                                                        {exp.description}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </section>
-                        )}
-
-                        {/* Projects */}
-                        {data.projects && data.projects.length > 0 && (
-                            <section>
-                                <div className="flex items-center gap-3 mb-6">
-                                    <div className="h-1 w-12" style={{ backgroundColor: accentColor }}></div>
-                                    <h2 className="text-xl font-bold uppercase tracking-wide" style={{ color: accentColor }}>
-                                        Projects
-                                    </h2>
-                                </div>
-
-                                <div className="space-y-5">
-                                    {data.projects.map((proj, index) => (
-                                        <div key={index} className="border-l-4 pl-4" style={{ borderColor: accentColor }}>
-                                            <div className="flex items-center gap-2">
-                                                <h3 className="font-bold text-gray-900">{proj.name}</h3>
-                                                {proj.link && (
-                                                    <a 
-                                                        href={proj.link} 
-                                                        target="_blank" 
-                                                        rel="noopener noreferrer"
-                                                        className="text-gray-400 hover:text-gray-600 transition-colors"
-                                                    >
-                                                        <ExternalLink size={14} />
-                                                    </a>
-                                                )}
-                                            </div>
-                                            {proj.type && (
-                                                <p className="text-xs mb-2" style={{ color: accentColor }}>
-                                                    {proj.type}
-                                                </p>
-                                            )}
-                                            {proj.description && (
-                                                <p className="text-sm text-gray-700 leading-relaxed">
-                                                    {proj.description}
-                                                </p>
-                                            )}
-                                        </div>
-                                    ))}
-                                </div>
-                            </section>
-                        )}
-                    </div>
-
-                    {/* Right Column */}
-                    <div className="space-y-8">
-                        {/* Education */}
-                        {data.education && data.education.length > 0 && (
-                            <section>
-                                <div className="flex items-center gap-3 mb-6">
-                                    <div className="h-1 w-12" style={{ backgroundColor: accentColor }}></div>
-                                    <h2 className="text-xl font-bold uppercase tracking-wide" style={{ color: accentColor }}>
-                                        Education
-                                    </h2>
-                                </div>
-
-                                <div className="space-y-5">
-                                    {data.education.map((edu, index) => (
-                                        <div key={index} className="bg-gray-50 p-4 rounded-lg">
-                                            <h3 className="font-bold text-gray-900">
-                                                {edu.degree}
-                                            </h3>
-                                            {edu.field && (
-                                                <p className="text-sm text-gray-600 mb-1">{edu.field}</p>
-                                            )}
-                                            <p className="font-semibold text-sm mb-2 flex items-center gap-2" style={{ color: accentColor }}>
-                                                <span>{edu.institution}</span>
-                                                {edu.link && (
-                                                    <a
-                                                        href={edu.link}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="text-gray-400 hover:text-gray-600 transition-colors"
-                                                        title="Open link"
-                                                    >
-                                                        <ExternalLink size={12} />
-                                                    </a>
-                                                )}
-                                            </p>
-                                            <div className="flex justify-between items-center text-xs text-gray-600">
-                                                {([formatDate(edu.start_date), (edu.is_current ? 'Present' : formatDate(edu.end_date || edu.graduation_date))].filter(Boolean).join(' - ') || null) && (
-                                                    <span>{[formatDate(edu.start_date), (edu.is_current ? 'Present' : formatDate(edu.end_date || edu.graduation_date))].filter(Boolean).join(' - ')}</span>
-                                                )}
-                                                {(edu.grade || edu.gpa || edu.percentage || edu.score) && (
-                                                    <span>Grade: {edu.grade || edu.gpa || edu.percentage || edu.score}</span>
-                                                )}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </section>
-                        )}
-
-                        {/* Skills */}
-                        {data.skills && data.skills.length > 0 && (
-                            <section>
-                                <div className="flex items-center gap-3 mb-6">
-                                    <div className="h-1 w-12" style={{ backgroundColor: accentColor }}></div>
-                                    <h2 className="text-xl font-bold uppercase tracking-wide" style={{ color: accentColor }}>
-                                        Skills
-                                    </h2>
-                                </div>
-
-                                <div className="flex flex-wrap gap-2">
-                                    {data.skills.map((skill, index) => (
-                                        <span
-                                            key={index}
-                                            className="px-4 py-2 text-sm font-medium rounded-full text-white"
-                                            style={{ backgroundColor: accentColor }}
-                                        >
-                                            {skill}
-                                        </span>
-                                    ))}
-                                </div>
-                            </section>
-                        )}
-                    </div>
-                </div>
             </div>
         </div>
     );
-}
+};
 
 export default CreativeImageTemplate;
-

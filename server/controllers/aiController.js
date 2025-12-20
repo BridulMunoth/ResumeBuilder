@@ -126,6 +126,54 @@ const normalizeResumeData = (raw = {}) => {
     volunteer_experience,
     hobbies: safeArray(raw.hobbies),
     custom_sections,
+    formatting: {
+      layout: { columns: raw.formatting?.layout?.columns || 1 },
+      spacing: {
+        font_size: raw.formatting?.spacing?.font_size || 11,
+        line_height: raw.formatting?.spacing?.line_height || 1.3,
+        margin_horizontal: raw.formatting?.spacing?.margin_horizontal || 16,
+        margin_vertical: raw.formatting?.spacing?.margin_vertical || 16,
+        section_spacing: raw.formatting?.spacing?.section_spacing || 6,
+      },
+      colors: {
+        primary: raw.formatting?.colors?.primary || "#000000",
+        secondary: raw.formatting?.colors?.secondary || "#4B5563",
+        accent: raw.formatting?.colors?.accent || "#3B82F6",
+        text: raw.formatting?.colors?.text || "#1F2937",
+        background: raw.formatting?.colors?.background || "#FFFFFF",
+      },
+      section_order: Array.isArray(raw.formatting?.section_order)
+        ? raw.formatting.section_order
+        : [
+          "personal",
+          "summary",
+          "experience",
+          "education",
+          "projects",
+          "skills",
+          "certifications",
+          "languages",
+          "achievements",
+          "volunteer",
+          "hobbies",
+          "custom",
+        ],
+      section_visibility: raw.formatting?.section_visibility || {
+        personal: true,
+        summary: true,
+        experience: true,
+        education: true,
+        projects: true,
+        skills: true,
+        certifications: true,
+        languages: true,
+        achievements: true,
+        volunteer: true,
+        hobbies: true,
+        custom: true,
+      },
+      section_titles: raw.formatting?.section_titles || {},
+    },
   };
 };
 

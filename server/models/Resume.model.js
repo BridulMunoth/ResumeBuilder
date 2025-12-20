@@ -241,6 +241,66 @@ const ResumeSchema = new mongoose.Schema(
       ],
       default: [],
     },
+    // ---------- FORMATTING ----------
+    formatting: {
+      layout: {
+        columns: { type: Number, default: 1 }, // 1 or 2
+      },
+      spacing: {
+        font_size: { type: Number, default: 11 }, // pt
+        line_height: { type: Number, default: 1.3 },
+        margin_horizontal: { type: Number, default: 16 }, // mm
+        margin_vertical: { type: Number, default: 16 }, // mm
+        section_spacing: { type: Number, default: 6 }, // mm
+      },
+      colors: {
+        primary: { type: String, default: "#000000" },
+        secondary: { type: String, default: "#4B5563" },
+        accent: { type: String, default: "#3B82F6" },
+        text: { type: String, default: "#1F2937" },
+        background: { type: String, default: "#FFFFFF" },
+      },
+      section_order: {
+        type: [String],
+        default: [
+          "personal",
+          "summary",
+          "experience",
+          "education",
+          "projects",
+          "skills",
+          "certifications",
+          "languages",
+          "achievements",
+          "volunteer",
+          "hobbies",
+          "custom",
+        ],
+      },
+      section_visibility: {
+        type: Map,
+        of: Boolean,
+        default: {
+          personal: true,
+          summary: true,
+          experience: true,
+          education: true,
+          projects: true,
+          skills: true,
+          certifications: true,
+          languages: true,
+          achievements: true,
+          volunteer: true,
+          hobbies: true,
+          custom: true,
+        },
+      },
+      section_titles: {
+        type: Map,
+        of: String,
+        default: {},
+      },
+    },
   },
   { timestamps: true, minimize: false }
 );
