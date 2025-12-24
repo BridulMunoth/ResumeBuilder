@@ -1,4 +1,9 @@
-import { HeartHandshake, Plus, Trash2, Lightbulb } from "lucide-react";
+import {
+  HeartHandshake,
+  Plus,
+  Trash2,
+  Lightbulb,
+} from "lucide-react";
 import React, { useState } from "react";
 import TipsPanel from "./TipsPanel";
 
@@ -15,7 +20,8 @@ const HobbiesForm = ({ data = [], onChange }) => {
 
   const updateHobby = (index, value) => {
     const updated = [...(data || [])];
-    updated[index] = value;
+    // Normalize to simple string format only
+    updated[index] = typeof value === "string" ? value : value?.name || "";
     onChange(updated);
   };
 
@@ -67,30 +73,46 @@ const HobbiesForm = ({ data = [], onChange }) => {
           <p className="text-sm text-slate-700">No hobbies added yet</p>
         </div>
       ) : (
-        <div className="space-y-3">
-          {data.map((item, index) => (
-            <div
-              key={index}
-              className="flex items-center gap-3 rounded-2xl border border-white/80 bg-white/90 p-3 shadow-[0_10px_30px_rgba(15,23,42,0.08)] backdrop-blur-xl"
-            >
-              <input
-                value={item}
-                onChange={(e) => updateHobby(index, e.target.value)}
-                type="text"
-                className={`${baseInputClass}`}
-                placeholder="e.g., Reading, Football, Photography"
-              />
+        <div className="space-y-4">
+          {data.map((item, index) => {
+            const name = typeof item === "string" ? item : item?.name || "";
 
-              <button
-                onClick={() => removeHobby(index)}
-                className="inline-flex h-9 w-9 items-center justify-center 
-                  rounded-xl bg-rose-50 border border-rose-300/60 
-                  text-rose-600 hover:bg-rose-100 transition"
+            return (
+              <div
+                key={index}
+                className="rounded-2xl border border-white/80 bg-white/90 p-4 shadow-[0_10px_30px_rgba(15,23,42,0.08)] backdrop-blur-xl flex flex-col gap-3"
               >
-                <Trash2 className="h-4 w-4" />
-              </button>
-            </div>
-          ))}
+                <div className="flex items-start gap-3">
+                  <div className="flex-1 space-y-1.5">
+                    <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                      Hobby Name
+                    </label>
+                    <input
+                      value={name || ""}
+                      onChange={(e) =>
+                        updateHobby(
+                          index,
+                          e.target.value
+                        )
+                      }
+                      type="text"
+                      className={baseInputClass}
+                      placeholder="e.g., Photography"
+                    />
+                  </div>
+
+                  <button
+                    onClick={() => removeHobby(index)}
+                    className="mt-6 inline-flex h-10 w-10 items-center justify-center 
+                      rounded-xl bg-rose-50 border border-rose-300/60 
+                      text-rose-600 hover:bg-rose-100 transition shrink-0"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
 

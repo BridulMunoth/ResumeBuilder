@@ -1,16 +1,24 @@
 import React from "react";
 
-const base =
-  "px-3 py-2 rounded-xl border text-sm font-medium transition-all";
-const active =
-  "bg-purple-50 border-purple-500 text-purple-600";
-const inactive =
-  "bg-white border-gray-300 text-gray-600 hover:bg-gray-50";
+const base = "px-3 py-2 rounded-xl border text-sm font-medium transition-all";
+const active = "bg-purple-50 border-purple-500 text-purple-600";
+const inactive = "bg-white border-gray-300 text-gray-600 hover:bg-gray-50";
 
 const HeadingStyleControls = ({ value, onChange }) => {
   const set = (k, v) => onChange({ ...value, [k]: v });
 
-  const STYLES = ["line", "boxed", "plain", "underline", "leftLine", "zigzag"];
+  const STYLES = [
+    "boxed",
+    "plain",
+    "underline",
+    "leftLine",
+    "modern",
+    "highlight",
+    "shading",
+    "circleLine",
+    "diamondLine",
+    "pill",
+  ];
   const SIZES = ["S", "M", "L", "XL"];
   const ICON_STYLES = ["none", "outline", "filled"];
 
@@ -26,9 +34,7 @@ const HeadingStyleControls = ({ value, onChange }) => {
             <button
               key={style}
               onClick={() => set("style", style)}
-              className={`${base} ${
-                value.style === style ? active : inactive
-              }`}
+              className={`${base} ${value.style === style ? active : inactive}`}
             >
               {style}
             </button>
@@ -88,6 +94,24 @@ const HeadingStyleControls = ({ value, onChange }) => {
               }`}
             >
               {ic.charAt(0).toUpperCase() + ic.slice(1)}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Alignment */}
+      <div>
+        <p className="text-sm font-medium text-gray-700 mb-2">Alignment</p>
+        <div className="flex gap-3">
+          {["left", "center", "right"].map((align) => (
+            <button
+              key={align}
+              onClick={() => set("align", align)}
+              className={`${base} ${
+                (value.align || "left") === align ? active : inactive
+              }`}
+            >
+              {align.charAt(0).toUpperCase() + align.slice(1)}
             </button>
           ))}
         </div>

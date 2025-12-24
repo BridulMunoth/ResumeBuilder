@@ -37,11 +37,11 @@ const LevelSelect = ({ value, onChange }) => {
       <Select.Trigger
         className="
           relative flex w-full items-center justify-between rounded-2xl
-          border border-white/60 bg-gradient-to-r from-blue-50/70 via-white/80 to-purple-50/70
+          border border-gray-200 bg-white
           px-4 py-2.5 text-left text-sm text-slate-900
-          shadow-[0_10px_30px_rgba(15,23,42,0.10)]
-          backdrop-blur-xl outline-none transition
-          focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500
+          shadow-sm
+          outline-none transition
+          focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 hover:border-blue-300
         "
       >
         <Select.Value placeholder="Select your proficiency level" />
@@ -56,10 +56,9 @@ const LevelSelect = ({ value, onChange }) => {
           position="popper"
           className="
             radix-select-content z-50 min-w-[220px] overflow-hidden
-            rounded-3xl border border-white/70
-            bg-gradient-to-br from-sky-50/95 via-white/95 to-violet-50/95
-            shadow-[0_22px_55px_rgba(15,23,42,0.35)]
-            backdrop-blur-2xl
+            rounded-2xl border border-gray-100
+            bg-white
+            shadow-xl
           "
         >
           <Select.Viewport className="max-h-60 space-y-1 overflow-auto p-2">
@@ -104,8 +103,14 @@ const getCategoryLabel = (raw) =>
 
 // 🔽 Sortable category block (whole section draggable)
 const SortableCategorySection = ({ id, label, children }) => {
-  const { setNodeRef, attributes, listeners, transform, transition, isDragging } =
-    useSortable({ id });
+  const {
+    setNodeRef,
+    attributes,
+    listeners,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -137,7 +142,14 @@ const SortableCategorySection = ({ id, label, children }) => {
 };
 
 // 🔽 Sortable skill chip
-const SortableSkillChip = ({ id, skill, index, isEditing, onEdit, onRemove }) => {
+const SortableSkillChip = ({
+  id,
+  skill,
+  index,
+  isEditing,
+  onEdit,
+  onRemove,
+}) => {
   const {
     attributes,
     listeners,
@@ -160,11 +172,11 @@ const SortableSkillChip = ({ id, skill, index, isEditing, onEdit, onRemove }) =>
     <span
       ref={setNodeRef}
       style={style}
-      className={`inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-medium ring-1 ring-white/70 backdrop-blur transition
+      className={`inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-medium ring-1 ring-gray-200 transition shadow-sm
         ${
           isEditing
-            ? "bg-gradient-to-r from-blue-100/95 to-indigo-100/95 text-slate-900"
-            : "bg-gradient-to-r from-sky-100/95 to-indigo-100/95 text-slate-800"
+            ? "bg-blue-50 text-blue-900 ring-blue-200"
+            : "bg-white text-slate-700 hover:bg-slate-50"
         }`}
     >
       {/* Drag handle for skill */}
@@ -219,9 +231,7 @@ const SkillsForm = ({ data, onChange }) => {
   const [categories, setCategories] = useState(() => {
     const fromData = Array.from(
       new Set(
-        skillsArray
-          .map((s) => (s?.category || "").trim())
-          .filter(Boolean)
+        skillsArray.map((s) => (s?.category || "").trim()).filter(Boolean)
       )
     );
     return fromData;
@@ -510,11 +520,11 @@ const SkillsForm = ({ data, onChange }) => {
     }
   };
 
-  // glassy input
+  // clean input
   const baseInputClass =
-    "w-full rounded-2xl border border-white/60 bg-white/70 px-3.5 py-2.5 text-sm " +
-    "text-slate-900 placeholder:text-slate-400 shadow-[0_10px_30px_rgba(15,23,42,0.08)] " +
-    "backdrop-blur-md focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 " +
+    "w-full rounded-2xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm " +
+    "text-slate-900 placeholder:text-slate-400 shadow-sm " +
+    "focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 hover:border-blue-300 " +
     "outline-none transition";
 
   // group skills by raw category key
@@ -537,8 +547,8 @@ const SkillsForm = ({ data, onChange }) => {
   const selectedCategoryLabel = getCategoryLabel(newSkill.category || "");
 
   return (
-    <div className="w-full rounded-3xl bg-gradient-to-br from-sky-100 via-white to-indigo-100 p-[1px] shadow-lg">
-      <div className="space-y-6 rounded-3xl border border-white/60 bg-white/75 px-5 py-5 shadow-[0_18px_45px_rgba(15,23,42,0.16)] backdrop-blur-2xl sm:px-6 sm:py-6">
+    <div className="w-full rounded-3xl bg-white p-[1px] shadow-sm ring-1 ring-gray-200">
+      <div className="space-y-6 rounded-3xl bg-white px-5 py-5 sm:px-6 sm:py-6">
         {/* Header */}
         <div className="flex items-start justify-between gap-3">
           <div>

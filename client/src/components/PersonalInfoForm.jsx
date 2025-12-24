@@ -15,15 +15,37 @@ import React from "react";
 import TipsPanel from "./TipsPanel";
 
 const fields = [
-  { key: "full_name", label: "Full Name", icon: User, type: "text", required: true },
-  { key: "email", label: "Email Address", icon: Mail, type: "email", required: true },
+  {
+    key: "full_name",
+    label: "Full Name",
+    icon: User,
+    type: "text",
+    required: true,
+  },
+  {
+    key: "email",
+    label: "Email Address",
+    icon: Mail,
+    type: "email",
+    required: true,
+  },
   { key: "phone", label: "Phone Number", icon: Phone, type: "tel" },
   { key: "location", label: "Location", icon: MapPin, type: "text" },
-  { key: "profession", label: "Profession", icon: BriefcaseBusiness, type: "text" },
+  {
+    key: "profession",
+    label: "Profession",
+    icon: BriefcaseBusiness,
+    type: "text",
+  },
   { key: "linkedin", label: "LinkedIn Profile", icon: Linkedin, type: "url" },
   { key: "github", label: "GitHub Profile", icon: Github, type: "url" },
   { key: "website", label: "Personal Website", icon: Globe, type: "url" },
-  { key: "date_of_birth", label: "Date of Birth", icon: Calendar, type: "date" },
+  {
+    key: "date_of_birth",
+    label: "Date of Birth",
+    icon: Calendar,
+    type: "date",
+  },
   { key: "nationality", label: "Nationality", icon: Flag, type: "text" },
 ];
 
@@ -85,12 +107,12 @@ const PersonalInfoForm = ({
     return !error;
   };
 
-  // glassy input (same system as SkillsForm)
+  // clean premium input (same system as SkillsForm)
   const baseInputClass =
-    "w-full rounded-2xl border border-white/60 bg-white/70 px-3.5 py-2.5 text-sm " +
-    "text-slate-900 placeholder:text-slate-400 shadow-[0_10px_30px_rgba(15,23,42,0.08)] " +
-    "backdrop-blur-md focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 " +
-    "outline-none transition";
+    "w-full rounded-2xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm " +
+    "text-slate-900 placeholder:text-slate-400 shadow-sm " +
+    "focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 " +
+    "outline-none transition hover:border-blue-300";
 
   return (
     <div className="space-y-6">
@@ -109,14 +131,14 @@ const PersonalInfoForm = ({
           onClick={() => setShowTips(true)}
           aria-label="Get tips"
           title="Get tips"
-          className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-yellow-300/70 bg-white/80 text-yellow-600 shadow-[0_0_18px_rgba(250,204,21,0.6)] backdrop-blur-md transition hover:bg-yellow-50"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-yellow-200 bg-yellow-50 text-yellow-600 shadow-sm transition hover:bg-yellow-100 hover:border-yellow-300"
         >
           <Lightbulb className="h-4 w-4" />
         </button>
       </div>
 
-      {/* Image + remove background — glass card */}
-      <div className="mt-2 rounded-2xl border border-white/60 bg-white/70 p-4 shadow-[0_14px_35px_rgba(15,23,42,0.12)] backdrop-blur-xl sm:flex sm:items-center sm:justify-between sm:gap-6">
+      {/* Image + remove background — clean card */}
+      <div className="mt-2 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm sm:flex sm:items-center sm:justify-between sm:gap-6">
         <label className="flex cursor-pointer items-center gap-3">
           {data.image ? (
             <img
@@ -126,12 +148,12 @@ const PersonalInfoForm = ({
                   : URL.createObjectURL(data.image)
               }
               alt="user"
-              className="h-16 w-16 rounded-2xl object-cover ring-2 ring-white/80 shadow-[0_10px_25px_rgba(15,23,42,0.35)]"
+              className="h-16 w-16 rounded-xl object-cover border border-gray-200"
             />
           ) : (
             <div className="inline-flex items-center gap-3 text-slate-600 hover:text-slate-800">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-dashed border-slate-300/80 bg-white/70 shadow-[0_8px_20px_rgba(15,23,42,0.06)] backdrop-blur">
-                <User className="h-6 w-6 text-slate-500" />
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-dashed border-gray-300 bg-gray-50 shadow-sm">
+                <User className="h-6 w-6 text-gray-400" />
               </div>
               <div className="flex flex-col">
                 <span className="text-sm font-medium text-slate-800">

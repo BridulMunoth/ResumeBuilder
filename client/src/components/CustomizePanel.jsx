@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import SectionReorder from "./SectionReorder";
 import SpacingControls from "./SpacingControls";
-import ColorSettings from "./ColorSettings";
+
 import SectionStyleControls from "./SectionStyleControls";
 
 import {
@@ -46,13 +46,7 @@ const defaultFormatting = {
     levelMode: "text",
     compactMode: "bullet",
     subinfo: "dash",
-    customLevels: [
-      "Beginner",
-      "Amateur",
-      "Competent",
-      "Proficient",
-      "Expert",
-    ],
+    customLevels: ["Beginner", "Amateur", "Competent", "Proficient", "Expert"],
   },
 
   languages: {
@@ -70,7 +64,7 @@ const defaultFormatting = {
   },
 
   interests: {
-    layout: "grid",
+    layout: "compact",
     compactMode: "comma",
     subinfo: "dash",
   },
@@ -101,17 +95,26 @@ const CustomizePanel = ({ formatting, onChange, sectionsList }) => {
 
     font: { ...defaultFormatting.font, ...(formatting?.font || {}) },
     heading: { ...defaultFormatting.heading, ...(formatting?.heading || {}) },
-    personal: { ...defaultFormatting.personal, ...(formatting?.personal || {}) },
+    personal: {
+      ...defaultFormatting.personal,
+      ...(formatting?.personal || {}),
+    },
 
     skills: { ...defaultFormatting.skills, ...(formatting?.skills || {}) },
-    languages: { ...defaultFormatting.languages, ...(formatting?.languages || {}) },
-    interests: { ...defaultFormatting.interests, ...(formatting?.interests || {}) },
+    languages: {
+      ...defaultFormatting.languages,
+      ...(formatting?.languages || {}),
+    },
+    interests: {
+      ...defaultFormatting.interests,
+      ...(formatting?.interests || {}),
+    },
   };
 
   const tabs = [
     { id: "sections", label: "Sections", icon: List },
     { id: "spacing", label: "Layout", icon: Layout },
-    { id: "colors", label: "Colors", icon: Palette },
+
     { id: "content", label: "Content", icon: Settings },
     { id: "font", label: "Font", icon: TextIcon },
     { id: "headings", label: "Headings", icon: HeadingIcon },
@@ -146,6 +149,8 @@ const CustomizePanel = ({ formatting, onChange, sectionsList }) => {
             order={safeFormatting.section_order}
             visibility={safeFormatting.section_visibility}
             sectionTitles={safeFormatting.section_titles}
+            sectionPositions={safeFormatting.section_positions || {}}
+            layout={safeFormatting.layout || { columns: 1 }}
             sectionsList={sectionsList}
             onOrderChange={(val) => onChange("section_order", val)}
             onVisibilityChange={(id) =>
@@ -160,6 +165,12 @@ const CustomizePanel = ({ formatting, onChange, sectionsList }) => {
                 [id]: name,
               })
             }
+            onPositionChange={(id, pos) =>
+              onChange("section_positions", {
+                ...(safeFormatting.section_positions || {}),
+                [id]: pos,
+              })
+            }
           />
         )}
 
@@ -168,14 +179,6 @@ const CustomizePanel = ({ formatting, onChange, sectionsList }) => {
           <SpacingControls
             spacing={safeFormatting.spacing}
             layout={safeFormatting.layout}
-            onChange={onChange}
-          />
-        )}
-
-        {/* Colors */}
-        {activeTab === "colors" && (
-          <ColorSettings
-            colors={safeFormatting.colors}
             onChange={onChange}
           />
         )}
@@ -199,6 +202,8 @@ const CustomizePanel = ({ formatting, onChange, sectionsList }) => {
               title="Interests"
               value={safeFormatting.interests}
               onChange={(v) => onChange("interests", v)}
+              hideLevels={true}
+              layouts={["compact"]}
             />
           </>
         )}

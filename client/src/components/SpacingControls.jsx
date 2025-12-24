@@ -1,6 +1,14 @@
 import React from "react";
 import { Minus, Plus, List, Columns, Maximize2 } from "lucide-react";
 
+const DEFAULT_SPACING = {
+  font_size: 11,
+  line_height: 1.3,
+  margin_horizontal: 16,
+  margin_vertical: 16,
+  section_spacing: 6,
+};
+
 const SpacingControls = ({ spacing, layout, onChange }) => {
   const handleChange = (key, value) => {
     onChange("spacing", { ...spacing, [key]: value });
@@ -8,6 +16,10 @@ const SpacingControls = ({ spacing, layout, onChange }) => {
 
   const handleLayoutChange = (val) => {
     onChange("layout", { ...layout, columns: val });
+  };
+
+  const handleResetSpacing = () => {
+    onChange("spacing", { ...DEFAULT_SPACING });
   };
 
   return (
@@ -59,7 +71,16 @@ const SpacingControls = ({ spacing, layout, onChange }) => {
 
       {/* Spacing Controls */}
       <section className="space-y-6">
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">Spacing</h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-gray-800">Spacing</h3>
+          <button
+            type="button"
+            onClick={handleResetSpacing}
+            className="text-xs font-semibold text-blue-600 hover:text-blue-700 px-2 py-1 rounded-full hover:bg-blue-50 border border-blue-100"
+          >
+            Reset to default
+          </button>
+        </div>
 
         {/* Font Size */}
         <div className="space-y-2">

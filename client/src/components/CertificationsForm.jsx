@@ -29,19 +29,18 @@ const CertificationsForm = ({ data = [], onChange }) => {
   };
 
   const baseInputClass =
-    "w-full rounded-2xl border border-white/80 bg-white/95 px-3.5 py-3 text-sm " +
-    "text-slate-900 placeholder:text-slate-400 shadow-[0_10px_26px_rgba(15,23,42,0.08)] " +
-    "backdrop-blur-xl focus:border-sky-500 focus:ring-2 focus:ring-sky-400/60 " +
-    "outline-none transition";
+    "w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm " +
+    "text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-sky-500 " +
+    "focus:ring-1 focus:ring-sky-500 transition shadow-sm";
 
   return (
     <div className="space-y-6">
       {/* HEADER */}
-      <div className="flex items-start justify-between gap-4 rounded-3xl bg-gradient-to-r from-sky-50 via-white to-indigo-50/80 px-5 py-4 shadow-[0_12px_30px_rgba(15,23,42,0.08)] border border-white/80">
+      <div className="flex items-start justify-between gap-4 rounded-2xl border border-slate-200 bg-slate-50/50 px-5 py-4">
         <div className="space-y-1">
           <h3 className="flex items-center gap-2 text-lg font-semibold text-slate-900">
-            <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-400 via-sky-500 to-indigo-500 shadow-[0_8px_20px_rgba(56,189,248,0.55)] ring-2 ring-white/80">
-              <Award className="h-4 w-4 text-white" />
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white border border-slate-200 text-sky-500 shadow-sm">
+              <Award className="h-4 w-4" />
             </span>
             Certifications & Courses
           </h3>
@@ -56,7 +55,7 @@ const CertificationsForm = ({ data = [], onChange }) => {
             onClick={() => setShowTips(true)}
             aria-label="Get tips"
             title="Get tips"
-            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-yellow-300/80 bg-yellow-50/90 text-yellow-600 shadow-[0_0_10px_rgba(250,204,21,0.35)] backdrop-blur-md transition hover:bg-yellow-100"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-yellow-200 bg-yellow-50 text-yellow-600 hover:bg-yellow-100 transition"
           >
             <Lightbulb className="h-4 w-4" />
           </button>
@@ -64,10 +63,7 @@ const CertificationsForm = ({ data = [], onChange }) => {
           <button
             type="button"
             onClick={addCertification}
-            className="inline-flex items-center gap-2 rounded-xl 
-                       bg-emerald-50 border border-emerald-300/70 
-                       px-5 py-2.5 text-sm font-medium text-emerald-700
-                       hover:bg-emerald-100 transition"
+            className="inline-flex items-center gap-2 rounded-xl bg-emerald-50 border border-emerald-200 px-4 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-100 transition"
           >
             <Plus className="h-4 w-4" />
             Add certification
@@ -77,9 +73,11 @@ const CertificationsForm = ({ data = [], onChange }) => {
 
       {/* EMPTY STATE */}
       {(data || []).length === 0 ? (
-        <div className="rounded-3xl border border-dashed border-slate-200/90 bg-gradient-to-b from-sky-50/95 via-white/95 to-indigo-50/90 py-10 text-center shadow-[0_16px_38px_rgba(15,23,42,0.08)] backdrop-blur-xl">
-          <Award className="mx-auto mb-3 h-10 w-10 text-slate-300" />
-          <p className="text-sm font-medium text-slate-800">
+        <div className="rounded-2xl border border-dashed border-slate-300 bg-white py-12 text-center">
+          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-slate-50">
+            <Award className="h-6 w-6 text-slate-400" />
+          </div>
+          <p className="text-sm font-medium text-slate-900">
             No certifications added yet.
           </p>
           <p className="mt-1 text-xs text-slate-500">
@@ -92,22 +90,19 @@ const CertificationsForm = ({ data = [], onChange }) => {
           {(data || []).map((cert, index) => (
             <div
               key={index}
-              className="rounded-3xl border border-white/80 bg-white/90 p-6 shadow-[0_20px_50px_rgba(15,23,42,0.14)] backdrop-blur-2xl space-y-6"
+              className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-6 transition-all hover:shadow-md"
             >
               {/* CARD HEADER */}
               <div className="flex items-start justify-between gap-4">
                 <div className="space-y-1">
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-500">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-sky-600">
                     Certification #{index + 1}
                   </p>
                   {(cert.name || cert.issuer) && (
                     <p className="text-sm font-semibold text-slate-900">
                       {cert.name || "Certification title not set"}
                       {cert.issuer && (
-                        <span className="text-slate-500">
-                          {" "}
-                          · {cert.issuer}
-                        </span>
+                        <span className="text-slate-500"> · {cert.issuer}</span>
                       )}
                     </p>
                   )}
@@ -116,9 +111,7 @@ const CertificationsForm = ({ data = [], onChange }) => {
                 <button
                   type="button"
                   onClick={() => removeCertification(index)}
-                  className="inline-flex h-8 w-8 items-center justify-center 
-                             rounded-xl bg-rose-50 border border-rose-300/70 
-                             text-rose-600 hover:bg-rose-100 transition"
+                  className="group inline-flex h-8 w-8 items-center justify-center rounded-lg border border-transparent text-slate-400 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 transition"
                   aria-label="Remove certification"
                   title="Remove certification"
                 >
@@ -127,14 +120,14 @@ const CertificationsForm = ({ data = [], onChange }) => {
               </div>
 
               {/* DIVIDER */}
-              <div className="h-px w-full bg-gradient-to-r from-transparent via-sky-100 to-transparent" />
+              <div className="h-px w-full bg-slate-100" />
 
               {/* BODY */}
               <div className="space-y-6">
                 {/* Name / Issuer */}
-                <div className="grid gap-4 md:grid-cols-2">
+                <div className="grid gap-5 md:grid-cols-2">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
+                    <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                       Certification / course name
                     </label>
                     <input
@@ -149,7 +142,7 @@ const CertificationsForm = ({ data = [], onChange }) => {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
+                    <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                       Issuer
                     </label>
                     <input
@@ -165,9 +158,9 @@ const CertificationsForm = ({ data = [], onChange }) => {
                 </div>
 
                 {/* Issue / Expiry dates */}
-                <div className="grid gap-4 md:grid-cols-2">
+                <div className="grid gap-5 md:grid-cols-2">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
+                    <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                       Issue date
                     </label>
                     <input
@@ -181,13 +174,17 @@ const CertificationsForm = ({ data = [], onChange }) => {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
+                    <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                       Expiry date (if any)
                     </label>
                     <input
                       value={cert.expiry_date || ""}
                       onChange={(e) =>
-                        updateCertification(index, "expiry_date", e.target.value)
+                        updateCertification(
+                          index,
+                          "expiry_date",
+                          e.target.value
+                        )
                       }
                       type="month"
                       className={baseInputClass}
@@ -196,9 +193,9 @@ const CertificationsForm = ({ data = [], onChange }) => {
                 </div>
 
                 {/* Credential ID / URL */}
-                <div className="grid gap-4 md:grid-cols-2">
+                <div className="grid gap-5 md:grid-cols-2">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
+                    <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                       Credential ID
                     </label>
                     <input
@@ -217,7 +214,7 @@ const CertificationsForm = ({ data = [], onChange }) => {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
+                    <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                       Credential URL
                     </label>
                     <input
@@ -238,7 +235,7 @@ const CertificationsForm = ({ data = [], onChange }) => {
 
                 {/* Extra Link */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
+                  <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                     Additional link (optional)
                   </label>
                   <input

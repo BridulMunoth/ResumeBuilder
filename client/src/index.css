@@ -2,20 +2,29 @@
 
 @import "tailwindcss";
 
-*{
-     font-family: "Outfit", sans-serif;
+* {
+  font-family: "Outfit", sans-serif;
+}
+
+/* Ensure resume preview area can override the global font.
+   Inline style on .resume-font-root sets the chosen font, and
+   all descendants inherit it with higher priority. */
+.resume-font-root * {
+  font-family: inherit !important;
 }
 
 @layer base {
   button {
     @apply cursor-pointer;
-     }
-    input:not([type="checkbox"]){
-     @apply outline-none focus:ring border border-gray-300 focus:ring-blue-500 focus:border-blue-500 rounded-lg;
-    }
-    textarea {
-     @apply outline-none focus:ring border border-gray-300 focus:ring-blue-500 focus:border-blue-500 rounded-lg resize-none;
-    }
+  }
+
+  input:not([type="checkbox"]) {
+    @apply outline-none px-4 py-2.5 border border-gray-200 rounded-lg transition-all duration-300 shadow-sm hover:border-emerald-300 hover:shadow-md focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 placeholder:text-gray-400 bg-white;
+  }
+
+  textarea {
+    @apply outline-none px-4 py-2.5 border border-gray-200 rounded-lg resize-none transition-all duration-300 shadow-sm hover:border-emerald-300 hover:shadow-md focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 placeholder:text-gray-400 bg-white;
+  }
 }
 
 @keyframes dropdownIn {
@@ -23,6 +32,7 @@
     opacity: 0;
     transform: translateY(-6px) scale(0.98);
   }
+
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
@@ -34,6 +44,7 @@
     opacity: 1;
     transform: translateY(0) scale(1);
   }
+
   to {
     opacity: 0;
     transform: translateY(-4px) scale(0.98);
@@ -47,4 +58,78 @@
 
 .radix-select-content[data-state="closed"] {
   animation: dropdownOut 0.12s ease-in forwards;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+.animate-fadeInUp {
+  animation: fadeInUp 0.4s ease-out forwards;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Utilities */
+.scrollbar-stable {
+  scrollbar-gutter: stable;
+}
+
+/* Optional: Refine custom scrollbar if not already present */
+/* Hide scrollbar for Chrome, Safari and Opera */
+.custom-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 20px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #94a3b8;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.custom-scrollbar {
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
 }

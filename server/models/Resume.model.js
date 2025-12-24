@@ -243,6 +243,7 @@ const ResumeSchema = new mongoose.Schema(
     },
     // ---------- FORMATTING ----------
     formatting: {
+      // Layout / spacing / colors already used in templates
       layout: {
         columns: { type: Number, default: 1 }, // 1 or 2
       },
@@ -296,6 +297,47 @@ const ResumeSchema = new mongoose.Schema(
         },
       },
       section_titles: {
+        type: Map,
+        of: String,
+        default: {},
+      },
+
+      // NEW: store all customization-panel options so they persist
+      font: {
+        type: {
+          type: String,
+          default: "sans",
+        },
+        family: {
+          type: String,
+          default: "Source Sans Pro",
+        },
+      },
+
+      // Use Mixed for the rest to stay flexible with future changes
+      heading: {
+        type: mongoose.Schema.Types.Mixed,
+        default: {},
+      },
+      personal: {
+        type: mongoose.Schema.Types.Mixed,
+        default: {},
+      },
+      skills: {
+        // formatting for Skills section (NOT skills data)
+        type: mongoose.Schema.Types.Mixed,
+        default: {},
+      },
+      languages: {
+        type: mongoose.Schema.Types.Mixed,
+        default: {},
+      },
+      interests: {
+        type: mongoose.Schema.Types.Mixed,
+        default: {},
+      },
+      section_positions: {
+        // main / sidebar placement for two-column layouts
         type: Map,
         of: String,
         default: {},

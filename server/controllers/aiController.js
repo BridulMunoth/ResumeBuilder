@@ -127,6 +127,7 @@ const normalizeResumeData = (raw = {}) => {
     hobbies: safeArray(raw.hobbies),
     custom_sections,
     formatting: {
+      // Layout / spacing / colors
       layout: { columns: raw.formatting?.layout?.columns || 1 },
       spacing: {
         font_size: raw.formatting?.spacing?.font_size || 11,
@@ -145,19 +146,19 @@ const normalizeResumeData = (raw = {}) => {
       section_order: Array.isArray(raw.formatting?.section_order)
         ? raw.formatting.section_order
         : [
-          "personal",
-          "summary",
-          "experience",
-          "education",
-          "projects",
-          "skills",
-          "certifications",
-          "languages",
-          "achievements",
-          "volunteer",
-          "hobbies",
-          "custom",
-        ],
+            "personal",
+            "summary",
+            "experience",
+            "education",
+            "projects",
+            "skills",
+            "certifications",
+            "languages",
+            "achievements",
+            "volunteer",
+            "hobbies",
+            "custom",
+          ],
       section_visibility: raw.formatting?.section_visibility || {
         personal: true,
         summary: true,
@@ -173,6 +174,56 @@ const normalizeResumeData = (raw = {}) => {
         custom: true,
       },
       section_titles: raw.formatting?.section_titles || {},
+
+      // Default customization panel settings for AI‑created resumes
+      font: {
+        type: raw.formatting?.font?.type || "sans",
+        family: raw.formatting?.font?.family || "Source Sans Pro",
+      },
+      heading: raw.formatting?.heading || {
+        style: "underline",
+        caps: "capitalize",
+        size: "m",
+        icon: "filled",
+      },
+      personal: raw.formatting?.personal || {
+        align: "left",
+        arrangement: "stacked",
+        bulletStyle: "icon",
+        iconStyle: "filled",
+      },
+      skills: raw.formatting?.skills || {
+        layout: "grid",
+        levelMode: "text",
+        compactMode: "bullet",
+        subinfo: "dash",
+        customLevels: [
+          "Beginner",
+          "Amateur",
+          "Competent",
+          "Proficient",
+          "Expert",
+        ],
+      },
+      languages: raw.formatting?.languages || {
+        layout: "grid",
+        levelMode: "text",
+        compactMode: "bullet",
+        subinfo: "dash",
+        customLevels: [
+          "Basic",
+          "Conversational",
+          "Proficient",
+          "Fluent",
+          "Native/Bilingual",
+        ],
+      },
+      interests: raw.formatting?.interests || {
+        layout: "compact",
+        compactMode: "comma",
+        subinfo: "dash",
+      },
+      section_positions: raw.formatting?.section_positions || {},
     },
   };
 };
