@@ -181,6 +181,9 @@ const SectionReorder = ({
   onVisibilityChange,
   onRename,
   onPositionChange, // New Handler
+  onResetNames,
+  onResetOrder,
+  onResetLayout,
   sectionsList, // Full list of available sections with labels
 }) => {
   const sensors = useSensors(
@@ -213,6 +216,33 @@ const SectionReorder = ({
           " Use the layout icon to switch between Sidebar and Main column."}
       </p>
 
+      {/* Reset Controls */}
+      <div className="flex gap-2 mb-4">
+        <button
+          onClick={onResetNames}
+          className="flex-1 text-xs py-1.5 px-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded transition-colors border border-gray-300"
+          title="Reset all section names to default"
+        >
+          Reset Names
+        </button>
+        <button
+          onClick={onResetOrder}
+          className="flex-1 text-xs py-1.5 px-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded transition-colors border border-gray-300"
+          title="Reset section order to default"
+        >
+          Reset Order
+        </button>
+        {isTwoColumn && (
+          <button
+            onClick={onResetLayout}
+            className="flex-1 text-xs py-1.5 px-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded transition-colors border border-gray-300"
+            title="Reset sidebar/main layout to default"
+          >
+            Reset Layout
+          </button>
+        )}
+      </div>
+
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
@@ -220,38 +250,40 @@ const SectionReorder = ({
       >
         <SortableContext items={order} strategy={verticalListSortingStrategy}>
           <div className="flex flex-col">
-            {order.map((sectionId) => {
-              const sectionDef = sectionsList.find((s) => s.id === sectionId);
-              const defaultName = sectionDef ? sectionDef.name : sectionId;
-              const customTitle = sectionTitles[sectionId];
-              const isVisible = visibility[sectionId] ?? true;
-              const isSidebarDefault = [
-                "skills",
-                "languages",
-                "interests",
-                "hobbies",
-                "certifications",
-                "achievements",
-              ].includes(sectionId);
-              const position =
-                sectionPositions[sectionId] ||
-                (isSidebarDefault ? "sidebar" : "main");
+            {order
+              .filter((id) => id !== "custom_undefined") // Filter out undefined custom sections from UI
+              .map((sectionId) => {
+                const sectionDef = sectionsList.find((s) => s.id === sectionId);
+                const defaultName = sectionDef ? sectionDef.name : sectionId;
+                const customTitle = sectionTitles[sectionId];
+                const isVisible = visibility[sectionId] ?? true;
+                const isSidebarDefault = [
+                  "skills",
+                  "languages",
+                  "interests",
+                  "hobbies",
+                  "certifications",
+                  "achievements",
+                ].includes(sectionId);
+                const position =
+                  sectionPositions[sectionId] ||
+                  (isSidebarDefault ? "sidebar" : "main");
 
-              return (
-                <SortableItem
-                  key={sectionId}
-                  id={sectionId}
-                  name={defaultName}
-                  customTitle={customTitle}
-                  isVisible={isVisible}
-                  position={position}
-                  isTwoColumn={isTwoColumn}
-                  onToggleVisibility={onVisibilityChange}
-                  onRename={onRename}
-                  onPositionChange={onPositionChange}
-                />
-              );
-            })}
+                return (
+                  <SortableItem
+                    key={sectionId}
+                    id={sectionId}
+                    name={defaultName}
+                    customTitle={customTitle}
+                    isVisible={isVisible}
+                    position={position}
+                    isTwoColumn={isTwoColumn}
+                    onToggleVisibility={onVisibilityChange}
+                    onRename={onRename}
+                    onPositionChange={onPositionChange}
+                  />
+                );
+              })}
           </div>
         </SortableContext>
       </DndContext>

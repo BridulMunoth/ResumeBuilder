@@ -85,7 +85,12 @@ const defaultFormatting = {
    COMPONENT START
 --------------------------------------------------------- */
 
-const CustomizePanel = ({ formatting, onChange, sectionsList }) => {
+const CustomizePanel = ({
+  formatting,
+  onChange,
+  sectionsList,
+  selectedTemplate,
+}) => {
   const [activeTab, setActiveTab] = useState("sections");
 
   /* ⭐ Merge formatting with defaults (fix undefined errors) */
@@ -123,6 +128,16 @@ const CustomizePanel = ({ formatting, onChange, sectionsList }) => {
 
   return (
     <div className="h-full flex flex-col bg-white">
+      {/* Classic Template Notice */}
+      {selectedTemplate === "classic" && (
+        <div className="mx-6 mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+          <p className="text-xs text-amber-800 font-medium">
+            📌 <strong>Classic Template:</strong> Some advanced customizations
+            are disabled to maintain the traditional layout.
+          </p>
+        </div>
+      )}
+
       {/* Tabs */}
       <div className="flex border-b border-gray-200">
         {tabs.map((tab) => (
@@ -171,6 +186,14 @@ const CustomizePanel = ({ formatting, onChange, sectionsList }) => {
                 [id]: pos,
               })
             }
+            onResetNames={() => onChange("section_titles", {})}
+            onResetOrder={() =>
+              onChange(
+                "section_order",
+                sectionsList.map((s) => s.id)
+              )
+            }
+            onResetLayout={() => onChange("section_positions", {})}
           />
         )}
 
@@ -180,6 +203,7 @@ const CustomizePanel = ({ formatting, onChange, sectionsList }) => {
             spacing={safeFormatting.spacing}
             layout={safeFormatting.layout}
             onChange={onChange}
+            template={selectedTemplate}
           />
         )}
 
@@ -221,6 +245,7 @@ const CustomizePanel = ({ formatting, onChange, sectionsList }) => {
           <HeadingStyleControls
             value={safeFormatting.heading}
             onChange={(v) => onChange("heading", v)}
+            template={selectedTemplate}
           />
         )}
 
@@ -229,6 +254,7 @@ const CustomizePanel = ({ formatting, onChange, sectionsList }) => {
           <PersonalDetailsControls
             value={safeFormatting.personal}
             onChange={(v) => onChange("personal", v)}
+            template={selectedTemplate}
           />
         )}
       </div>

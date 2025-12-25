@@ -1,464 +1,1172 @@
 import React from "react";
-import { Mail, Phone, MapPin, Linkedin, Globe, ExternalLink, Github, Calendar, Flag } from "lucide-react";
+import {
+  Mail,
+  Phone,
+  MapPin,
+  Linkedin,
+  Globe,
+  ExternalLink,
+  Github,
+  Calendar,
+  Flag,
+  Briefcase,
+  Code,
+  Award,
+  Trophy,
+  Heart,
+  Cpu,
+  Sparkles,
+  FileText,
+  Languages as LanguagesIcon,
+  BookOpen,
+  Star,
+  Circle,
+} from "lucide-react";
+import {
+  formatDateRange as formatRange,
+  getFontFallback,
+} from "./TemplateHelpers";
 
-const ExecutiveTemplate = ({ data, accentColor, formatting }) => {
-    const {
-        layout = { columns: 2 },
-        spacing = {
-            font_size: 11,
-            line_height: 1.5,
-            margin_horizontal: 10,
-            margin_vertical: 10,
-            section_spacing: 6,
-        },
-        colors = {
-            primary: "#111827",
-            secondary: "#4B5563",
-            accent: accentColor || "#1f2937", // Dark gray default for executive
-            text: "#374151",
-            background: "#FFFFFF",
-        },
-        section_order = [],
-        section_visibility = {},
-        section_titles = {},
-    } = formatting || {};
+/* ==========================================================================
+   UTILITIES
+   ========================================================================== */
 
-    const getSectionTitle = (id, defaultTitle) => section_titles[id] || defaultTitle;
-    const isVisible = (id) => section_visibility[id] !== false;
+const cx = (...cls) => cls.filter(Boolean).join(" ");
 
-    // Safe date formatter
-    const formatDate = (dateStr) => {
-        if (!dateStr) return "";
-        const d = new Date(dateStr);
-        if (Number.isNaN(d.getTime())) return "";
-        return d.toLocaleDateString("en-US", { year: "numeric", month: "short" });
+const getFontFamily = (font) => {
+  if (font?.family) return ""; // Let inline style handle the custom family
+  if (!font) return "font-sans";
+  if (font.type === "serif") return "font-serif";
+  if (font.type === "mono") return "font-mono";
+  return "font-sans";
+};
+
+const formatFullDate = (d) => {
+  if (!d) return "";
+  const dt = new Date(d);
+  if (isNaN(dt.getTime())) return "";
+  return dt.toLocaleDateString("en-US", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+};
+
+const normalizeLevel = (val) => {
+  if (!val) return 0;
+  const map = {
+    beginner: 1,
+    basic: 1,
+    amateur: 2,
+    elementary: 2,
+    competent: 3,
+    intermediate: 3,
+    proficient: 4,
+    advanced: 4,
+    expert: 5,
+    native: 5,
+    master: 5,
+  };
+  if (typeof val === "string") return map[val.toLowerCase()] || 3;
+  if (val > 5) return Math.round(val / 20); // assume 100 base
+  return val;
+};
+
+/* ==========================================================================
+   HELPERS & COMPONENTS
+   ========================================================================== */
+
+const ContactItem = ({
+  icon: Icon,
+  value,
+  accent,
+  formatting,
+  forceWhiteIcon,
+}) => {
+  if (!value) return null;
+
+  const style = formatting?.personal?.iconStyle || "filled";
+
+  const renderIcon = () => {
+    if (style === "none" || !Icon) return null;
+
+    const size = 15;
+    const baseClass = "shrink-0 flex items-center justify-center shadow-sm";
+
+    if (forceWhiteIcon) {
+      if (style === "outline")
+        return (
+          <Icon
+            size={size}
+            className="text-white drop-shadow-md"
+            strokeWidth={2}
+          />
+        );
+      if (style === "glow")
+        return (
+          <Icon
+            size={size}
+            className="text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]"
+            strokeWidth={2}
+          />
+        );
+      if (style === "filled")
+        return (
+          <div
+            className={`${baseClass} w-7 h-7 rounded bg-white border border-black/25`}
+            style={{ color: accent }}
+          >
+            <Icon size={14} strokeWidth={2.5} />
+          </div>
+        );
+      if (style === "soft")
+        return (
+          <div
+            className={`${baseClass} w-7 h-7 rounded-full`}
+            style={{ backgroundColor: "rgba(255,255,255,0.2)", color: "white" }}
+          >
+            <Icon size={14} strokeWidth={2} />
+          </div>
+        );
+      if (style === "diamond")
+        return (
+          <div className="relative w-6 h-6 flex items-center justify-center shrink-0">
+            <div className="absolute inset-0 bg-white opacity-20 transform rotate-45 rounded-sm" />
+            <div className="relative z-10 text-white">
+              <Icon size={12} strokeWidth={2} />
+            </div>
+          </div>
+        );
+      if (style === "round" || style === "square")
+        return (
+          <div
+            className={`${baseClass} w-6 h-6 ${
+              style === "round" ? "rounded-full" : "rounded"
+            } bg-white`}
+            style={{ color: accent }}
+          >
+            <Icon size={12} strokeWidth={2.5} />
+          </div>
+        );
+      return <Icon size={size} className="text-white" />;
+    }
+
+    // Normal Mode
+    const bgSoft = `${accent}20`;
+    if (style === "outline")
+      return <Icon size={size} style={{ color: accent }} strokeWidth={2} />;
+    if (style === "glow")
+      return (
+        <Icon
+          size={size}
+          style={{ color: accent, filter: `drop-shadow(0 0 4px ${accent})` }}
+          strokeWidth={2}
+        />
+      );
+    if (style === "filled")
+      return (
+        <div
+          className={`${baseClass} w-7 h-7 rounded bg-white border border-gray-200`}
+          style={{ color: accent }}
+        >
+          <Icon size={14} strokeWidth={2} />
+        </div>
+      );
+    if (style === "soft")
+      return (
+        <div
+          className={`${baseClass} w-7 h-7 rounded-full`}
+          style={{ backgroundColor: bgSoft, color: accent }}
+        >
+          <Icon size={14} strokeWidth={2} />
+        </div>
+      );
+    if (style === "diamond")
+      return (
+        <div className="relative w-6 h-6 flex items-center justify-center shrink-0">
+          <div
+            className="absolute inset-0 opacity-20 transform rotate-45 rounded-sm"
+            style={{ backgroundColor: accent }}
+          />
+          <div className="relative z-10 text-white" style={{ color: accent }}>
+            <Icon size={12} strokeWidth={2} />
+          </div>
+        </div>
+      );
+    if (style === "round" || style === "square")
+      return (
+        <div
+          className={`${baseClass} w-6 h-6 ${
+            style === "round" ? "rounded-full" : "rounded"
+          }`}
+          style={{ backgroundColor: bgSoft, color: accent }}
+        >
+          <Icon size={12} strokeWidth={2} />
+        </div>
+      );
+    return <Icon size={size} style={{ color: accent }} />;
+  };
+
+  return (
+    <div
+      className="flex items-center gap-2.5 font-medium tracking-wide"
+      style={{
+        color: forceWhiteIcon ? "white" : "inherit",
+        textShadow: forceWhiteIcon ? "0 1px 2px rgba(0,0,0,0.1)" : "none",
+        fontSize: "0.9em",
+      }}
+    >
+      {style !== "none" && renderIcon()}
+      <span className="break-all opacity-95 hover:opacity-100 transition-opacity">
+        {value}
+      </span>
+    </div>
+  );
+};
+
+const SectionHeading = ({ title, icon: Icon, formatting }) => {
+  const accent = formatting.colors?.accent || "#3B82F6";
+  const style = formatting.heading?.style || "underline";
+  const caps = formatting.heading?.caps || "uppercase";
+  const iconStyle = formatting.heading?.iconStyle || "filled";
+  const fontSizeVal =
+    formatting.heading?.size === "XL"
+      ? "1.5em"
+      : formatting.heading?.size === "L"
+      ? "1.25em"
+      : formatting.heading?.size === "S"
+      ? "0.9em"
+      : "1.1em";
+
+  const align = formatting.heading?.align || "left";
+  const alignClass =
+    align === "center"
+      ? "justify-center"
+      : align === "right"
+      ? "justify-end"
+      : "justify-start";
+
+  const renderIcon = () => {
+    if (!Icon || iconStyle === "none") return null;
+    if (iconStyle === "outline") {
+      return <Icon size={18} style={{ color: accent }} />;
+    }
+    return (
+      <div
+        className="p-1 rounded bg-opacity-10 mr-2"
+        style={{ backgroundColor: accent, color: "white" }}
+      >
+        <Icon size={12} className="text-white" />
+      </div>
+    );
+  };
+
+  if (style === "boxed") {
+    return (
+      <div
+        className={cx(
+          "flex items-center gap-2 px-3 py-1.5 rounded-md mb-4",
+          caps,
+          alignClass
+        )}
+        style={{
+          backgroundColor: accent,
+          color: "white",
+          fontSize: fontSizeVal,
+        }}
+      >
+        {Icon && iconStyle !== "none" && (
+          <Icon size={16} className="text-white" />
+        )}
+        <span className="font-bold tracking-wide">{title}</span>
+      </div>
+    );
+  }
+
+  if (style === "leftLine") {
+    return (
+      <div
+        className={cx(
+          "flex items-center gap-3 mb-4 pl-3 border-l-4",
+          caps,
+          alignClass
+        )}
+        style={{ borderColor: accent, fontSize: fontSizeVal }}
+      >
+        <span
+          className="font-bold tracking-wide"
+          style={{ color: formatting.colors?.text }}
+        >
+          {title}
+        </span>
+      </div>
+    );
+  }
+
+  if (style === "modern") {
+    return (
+      <div
+        className={cx(
+          "flex items-center gap-3 mb-4 pl-3 py-1 border-l-4",
+          caps,
+          alignClass
+        )}
+        style={{
+          borderColor: accent,
+          background: `linear-gradient(90deg, ${accent}15 0%, transparent 100%)`,
+          fontSize: fontSizeVal,
+        }}
+      >
+        <span
+          className="font-bold tracking-wide"
+          style={{ color: formatting.colors?.text }}
+        >
+          {title}
+        </span>
+      </div>
+    );
+  }
+
+  if (style === "highlight") {
+    return (
+      <div className={cx("mb-4 flex", alignClass)}>
+        <div className="relative inline-block">
+          <span
+            className={cx(
+              "absolute bottom-1 left-0 w-full h-3 z-0 opacity-40 transform -rotate-1",
+              "rounded-sm"
+            )}
+            style={{ backgroundColor: accent }}
+          />
+          <div
+            className={cx("relative z-10 flex items-center gap-2 px-1", caps)}
+            style={{ fontSize: fontSizeVal }}
+          >
+            {renderIcon()}
+            <span
+              className="font-bold tracking-wide"
+              style={{ color: formatting.colors?.text }}
+            >
+              {title}
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (style === "shading") {
+    return (
+      <div
+        className={cx(
+          "flex items-center gap-2 mb-4 px-3 py-1.5 border-b-2",
+          caps,
+          alignClass
+        )}
+        style={{
+          borderColor: accent,
+          backgroundColor: `${accent}10`, // 10% opacity
+        }}
+      >
+        {renderIcon()}
+        <span
+          className="font-bold tracking-wide"
+          style={{ color: formatting.colors?.text }}
+        >
+          {title}
+        </span>
+      </div>
+    );
+  }
+
+  if (style === "circleLine") {
+    return (
+      <div className={cx("flex items-center gap-3 mb-4", alignClass)}>
+        <div
+          className="w-6 h-6 rounded-full flex items-center justify-center shrink-0"
+          style={{ backgroundColor: accent, color: "white" }}
+        >
+          {Icon ? (
+            <Icon size={14} />
+          ) : (
+            <span className="font-bold" style={{ fontSize: "0.8em" }}>
+              #
+            </span>
+          )}
+        </div>
+        <span
+          className={cx("font-bold tracking-wide", caps)}
+          style={{ color: formatting.colors?.text, fontSize: fontSizeVal }}
+        >
+          {title}
+        </span>
+        <div
+          className="h-[2px] flex-1 opacity-20"
+          style={{ backgroundColor: formatting.colors?.text || "#000" }}
+        />
+      </div>
+    );
+  }
+
+  if (style === "diamondLine") {
+    return (
+      <div className={cx("flex items-center gap-4 mb-4", alignClass)}>
+        <div className="relative w-6 h-6 flex items-center justify-center shrink-0">
+          <div
+            className="absolute inset-0 transform rotate-45 rounded-sm"
+            style={{ backgroundColor: accent }}
+          />
+          <div className="relative z-10 text-white">
+            {Icon ? (
+              <Icon size={12} />
+            ) : (
+              <span className="font-bold" style={{ fontSize: "0.8em" }}>
+                #
+              </span>
+            )}
+          </div>
+        </div>
+        <span
+          className={cx("font-bold tracking-wide", caps)}
+          style={{ color: formatting.colors?.text, fontSize: fontSizeVal }}
+        >
+          {title}
+        </span>
+        <div
+          className="h-[1px] flex-1 opacity-20"
+          style={{ backgroundColor: formatting.colors?.text || "#000" }}
+        />
+      </div>
+    );
+  }
+
+  if (style === "pill") {
+    return (
+      <div className={cx("mb-4 flex", alignClass)}>
+        <div
+          className={cx(
+            "inline-flex items-center gap-2 px-4 py-1.5 rounded-full border",
+            caps
+          )}
+          style={{
+            borderColor: accent,
+            backgroundColor: `${accent}08`,
+            color: formatting.colors?.text,
+            fontSize: fontSizeVal,
+          }}
+        >
+          {Icon && <Icon size={16} style={{ color: accent }} />}
+          <span className="font-bold tracking-wide">{title}</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Default / Underline
+  return (
+    <div className={cx("mb-3 flex", alignClass)}>
+      <div
+        className={cx("inline-flex items-center gap-2 pb-1 w-full", caps)}
+        style={{
+          borderBottom: `2px solid ${accent}`,
+          fontSize: fontSizeVal,
+        }}
+      >
+        {renderIcon()}
+        <span className="font-bold tracking-wide" style={{ color: accent }}>
+          {title}
+        </span>
+      </div>
+    </div>
+  );
+};
+
+const renderLevelSection = (items, formatting, type) => {
+  if (!items?.length) return null;
+
+  const normalized = items.map((item) => {
+    if (typeof item === "string")
+      return { name: item, level: null, category: "General" };
+    return {
+      name: item.name || item.language,
+      level: item.level || item.proficiency || null,
+      category: item.category || "General",
     };
+  });
 
-    const formatDateRange = (start, end, isCurrent) => {
-        const startText = formatDate(start);
-        const endText = isCurrent ? "Present" : formatDate(end);
-        if (!startText && !endText) return "";
-        if (!startText) return endText;
-        if (!endText) return startText;
-        return `${startText} - ${endText}`;
+  const config = formatting[type] || {};
+  let layout = config.layout || "grid";
+  if (layout === "level") layout = "grid";
+  if (layout === "bubble") layout = "compact";
+
+  const levelMode = config.levelMode || "text";
+  const compactMode = config.compactMode || "bullet";
+  const enableBubble = config.enableBubble || false;
+  const subinfo = config.subinfo || "dash";
+  const accent = formatting.colors?.accent || "#3B82F6";
+
+  const formatSubinfo = (level) => {
+    if (!level) return null;
+    if (subinfo === "bracket")
+      return <span className="opacity-75 ml-1.5 font-normal">({level})</span>;
+    if (subinfo === "colon")
+      return <span className="opacity-75 ml-1.5 font-normal">: {level}</span>;
+    return <span className="opacity-75 ml-1.5 font-normal">– {level}</span>;
+  };
+
+  const renderLevelIndicator = (level, score) => {
+    if (levelMode === "hide") return null;
+    if (level == null || level === "") return null;
+
+    if (levelMode === "bar") {
+      const barWidth = enableBubble ? "w-10" : "w-12";
+      const margin = enableBubble ? "" : "ml-1.5";
+      return (
+        <div
+          className={cx(
+            barWidth,
+            "h-1.5 bg-gray-200 rounded-full overflow-hidden shrink-0 align-middle inline-block",
+            margin
+          )}
+        >
+          <div
+            className="h-full rounded-full"
+            style={{ width: `${score * 20}%`, backgroundColor: accent }}
+          />
+        </div>
+      );
+    }
+    if (levelMode === "dots") {
+      return (
+        <div
+          className={cx(
+            "flex gap-0.5 shrink-0 align-middle inline-flex",
+            enableBubble ? "" : "ml-1.5"
+          )}
+        >
+          {[1, 2, 3, 4, 5].map((dot) => (
+            <Circle
+              key={dot}
+              size={7}
+              className={dot <= score ? "fill-current" : "text-gray-300"}
+              style={dot <= score ? { color: accent } : {}}
+            />
+          ))}
+        </div>
+      );
+    }
+    return formatSubinfo(level);
+  };
+
+  // Bubble / Compact / Grid Logic
+  const groups = {};
+  normalized.forEach((item) => {
+    const cat = item.category || "General";
+    if (!groups[cat]) groups[cat] = [];
+    groups[cat].push(item);
+  });
+  const isFlat =
+    Object.keys(groups).length === 1 && Object.keys(groups)[0] === "General";
+
+  if (layout === "compact") {
+    const separatorMap = {
+      comma: ", ",
+      pipe: " | ",
+      bullet: " • ",
+      newline: <br />,
     };
+    const sep = separatorMap[compactMode] || ", ";
+    return (
+      <div className="leading-relaxed">
+        {normalized.map((item, i) => (
+          <span key={i}>
+            <span className="font-medium">{item.name}</span>
+            {renderLevelIndicator(item.level, normalizeLevel(item.level))}
+            {i < normalized.length - 1 && (
+              <span className="text-gray-400 mx-1">{sep}</span>
+            )}
+          </span>
+        ))}
+      </div>
+    );
+  }
 
-    const getList = (item) => {
-        if (!item) return [];
-        if (Array.isArray(item)) return item;
-        if (typeof item === 'string') return item.split(',').map(i => i.trim()).filter(Boolean);
-        return [];
-    };
+  // Fallback Grid
+  return (
+    <div className="space-y-4">
+      {Object.entries(groups).map(([cat, list]) => (
+        <div key={cat}>
+          {!isFlat && (
+            <p
+              className="font-bold uppercase mb-1.5 opacity-80"
+              style={{ color: accent, fontSize: "0.85em" }}
+            >
+              {cat}
+            </p>
+          )}
+          <div className="flex flex-wrap gap-x-4 gap-y-2">
+            {list.map((item, i) => (
+              <div
+                key={i}
+                className="flex flex-wrap items-center gap-1.5 min-w-[120px]"
+              >
+                <div
+                  className="w-1.5 h-1.5 rounded-full shrink-0"
+                  style={{ backgroundColor: accent }}
+                />
+                <span className="font-medium break-words">{item.name}</span>
+                {renderLevelIndicator(item.level, normalizeLevel(item.level))}
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
 
-    // Styling
-    const containerStyle = {
-        fontFamily: "'Georgia', 'Times New Roman', serif", // Executive often serif or very clean sans
-        color: colors.text,
-        backgroundColor: colors.background,
+const TimelineItem = ({
+  item,
+  accent,
+  showLocation = true,
+  showGrade = false,
+}) => {
+  if (!item) return null;
+
+  const range = formatRange(item.start_date, item.end_date, item.is_current);
+  const displayDate =
+    range || (typeof item.start_date === "string" ? item.start_date : "");
+
+  const tech =
+    typeof item.technologies === "string"
+      ? item.technologies
+          .split(",")
+          .map((t) => t.trim())
+          .filter(Boolean)
+      : (item.technologies || []).filter(Boolean);
+  const achievements =
+    typeof item.achievements === "string"
+      ? item.achievements
+          .split("\n")
+          .map((a) => a.trim())
+          .filter(Boolean)
+      : (item.achievements || []).filter(Boolean);
+
+  const title = item.title || item.degree || item.position;
+  const subtitle =
+    item.company ||
+    item.school ||
+    item.institution ||
+    item.organization ||
+    item.issuer;
+  const location = item.location || item.board_university;
+  const link = item.link || item.url || item.credential_url;
+  const grade = item.grade || item.gpa || item.percentage;
+
+  return (
+    <div className="mb-4 last:mb-0">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 mb-1">
+        <h3
+          className="font-bold text-gray-900 leading-tight"
+          style={{ fontSize: "1.1em" }}
+        >
+          {title}
+        </h3>
+        <div className="flex items-center gap-2">
+          {displayDate && (
+            <span
+              className="font-mono text-gray-500 font-bold"
+              style={{ fontSize: "0.85em" }}
+            >
+              {displayDate}
+            </span>
+          )}
+          {link && (
+            <a
+              href={link}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex align-middle opacity-80 hover:opacity-100"
+              style={{ color: accent }}
+            >
+              <ExternalLink size={14} />
+            </a>
+          )}
+        </div>
+      </div>
+
+      <div className="flex flex-wrap items-baseline justify-between gap-x-2 mb-2">
+        <div
+          className="flex flex-wrap items-center gap-x-2 font-semibold"
+          style={{ color: accent, fontSize: "0.95em" }}
+        >
+          {subtitle && <span>{subtitle}</span>}
+          {location && showLocation && subtitle && (
+            <span className="text-gray-400 font-normal">•</span>
+          )}
+          {showLocation && location && (
+            <span className="text-gray-500 font-normal italic">{location}</span>
+          )}
+        </div>
+        {item.employment_type && (
+          <span className="text-gray-400 font-medium text-xs whitespace-nowrap">
+            {item.employment_type}
+          </span>
+        )}
+      </div>
+
+      {showGrade && grade && (
+        <div className="text-gray-600 font-medium text-sm mb-1">
+          Grade: {grade}
+        </div>
+      )}
+      {item.field && (
+        <div className="text-gray-500 text-sm mb-1">Field: {item.field}</div>
+      )}
+
+      {item.description && (
+        <div className="text-gray-700 whitespace-pre-line leading-relaxed mb-2 opacity-90">
+          {item.description}
+        </div>
+      )}
+
+      {achievements.length > 0 && (
+        <ul className="list-disc ml-5 space-y-1 mb-2 text-gray-700">
+          {achievements.map((a, i) => (
+            <li key={i}>{a}</li>
+          ))}
+        </ul>
+      )}
+
+      {tech.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mt-2">
+          <span className="font-bold text-xs uppercase opacity-70">Tech:</span>
+          {tech.map((t, i) => (
+            <span
+              key={i}
+              className="text-sm text-gray-600 bg-gray-50 px-1.5 py-0.5 rounded border border-gray-100"
+            >
+              {t}
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+/* ==========================================================================
+   MAIN COMPONENT
+   ========================================================================== */
+
+const ExecutiveTemplate = ({ data, formatting = {}, accentColor }) => {
+  const effectiveFormatting = {
+    ...formatting,
+    colors: {
+      ...formatting.colors,
+      accent: formatting.colors?.accent || accentColor || "#1f2937",
+    },
+  };
+  const accent = effectiveFormatting.colors.accent;
+  const textColor = effectiveFormatting.colors?.text || "#374151";
+
+  // Font config
+  const currentFont = effectiveFormatting.font || {};
+  const fontFamily = getFontFamily(currentFont) || "font-serif";
+  const selectedFont = currentFont.family || "Merriweather";
+
+  React.useEffect(() => {
+    if (selectedFont) {
+      const linkId = "dynamic-font-loader-executive";
+      let link = document.getElementById(linkId);
+      if (!link) {
+        link = document.createElement("link");
+        link.id = linkId;
+        link.rel = "stylesheet";
+        document.head.appendChild(link);
+      }
+      const fontName = selectedFont.replace(/\s+/g, "+");
+      link.href = `https://fonts.googleapis.com/css2?family=${fontName}:wght@300;400;700;900&display=swap`;
+    }
+  }, [selectedFont]);
+
+  const fontStyle = {
+    fontFamily: `'${selectedFont}', ${getFontFallback(currentFont)}`,
+  };
+
+  const spacing = effectiveFormatting.spacing || {
+    font_size: 11,
+    line_height: 1.5,
+    margin_horizontal: 14,
+    margin_vertical: 14,
+    section_spacing: 6,
+  };
+
+  const isTwoColumn = effectiveFormatting.layout?.columns === 2;
+  const mapId = (id) => (id === "custom" ? "custom_sections" : id);
+  const mappedOrder = (effectiveFormatting.section_order || []).map(mapId);
+  const mappedVisibility = Object.fromEntries(
+    Object.entries(effectiveFormatting.section_visibility || {}).map(
+      ([k, v]) => [mapId(k), v]
+    )
+  );
+  const sectionPositions = Object.fromEntries(
+    Object.entries(effectiveFormatting.section_positions || {}).map(
+      ([k, v]) => [mapId(k), v]
+    )
+  );
+
+  const getSectionTitle = (id, defaultTitle) =>
+    effectiveFormatting.section_titles?.[id] || defaultTitle;
+  const isVisible = (id) => mappedVisibility?.[id] !== false;
+
+  const sectionIcons = {
+    summary: FileText,
+    experience: Briefcase,
+    education: Flag,
+    projects: Code,
+    skills: Cpu,
+    languages: LanguagesIcon,
+    certifications: Award,
+    achievements: Trophy,
+    volunteer: Heart,
+    hobbies: Sparkles,
+    custom_sections: Star,
+  };
+
+  const renderSectionContent = (id) => {
+    switch (id) {
+      case "summary":
+        if (
+          !isVisible("summary") ||
+          (!data.summary && !data.professional_summary)
+        )
+          return null;
+        return (
+          <p className="whitespace-pre-line leading-relaxed text-justify">
+            {data.summary || data.professional_summary}
+          </p>
+        );
+      case "experience":
+        return data.experience?.map((item, i) => (
+          <TimelineItem key={i} item={item} accent={accent} />
+        ));
+      case "education":
+        return data.education?.map((item, i) => (
+          <TimelineItem key={i} item={item} accent={accent} showGrade={true} />
+        ));
+      case "projects":
+        return data.projects?.map((item, i) => {
+          const mapped = {
+            ...item,
+            title: item.name || item.title,
+            company: item.role || item.company,
+            achievements: item.highlights || item.achievements || [],
+          };
+          return <TimelineItem key={i} item={mapped} accent={accent} />;
+        });
+      case "skills":
+        return renderLevelSection(data.skills, effectiveFormatting, "skills");
+      case "languages":
+        return renderLevelSection(
+          data.languages,
+          effectiveFormatting,
+          "languages"
+        );
+      case "hobbies":
+        return renderLevelSection(
+          data.hobbies,
+          {
+            ...effectiveFormatting,
+            hobbies: { ...effectiveFormatting.hobbies, layout: "compact" },
+          },
+          "hobbies"
+        );
+      case "volunteer":
+        return data.volunteer_experience?.map((item, i) => {
+          const mapped = { ...item, title: item.role || item.title };
+          return <TimelineItem key={i} item={mapped} accent={accent} />;
+        });
+      case "certifications":
+        if (!data.certifications?.length) return null;
+        return (
+          <div className="space-y-4">
+            {data.certifications.map((c, i) => {
+              const link = c.credential_url || c.link;
+              const item = {
+                title: typeof c === "string" ? c : c.name,
+                company: (
+                  <span className="flex items-center gap-1.5 align-middle">
+                    {c.issuer}
+                    {c.link && (
+                      <a
+                        href={c.link}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="opacity-70 hover:opacity-100 transition inline-flex items-center align-middle"
+                        style={{ color: accent }}
+                        title={c.link}
+                      >
+                        <ExternalLink size={12} />
+                      </a>
+                    )}
+                  </span>
+                ),
+                start_date: c.date || c.issue_date,
+                end_date: c.expiry_date,
+                description: c.credential_id ? (
+                  <span>
+                    Credential ID: {c.credential_id}
+                    {link && (
+                      <a
+                        href={link}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex align-middle ml-1.5 opacity-80 hover:opacity-100"
+                        style={{ color: accent }}
+                        title={link}
+                      >
+                        <ExternalLink size={12} />
+                      </a>
+                    )}
+                  </span>
+                ) : undefined,
+              };
+              return <TimelineItem key={i} item={item} accent={accent} />;
+            })}
+          </div>
+        );
+      case "achievements":
+        if (!data.achievements?.length) return null;
+        return (
+          <div className="space-y-2">
+            {data.achievements.map((a, i) => {
+              if (typeof a === "string")
+                return (
+                  <div key={i} className="flex gap-2">
+                    <Trophy
+                      size={14}
+                      className="text-yellow-500 shrink-0 mt-0.5"
+                    />
+                    <span>{a}</span>
+                  </div>
+                );
+              const item = {
+                title: a.title || a.name,
+                company: a.organization || a.issuer,
+                start_date: a.start_date || a.date,
+                achievements: a.description ? [a.description] : [],
+                link: a.link,
+              };
+              if (
+                !item.company &&
+                !item.link &&
+                !item.achievements.length &&
+                !item.start_date
+              ) {
+                return (
+                  <div key={i} className="flex gap-2">
+                    <Trophy
+                      size={14}
+                      className="text-yellow-500 shrink-0 mt-0.5"
+                    />
+                    <span className="font-medium">{item.title}</span>
+                  </div>
+                );
+              }
+              return <TimelineItem key={i} item={item} accent={accent} />;
+            })}
+          </div>
+        );
+      case "custom_sections":
+        if (!data.custom_sections?.length) return null;
+        return data.custom_sections.map((sec, idx) => (
+          <div key={idx} className="mb-4">
+            <h4 className="font-bold uppercase text-sm mb-2 opacity-80">
+              {sec.title}
+            </h4>
+            <ul className="list-disc ml-5">
+              {(typeof sec.items === "string"
+                ? sec.items.split("\n")
+                : sec.items || []
+              ).map((it, i) => (
+                <li key={i}>{it}</li>
+              ))}
+            </ul>
+          </div>
+        ));
+      default:
+        return null;
+    }
+  };
+
+  const SectionWrapper = ({ id }) => {
+    const title = getSectionTitle(id, id.charAt(0).toUpperCase() + id.slice(1));
+    const Icon = sectionIcons[id] || Star;
+    const content = renderSectionContent(id);
+    if (!content || (Array.isArray(content) && content.length === 0))
+      return null;
+
+    const spacingMb =
+      formatting.spacing?.section_spacing !== undefined
+        ? formatting.spacing.section_spacing * 2
+        : 24;
+    return (
+      <section style={{ marginBottom: spacingMb }}>
+        <SectionHeading
+          title={title}
+          icon={Icon}
+          formatting={effectiveFormatting}
+        />
+        <div style={{ color: textColor }}>{content}</div>
+      </section>
+    );
+  };
+
+  const defaultOrder = [
+    "summary",
+    "experience",
+    "education",
+    "skills",
+    "projects",
+    "certifications",
+    "languages",
+    "volunteer",
+    "achievements",
+    "hobbies",
+    "custom_sections",
+  ];
+  let allSections = mappedOrder.length ? mappedOrder : defaultOrder;
+  const visibleSections = allSections.filter((id) => isVisible(id));
+
+  let mainColNodes = [];
+  let sidebarNodes = [];
+
+  if (isTwoColumn) {
+    visibleSections.forEach((id) => {
+      const pos = sectionPositions[id];
+      const isSidebarDefault = [
+        "skills",
+        "languages",
+        "education",
+        "certifications",
+        "hobbies",
+        "achievements",
+      ].includes(id);
+      if (pos === "sidebar" || (!pos && isSidebarDefault)) {
+        sidebarNodes.push(<SectionWrapper key={id} id={id} />);
+      } else {
+        mainColNodes.push(<SectionWrapper key={id} id={id} />);
+      }
+    });
+  } else {
+    mainColNodes = visibleSections.map((id) => (
+      <SectionWrapper key={id} id={id} />
+    ));
+  }
+
+  const contentPadding = spacing.margin_horizontal
+    ? `${spacing.margin_vertical}mm ${spacing.margin_horizontal}mm`
+    : "20px";
+
+  // Header Logic
+  const headerConfig = effectiveFormatting.personal || {
+    align: "left",
+    arrangement: "inline",
+  };
+  const contactItems = [
+    { icon: Mail, value: data.email || data.personal_info?.email },
+    { icon: Phone, value: data.phone || data.personal_info?.phone },
+    { icon: MapPin, value: data.location || data.personal_info?.location },
+    { icon: Linkedin, value: data.linkedin || data.personal_info?.linkedin },
+    { icon: Github, value: data.github || data.personal_info?.github },
+    { icon: Globe, value: data.website || data.personal_info?.website },
+  ].filter((item) => item.value);
+
+  return (
+    <div
+      className={cx("bg-white min-h-[inherit] resume-font-root", fontFamily)}
+      style={{
+        ...fontStyle,
         fontSize: `${spacing.font_size}pt`,
         lineHeight: spacing.line_height,
-    };
+        color: textColor,
+      }}
+    >
+      <div className="border-t-8" style={{ borderColor: accent }}>
+        <div style={{ padding: contentPadding }}>
+          {/* Header */}
+          <div
+            className={`mb-6 ${
+              headerConfig.align === "center"
+                ? "text-center"
+                : headerConfig.align === "right"
+                ? "text-right"
+                : "text-left"
+            }`}
+          >
+            <h1
+              className="text-4xl font-bold tracking-tight mb-2"
+              style={{ color: effectiveFormatting.colors.primary || "#111827" }}
+            >
+              {data.name || data.personal_info?.full_name || "Your Name"}
+            </h1>
+            {(data.role || data.personal_info?.profession) && (
+              <p
+                className="text-xl font-light"
+                style={{
+                  color: effectiveFormatting.colors.secondary || "#4B5563",
+                }}
+              >
+                {data.role || data.personal_info?.profession}
+              </p>
+            )}
+          </div>
 
-    const contentPadding = {
-        padding: `${spacing.margin_vertical}mm ${spacing.margin_horizontal}mm`,
-    };
+          {/* Contact */}
+          <div
+            className={`
+                    mb-8 flex flex-wrap gap-4 text-sm border-y border-gray-200 py-4
+                    ${
+                      headerConfig.arrangement === "stacked"
+                        ? "flex-col"
+                        : headerConfig.arrangement === "spread"
+                        ? "justify-between"
+                        : "justify-start gap-x-6"
+                    }
+                    ${
+                      headerConfig.align === "center"
+                        ? "justify-center"
+                        : headerConfig.align === "right"
+                        ? "justify-end"
+                        : ""
+                    } 
+                `}
+          >
+            {contactItems.map((item, i) => (
+              <ContactItem
+                key={i}
+                icon={item.icon}
+                value={item.value}
+                accent={accent}
+                formatting={effectiveFormatting}
+              />
+            ))}
+          </div>
 
-    const sectionHeadingStyle = {
-        color: colors.accent,
-        fontWeight: "bold",
-        textTransform: "uppercase",
-        letterSpacing: "0.05em",
-        fontSize: "1.1em",
-        borderBottom: `2px solid ${colors.accent}`,
-        paddingBottom: "0.25rem",
-        marginBottom: "1rem",
-    };
-
-    const sectionContainerStyle = {
-        marginBottom: `${spacing.section_spacing}mm`,
-    };
-
-    // Group skills logic
-    const skillsArray = Array.isArray(data?.skills)
-        ? data.skills.map((s) => (typeof s === "string" ? { name: s } : s)).filter((s) => s && s.name)
-        : [];
-    const groupedSkills = skillsArray.reduce((acc, s) => {
-        const cat = (s.category || "Other").trim() || "Other";
-        if (!acc[cat]) acc[cat] = [];
-        acc[cat].push(s);
-        return acc;
-    }, {});
-    const groupedEntries = Object.entries(groupedSkills).sort(([a], [b]) => a.localeCompare(b));
-
-    // Renderers
-    const renderSkills = () => {
-         if (!data.skills || data.skills.length === 0 || !isVisible("skills")) return null;
-         return (
-            <section style={sectionContainerStyle}>
-                <h2 style={sectionHeadingStyle}>{getSectionTitle("skills", "Core Competencies")}</h2>
-                 <div className="space-y-3">
-                    {groupedEntries.map(([category, items]) => (
-                        <div key={category}>
-                             {category !== "Other" && (
-                                <h3 className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: colors.secondary }}>
-                                    {category}
-                                </h3>
-                            )}
-                            <div className="flex flex-wrap gap-x-4 gap-y-1">
-                                {items.map((s, idx) => (
-                                    <div key={idx} className="flex items-center gap-2">
-                                         <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: colors.accent }}></div>
-                                        <span className="text-sm font-medium" style={{ color: colors.primary }}>
-                                            {s.name}{s.level ? ` - ${s.level}` : ""}
-                                        </span>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </section>
-         );
-    };
-
-    const renderEducation = () => (
-        data.education && data.education.length > 0 && isVisible("education") && (
-            <section style={sectionContainerStyle}>
-                <h2 style={sectionHeadingStyle}>{getSectionTitle("education", "Education")}</h2>
-                <div className="space-y-4">
-                    {data.education.map((edu, index) => (
-                         <div key={index} className="pb-3 border-b border-gray-100 last:border-0">
-                            <h3 className="font-bold text-base" style={{ color: colors.primary }}>{edu.degree}</h3>
-                            {edu.field && <p className="text-sm italic" style={{ color: colors.secondary }}>{edu.field}</p>}
-                            <div className="flex justify-between items-baseline mt-1">
-                                <span className="font-semibold text-sm" style={{ color: colors.accent }}>{edu.institution}</span>
-                                <span className="text-sm text-gray-500">{formatDateRange(edu.start_date, edu.end_date, edu.is_current)}</span>
-                            </div>
-                            {(edu.grade || edu.gpa) && <div className="text-sm mt-1">Grade: {edu.grade || edu.gpa}</div>}
-                        </div>
-                    ))}
-                </div>
-            </section>
-        )
-    );
-
-    const renderExperience = () => (
-        data.experience && data.experience.length > 0 && isVisible("experience") && (
-            <section style={sectionContainerStyle}>
-                <h2 style={sectionHeadingStyle}>{getSectionTitle("experience", "Professional Experience")}</h2>
-                <div className="space-y-6">
-                    {data.experience.map((exp, index) => {
-                        const techList = getList(exp.technologies);
-                        return (
-                             <div key={index}>
-                                <div className="flex justify-between items-start mb-1">
-                                    <div>
-                                        <h3 className="font-bold text-lg" style={{ color: colors.primary }}>{exp.title}</h3>
-                                        <p className="font-semibold text-base" style={{ color: colors.accent }}>{exp.company}</p>
-                                    </div>
-                                    <div className="text-right">
-                                        <span className="block text-sm font-medium" style={{ color: colors.secondary }}>
-                                            {formatDateRange(exp.start_date, exp.end_date, exp.is_current)}
-                                        </span>
-                                        {exp.location && <span className="block text-xs text-gray-400">{exp.location}</span>}
-                                    </div>
-                                </div>
-                                {exp.description && (
-                                    <div className="text-sm leading-relaxed whitespace-pre-line mb-2">
-                                        {exp.description}
-                                    </div>
-                                )}
-                                {techList.length > 0 && (
-                                    <div className="text-sm mt-2">
-                                        <span className="font-bold text-xs uppercase" style={{ color: colors.secondary }}>Technologies: </span>
-                                        <span className="italic text-gray-600">{techList.join(", ")}</span>
-                                    </div>
-                                )}
-                             </div>
-                        );
-                    })}
-                </div>
-            </section>
-        )
-    );
-
-    const renderProjects = () => (
-        data.projects && data.projects.length > 0 && isVisible("projects") && (
-             <section style={sectionContainerStyle}>
-                <h2 style={sectionHeadingStyle}>{getSectionTitle("projects", "Key Projects")}</h2>
-                <div className="space-y-5">
-                    {data.projects.map((proj, index) => {
-                        const techList = getList(proj.technologies);
-                        return (
-                            <div key={index} className="pl-4 border-l-2 border-gray-200">
-                                <div className="flex justify-between items-start mb-1">
-                                    <div className="flex items-center gap-2">
-                                        <h3 className="font-bold text-base" style={{ color: colors.primary }}>{proj.name}</h3>
-                                        {proj.link && <a href={proj.link} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-600"><ExternalLink size={14} /></a>}
-                                    </div>
-                                    <span className="text-sm text-gray-500">{formatDateRange(proj.start_date, proj.end_date, proj.is_current)}</span>
-                                </div>
-                                {(proj.role || proj.type) && <p className="text-sm font-medium mb-1" style={{ color: colors.accent }}>{[proj.role, proj.type].filter(Boolean).join(" • ")}</p>}
-                                {proj.description && <p className="text-sm leading-relaxed mb-2">{proj.description}</p>}
-                                {techList.length > 0 && (
-                                     <div className="text-sm mt-1">
-                                        <span className="font-bold text-xs uppercase" style={{ color: colors.secondary }}>Technologies: </span>
-                                        <span className="italic text-gray-600">{techList.join(", ")}</span>
-                                    </div>
-                                )}
-                            </div>
-                        );
-                    })}
-                </div>
-             </section>
-        )
-    );
-     const renderCertifications = () => (
-        data.certifications && data.certifications.length > 0 && isVisible("certifications") && (
-             <section style={sectionContainerStyle}>
-                <h2 style={sectionHeadingStyle}>{getSectionTitle("certifications", "Certifications")}</h2>
-                 <ul className="space-y-2 text-sm">
-                    {data.certifications.map((c, i) => (
-                        <li key={i} className="flex flex-col">
-                             <span className="font-medium" style={{ color: colors.primary }}>{c.name || c}</span>
-                             <div className="flex justify-between text-xs text-gray-500">
-                                {c.issuer && <span>{c.issuer}</span>}
-                                {c.date && <span>{formatDate(c.date)}</span>}
-                             </div>
-                        </li>
-                    ))}
-                 </ul>
-            </section>
-        )
-    );
-
-    const renderLanguages = () => (
-        data.languages && data.languages.length > 0 && isVisible("languages") && (
-             <section style={sectionContainerStyle}>
-                 <h2 style={sectionHeadingStyle}>{getSectionTitle("languages", "Languages")}</h2>
-                <div className="space-y-1">
-                    {data.languages.map((lang, index) => (
-                         <div key={index} className="flex justify-between text-sm">
-                            <span className="font-medium" style={{ color: colors.primary }}>
-                                {typeof lang === 'string' ? lang : (lang.name || lang.language)}
-                            </span>
-                            {(lang.proficiency || lang.level) && (
-                                <span className="text-gray-500">{lang.proficiency || lang.level}</span>
-                            )}
-                         </div>
-                    ))}
-                </div>
-            </section>
-        )
-    );
-
-    const renderAchievements = () => (
-        data.achievements && data.achievements.length > 0 && isVisible("achievements") && (
-             <section style={sectionContainerStyle}>
-                 <h2 style={sectionHeadingStyle}>{getSectionTitle("achievements", "Achievements")}</h2>
-                <ul className="list-disc ml-5 space-y-2 text-sm">
-                    {data.achievements.map((item, index) => (
-                        <li key={index}>
-                             {typeof item === 'string' ? item : (
-                                <span>
-                                    <span className="font-semibold" style={{ color: colors.primary }}>{item.title}</span>
-                                    {item.date && <span className="text-gray-500 text-xs ml-1">({formatDate(item.date)})</span>}
-                                    {item.description && <span className="block text-xs mt-0.5">{item.description}</span>}
-                                </span>
-                            )}
-                        </li>
-                    ))}
-                </ul>
-            </section>
-        )
-    );
-
-    const renderVolunteer = () => (
-         data.volunteer_experience && data.volunteer_experience.length > 0 && isVisible("volunteer") && (
-            <section style={sectionContainerStyle}>
-                 <h2 style={sectionHeadingStyle}>{getSectionTitle("volunteer", "Volunteer")}</h2>
-                 <div className="space-y-3">
-                    {data.volunteer_experience.map((vol, index) => (
-                        <div key={index}>
-                            <div className="flex justify-between items-baseline">
-                                <h3 className="font-semibold text-sm" style={{ color: colors.primary }}>{vol.role}</h3>
-                                <p className="text-xs text-gray-500">{formatDateRange(vol.start_date, vol.end_date, vol.is_current)}</p>
-                            </div>
-                            <p className="text-xs mb-1 italic" style={{ color: colors.secondary }}>{vol.organization}</p>
-                             {vol.description && <p className="text-xs leading-relaxed">{vol.description}</p>}
-                        </div>
-                    ))}
-                </div>
-            </section>
-        )
-    );
-
-    const renderHobbies = () => (
-        data.hobbies && data.hobbies.length > 0 && isVisible("hobbies") && (
-            <section style={sectionContainerStyle}>
-                 <h2 style={sectionHeadingStyle}>{getSectionTitle("hobbies", "Interests")}</h2>
-                <p className="text-sm">{data.hobbies.join(", ")}</p>
-            </section>
-        )
-    );
-
-    const renderCustomSection = (section) => {
-        if (!section || !section.items || section.items.length === 0 || !isVisible(section.id)) return null;
-        return (
-            <section key={section.id} style={sectionContainerStyle}>
-                 <h2 style={sectionHeadingStyle}>{section.title}</h2>
-                <div className="space-y-3">
-                    {section.items.map((item, i) => (
-                        <div key={i}>
-                            <div className="flex justify-between items-start">
-                                <h3 className="font-bold text-sm" style={{ color: colors.primary }}>{item.title}</h3>
-                                {item.date && <div className="text-xs text-gray-500">{item.date}</div>}
-                            </div>
-                            {item.subtitle && <p className="text-xs italic" style={{ color: colors.accent }}>{item.subtitle}</p>}
-                            {item.description && <p className="text-sm leading-relaxed mt-1">{item.description}</p>}
-                        </div>
-                    ))}
-                </div>
-            </section>
-        );
-    };
-
-    const renderSummary = () => (
-        isVisible("summary") && data.professional_summary && (
-            <section className="mb-8" style={{ marginBottom: `${spacing.section_spacing}mm` }}>
-                <h2 style={sectionHeadingStyle}>
-                    {getSectionTitle("summary", "Executive Summary")}
-                </h2>
-                <p className="text-base leading-relaxed text-justify">
-                    {data.professional_summary}
-                </p>
-            </section>
-        )
-    );
-
-
-    // Component Routing
-     const renderSection = (id) => {
-        if (id.startsWith("custom_")) {
-            const sectionId = id.replace("custom_", "");
-            const section = data.custom_sections?.find(s => s.id === sectionId);
-            return renderCustomSection(section);
-        }
-
-        switch(id) {
-            case "education": return renderEducation();
-            case "skills": return renderSkills();
-            case "summary": return renderSummary();
-            case "experience": return renderExperience();
-            case "projects": return renderProjects();
-            case "certifications": return renderCertifications();
-            case "languages": return renderLanguages();
-            case "achievements": return renderAchievements();
-            case "volunteer": return renderVolunteer();
-            case "hobbies": return renderHobbies();
-            default: return null;
-        }
-    };
-
-    // Layout
-    const defaultOrder = ["summary", "experience", "projects", "skills", "education", "certifications", "languages", "volunteer", "achievements", "hobbies"];
-    let finalOrder = section_order.length > 0 ? section_order : defaultOrder;
-    const customSectionIds = data.custom_sections?.map(s => `custom_${s.id}`) || [];
-    const allIds = [...defaultOrder, ...customSectionIds];
-    const missingSections = allIds.filter(id => !finalOrder.includes(id));
-    finalOrder = [...finalOrder, ...missingSections];
-
-    // Executive layout logic:
-    // With 2 columns: Main (8/12) and Side (4/12).
-    // Main usually contains text-heavy stuff: Summary, Experience, Projects, Volunteer.
-    // Side usually contains lists: Contact (if not in header), Education, Skills, Certs, Languages.
-    
-    // We can stick to the same grouping logic as before but adapted for Executive feel.
-    const defaultMainIds = ["summary", "experience", "projects", "volunteer"];
-    
-    const currentMainIds = finalOrder.filter(id => defaultMainIds.includes(id) || id.startsWith("custom_")); 
-    // ^ Custom sections often can be main or side. Lets assume they are main unless small? 
-    // Actually, ProfessionalTemplate puts custom sections in Side by default? Let's check.
-    // ProfessionalTemplate put custom sections in SIDE if using 2 columns.
-    // Let's stick to consistent logic.
-    // The previous Executive code had Main: Exp, Proj. Side: Edu, Skills.
-    // Summary was at the top, full width? No, it was in a separate section above columns. (Lines 87-96 of original file).
-    // Let's keep Summary full width at top if possible, or part of Main.
-    // Original file had Summary separate. I will keep it separate or put it in Main if user orders it there?
-    // User order suggests they want to control position. But grid layout is restrictive.
-    // Let's create a "Top Section" for Summary if it's the first item?
-    // Or just put it in Main.
-    // I will put everything not in "Side" into "Main".    
-    
-    const sideIds = ["education", "skills", "certifications", "languages", "achievements", "hobbies"];
-    const forceSideIds = sideIds; // These consistently look better on side in 2-col
-    
-    const gridMainIds = finalOrder.filter(id => !forceSideIds.includes(id) && id !== "personal" && id !== "summary"); 
-    const gridSideIds = finalOrder.filter(id => forceSideIds.includes(id));
-
-    return (
-        <div className="bg-white min-h-[1000px]" style={containerStyle}>
-             {/* Header */}
-            <div className="border-t-8" style={{ borderColor: colors.accent }}>
-                <div style={contentPadding}>
-                    <div className="flex flex-col md:flex-row justify-between items-start mb-6">
-                        <div>
-                            <h1 className="text-4xl font-bold text-gray-900 mb-2 tracking-tight">
-                                {data.personal_info?.full_name || "Your Name"}
-                            </h1>
-                            {data.personal_info?.profession && (
-                                <p className="text-xl text-gray-600 font-light" style={{ color: colors.secondary }}>
-                                    {data.personal_info.profession}
-                                </p>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Contact Information Grid */}
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm border-t border-b border-gray-200 py-4 mb-6">
-                        {data.personal_info?.email && <div className="flex items-center gap-2"><Mail className="size-4" style={{ color: colors.accent }} /> <span>{data.personal_info.email}</span></div>}
-                        {data.personal_info?.phone && <div className="flex items-center gap-2"><Phone className="size-4" style={{ color: colors.accent }} /> <span>{data.personal_info.phone}</span></div>}
-                        {data.personal_info?.location && <div className="flex items-center gap-2"><MapPin className="size-4" style={{ color: colors.accent }} /> <span>{data.personal_info.location}</span></div>}
-                        {data.personal_info?.linkedin && <a href={data.personal_info.linkedin} className="flex items-center gap-2 hover:underline"><Linkedin className="size-4" style={{ color: colors.accent }} /><span className="break-all">{data.personal_info.linkedin}</span></a>}
-                        {data.personal_info?.website && <a href={data.personal_info.website} className="flex items-center gap-2 hover:underline"><Globe className="size-4" style={{ color: colors.accent }} /><span className="break-all">{data.personal_info.website}</span></a>}
-                        {data.personal_info?.github && <a href={data.personal_info.github} className="flex items-center gap-2 hover:underline"><Github className="size-4" style={{ color: colors.accent }} /><span className="break-all">{data.personal_info.github}</span></a>}
-                    </div>
-
-
-                     {/* Layout */}
-                     {layout.columns === 1 ? (
-                         <div className="space-y-6">
-                             {/* If 1 column, just render all in order (except personal which is header) */}
-                             {finalOrder.filter(id => id !== "personal").map(id => renderSection(id))}
-                         </div>
-                     ) : (
-                         <>
-                            {/* If Summary is meant to be at top, render it if it exists and is visible */}
-                            {/* But we must respect order. If user moved Summary to bottom, we shouldn't force it top. */}
-                            {/* However, the grid layout forces a split. */}
-                            {/* Let's see if Summary is in the "Main" list. If so, it renders in Main column. */}
-                            
-                            <div className="grid grid-cols-12 gap-8">
-                                <div className="col-span-12 md:col-span-8 space-y-8">
-                                    {/* Summary is usually first in main ids if present */}
-                                    {/* We will render all "Main" IDs here */}
-                                    {finalOrder.some(id => id === 'summary') && renderSection('summary')} 
-                                    {/* Wait, if I render summary specifically here, I should exclude it from the map below if I want it fixed? */}
-                                    {/* Or I just trust gridMainIds which I filtered summary out of? */}
-                                    {/* I filtered summary out of gridMainIds above. */}
-                                    
-                                    {gridMainIds.map(id => renderSection(id))}
-                                </div>
-                                <div className="col-span-12 md:col-span-4 space-y-8">
-                                     {gridSideIds.map(id => renderSection(id))}
-                                </div>
-                            </div>
-                         </>
-                     )}
-                </div>
+          {/* Body */}
+          {isTwoColumn ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="col-span-1 md:col-span-2">{mainColNodes}</div>
+              <div className="col-span-1">{sidebarNodes}</div>
             </div>
+          ) : (
+            <div className="space-y-6">{mainColNodes}</div>
+          )}
         </div>
-    );
+      </div>
+    </div>
+  );
 };
 
 export default ExecutiveTemplate;

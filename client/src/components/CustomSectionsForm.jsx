@@ -5,7 +5,7 @@ const CustomSectionsForm = ({ data = [], onChange }) => {
   const addSection = () => {
     onChange([
       ...(data || []),
-      { title: "", items: "", link: "" }   // items as string
+      { id: Date.now().toString(), title: "", items: "", link: "" }, // items as string
     ]);
   };
 
@@ -83,7 +83,9 @@ const CustomSectionsForm = ({ data = [], onChange }) => {
                 </label>
                 <input
                   value={section.title || ""}
-                  onChange={(e) => updateSection(index, "title", e.target.value)}
+                  onChange={(e) =>
+                    updateSection(index, "title", e.target.value)
+                  }
                   type="text"
                   className={baseInputClass}
                   placeholder="e.g., Publications, Workshops, Hackathons"
@@ -97,7 +99,7 @@ const CustomSectionsForm = ({ data = [], onChange }) => {
                 </label>
                 <textarea
                   rows={4}
-                  value={section.items || ""}  // plain string
+                  value={section.items || ""} // plain string
                   onChange={(e) =>
                     updateSection(index, "items", e.target.value)
                   }

@@ -30,6 +30,10 @@ import {
   Star,
   Circle,
 } from "lucide-react";
+import {
+  formatDateRange as formatRange,
+  getFontFallback,
+} from "./TemplateHelpers";
 
 /* ==========================================================================
    UTILITIES
@@ -44,33 +48,6 @@ const getFontFamily = (font) => {
   if (font.type === "serif") return "font-serif";
   if (font.type === "mono") return "font-mono";
   return "font-sans";
-};
-
-// Map our logical font "type" to a real CSS generic family
-const getFontFallback = (font) => {
-  const type = font?.type;
-  if (type === "serif") return "serif";
-  if (type === "mono" || type === "monospace") return "monospace";
-  // Treat undefined / "sans" / anything else as sans-serif
-  return "sans-serif";
-};
-
-const formatDate = (d) => {
-  if (!d) return "";
-  const dt = new Date(d);
-  if (isNaN(dt.getTime())) return "";
-  return dt.toLocaleDateString("en-US", { month: "short", year: "numeric" });
-};
-
-const formatRange = (start, end, isCurrent) => {
-  const a = formatDate(start);
-  const b = isCurrent ? "Present" : formatDate(end);
-  if (!a && !b) return "";
-  if (!a) return b;
-  if (!b) return a;
-  if (!a) return b;
-  if (!b) return a;
-  return `${a} — ${b}`;
 };
 
 const formatFullDate = (d) => {
@@ -109,7 +86,6 @@ const normalizeLevel = (val) => {
 /* ==========================================================================
    HELPERS
    ========================================================================== */
-
 const ContactItem = ({
   icon: Icon,
   value,

@@ -5,7 +5,7 @@ const btn = "px-4 py-2 rounded-xl border text-sm font-medium transition";
 const active = "bg-purple-50 border-purple-500 text-purple-600";
 const inactive = "bg-white border-gray-300 text-gray-600 hover:bg-gray-50";
 
-const PersonalDetailsControls = ({ value, onChange }) => {
+const PersonalDetailsControls = ({ value, onChange, template }) => {
   const set = (k, v) => onChange({ ...value, [k]: v });
 
   const ALIGN = ["left", "center", "right"];
@@ -21,15 +21,26 @@ const PersonalDetailsControls = ({ value, onChange }) => {
       <div>
         <p className="text-sm font-medium mb-2">Align</p>
         <div className="flex gap-3">
-          {ALIGN.map((a) => (
-            <button
-              key={a}
-              className={`${btn} ${value.align === a ? active : inactive}`}
-              onClick={() => set("align", a)}
-            >
-              {a.charAt(0).toUpperCase() + a.slice(1)}
-            </button>
-          ))}
+          {ALIGN.map((a) => {
+            const isDisabled = template === "classic" && a !== "left";
+            return (
+              <button
+                key={a}
+                className={`${btn} ${
+                  value.align === a ? active : inactive
+                } ${
+                  isDisabled
+                    ? "opacity-50 cursor-not-allowed bg-gray-100 text-gray-400"
+                    : ""
+                }`}
+                onClick={() => !isDisabled && set("align", a)}
+                disabled={isDisabled}
+                title={isDisabled ? "Not available for Classic Template" : a}
+              >
+                {a.charAt(0).toUpperCase() + a.slice(1)}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -37,17 +48,26 @@ const PersonalDetailsControls = ({ value, onChange }) => {
       <div>
         <p className="text-sm font-medium mb-2">Arrangement</p>
         <div className="flex gap-3">
-          {ARRANGE.map((a) => (
-            <button
-              key={a}
-              className={`${btn} ${
-                value.arrangement === a ? active : inactive
-              }`}
-              onClick={() => set("arrangement", a)}
-            >
-              {a}
-            </button>
-          ))}
+          {ARRANGE.map((a) => {
+            const isDisabled = template === "classic" && a !== "stacked";
+            return (
+              <button
+                key={a}
+                className={`${btn} ${
+                  value.arrangement === a ? active : inactive
+                } ${
+                  isDisabled
+                    ? "opacity-50 cursor-not-allowed bg-gray-100 text-gray-400"
+                    : ""
+                }`}
+                onClick={() => !isDisabled && set("arrangement", a)}
+                disabled={isDisabled}
+                title={isDisabled ? "Not available for Classic Template" : a}
+              >
+                {a}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -55,17 +75,30 @@ const PersonalDetailsControls = ({ value, onChange }) => {
       <div>
         <p className="text-sm font-medium mb-2">Image Alignment</p>
         <div className="flex gap-3">
-          {["hidden", "left", "center", "right"].map((align) => (
-            <button
-              key={align}
-              className={`${btn} ${
-                (value.imageAlign || "hidden") === align ? active : inactive
-              }`}
-              onClick={() => set("imageAlign", align)}
-            >
-              {align.charAt(0).toUpperCase() + align.slice(1)}
-            </button>
-          ))}
+          {["hidden", "left", "center", "right"].map((align) => {
+            const isDisabled = template === "classic" && !["hidden", "center"].includes(align);
+            return (
+              <button
+                key={align}
+                className={`${btn} ${
+                  (value.imageAlign || "hidden") === align ? active : inactive
+                } ${
+                  isDisabled
+                    ? "opacity-50 cursor-not-allowed bg-gray-100 text-gray-400"
+                    : ""
+                }`}
+                onClick={() => !isDisabled && set("imageAlign", align)}
+                disabled={isDisabled}
+                title={
+                  isDisabled
+                    ? "Not available for Classic Template"
+                    : align.charAt(0).toUpperCase() + align.slice(1)
+                }
+              >
+                {align.charAt(0).toUpperCase() + align.slice(1)}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -73,6 +106,7 @@ const PersonalDetailsControls = ({ value, onChange }) => {
       <div>
         <p className="text-sm font-medium mb-2">Icon Style</p>
         <div className="flex gap-3 flex-wrap">
+
           {[
             "none",
             "outline",
@@ -81,14 +115,17 @@ const PersonalDetailsControls = ({ value, onChange }) => {
             "soft",
             "diamond",
             "glow",
-          ].map((style) => (
+          ].map((style) => {
+             const isDisabled = template === 'classic' && ["soft", "diamond", "glow"].includes(style);
+             return (
             <button
               key={style}
               className={`${btn} px-3 py-2 ${
                 value.iconStyle === style ? active : inactive
-              }`}
-              onClick={() => set("iconStyle", style)}
-              title={style}
+              } ${isDisabled ? 'opacity-50 cursor-not-allowed bg-gray-100 text-gray-400' : ''}`}
+              onClick={() => !isDisabled && set("iconStyle", style)}
+              disabled={isDisabled}
+              title={isDisabled ? "Not available for Classic Template" : style}
             >
               {style === "none" && <Ban size={18} />}
               {(style === "outline" || style === "glow") && (
@@ -111,7 +148,7 @@ const PersonalDetailsControls = ({ value, onChange }) => {
                 <div className="w-4 h-4 rounded-sm bg-current opacity-20 transform rotate-45" />
               )}
             </button>
-          ))}
+          )})}
         </div>
       </div>
     </div>

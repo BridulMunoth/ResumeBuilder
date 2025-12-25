@@ -177,6 +177,8 @@ const normalizeResume = (r) => {
         } else if (typeof normalized.items !== "string") {
           normalized.items = "";
         }
+        if (!normalized.id)
+          normalized.id = `custom_${Math.random().toString(36).substr(2, 9)}`;
         return normalized;
       })
     : [];
@@ -237,7 +239,8 @@ const ResumeBuilder = () => {
         "achievements",
         "volunteer",
         "hobbies",
-        "custom",
+        "hobbies",
+        "custom_sections",
       ],
       section_visibility: {
         personal: true,
@@ -251,7 +254,7 @@ const ResumeBuilder = () => {
         achievements: true,
         volunteer: true,
         hobbies: true,
-        custom: true,
+        custom_sections: true,
       },
       section_titles: {},
       // Ensure a sane default font config so templates can react immediately
@@ -280,8 +283,33 @@ const ResumeBuilder = () => {
               type: normalized.formatting?.font?.type || "sans",
               family: normalized.formatting?.font?.family || "Source Sans Pro",
             },
+            // Migration: custom -> custom_sections
+            section_order: (normalized.formatting?.section_order || [])
+              .map((id) => (id === "custom" ? "custom_sections" : id))
+              .filter((id) => id !== "custom_undefined"), // Remove undefined custom sections
+
+            section_visibility: {
+              ...(normalized.formatting?.section_visibility || {}),
+              custom_sections:
+                normalized.formatting?.section_visibility?.custom ??
+                normalized.formatting?.section_visibility?.custom_sections ??
+                true,
+            },
           },
         };
+
+        // remove old custom key if migrated
+        if ("custom" in withFormattingDefaults.formatting.section_visibility) {
+          delete withFormattingDefaults.formatting.section_visibility.custom;
+        }
+        // Remove custom_undefined if present
+        if (
+          "custom_undefined" in
+          withFormattingDefaults.formatting.section_visibility
+        ) {
+          delete withFormattingDefaults.formatting.section_visibility
+            .custom_undefined;
+        }
 
         setResumeData(withFormattingDefaults);
         document.title = data.resume.title;
@@ -311,7 +339,7 @@ const ResumeBuilder = () => {
     { id: "achievements", name: "Achievements", Icon: Trophy },
     { id: "volunteer", name: "Volunteer", Icon: HeartHandshake },
     { id: "hobbies", name: "Hobbies", Icon: Smile },
-    { id: "custom", name: "Custom Sections", Icon: Layers },
+    { id: "custom_sections", name: "Custom Sections", Icon: Layers },
   ];
 
   const activeSection = sections[activeSectionIndex];
@@ -750,6 +778,7 @@ const ResumeBuilder = () => {
                       });
                     }}
                     sectionsList={sections}
+                    selectedTemplate={resumeData.template}
                   />
                 ) : (
                   <div
