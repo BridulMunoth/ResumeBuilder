@@ -893,19 +893,20 @@ const ExecutiveTemplate = ({ data, formatting = {}, accentColor }) => {
           <div className="space-y-4">
             {data.certifications.map((c, i) => {
               const link = c.credential_url || c.link;
+              const credentialId = c.credential_id || c.id;
               const item = {
                 title: typeof c === "string" ? c : c.name,
                 company: (
                   <span className="flex items-center gap-1.5 align-middle">
                     {c.issuer}
-                    {c.link && (
+                    {link && (
                       <a
-                        href={c.link}
+                        href={link}
                         target="_blank"
                         rel="noreferrer"
                         className="opacity-70 hover:opacity-100 transition inline-flex items-center align-middle"
                         style={{ color: accent }}
-                        title={c.link}
+                        title={link}
                       >
                         <ExternalLink size={12} />
                       </a>
@@ -914,9 +915,9 @@ const ExecutiveTemplate = ({ data, formatting = {}, accentColor }) => {
                 ),
                 start_date: c.date || c.issue_date,
                 end_date: c.expiry_date,
-                description: c.credential_id ? (
+                description: credentialId ? (
                   <span>
-                    Credential ID: {c.credential_id}
+                    Credential ID: {credentialId}
                     {link && (
                       <a
                         href={link}
@@ -931,6 +932,7 @@ const ExecutiveTemplate = ({ data, formatting = {}, accentColor }) => {
                     )}
                   </span>
                 ) : undefined,
+                // link: link, // Removed to avoid double linking on title/date
               };
               return <TimelineItem key={i} item={item} accent={accent} />;
             })}
@@ -955,14 +957,18 @@ const ExecutiveTemplate = ({ data, formatting = {}, accentColor }) => {
                 title: a.title || a.name,
                 company: a.organization || a.issuer,
                 start_date: a.start_date || a.date,
-                achievements: a.description ? [a.description] : [],
-                link: a.link,
+                achievements: a.highlights || a.achievements || [], // Use rich achievements/highlights
+                description: a.description, // Use description if available
+                location: a.location, // Pass location
+                link: a.link || a.url,
               };
               if (
                 !item.company &&
                 !item.link &&
                 !item.achievements.length &&
-                !item.start_date
+                !item.start_date &&
+                !item.description &&
+                !item.location
               ) {
                 return (
                   <div key={i} className="flex gap-2">

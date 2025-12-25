@@ -1,483 +1,1001 @@
 import React from "react";
-import { Mail, Phone, MapPin, ExternalLink, Linkedin, Globe, Github, Calendar, Flag } from "lucide-react";
+import {
+  Mail,
+  Phone,
+  MapPin,
+  Linkedin,
+  Globe,
+  ExternalLink,
+  Github,
+  Calendar,
+  Flag,
+  Briefcase,
+  Code,
+  Award,
+  Trophy,
+  Heart,
+  Cpu,
+  Sparkles,
+  FileText,
+  Languages as LanguagesIcon,
+  BookOpen,
+  Star,
+  Circle,
+} from "lucide-react";
+import {
+  formatDateRange as formatRange,
+  getFontFallback,
+} from "./TemplateHelpers";
 
-const MinimalImageTemplate = ({ data, accentColor, formatting }) => {
-    const {
-        layout = { columns: 2 },
-        spacing = {
-            font_size: 10,
-            line_height: 1.6,
-            margin_horizontal: 10,
-            margin_vertical: 10,
-            section_spacing: 8,
-        },
-        colors = {
-            primary: "#18181b", // zinc-900
-            secondary: "#52525b", // zinc-600
-            accent: accentColor || "#27272a", // zinc-800 default
-            text: "#3f3f46", // zinc-700
-            background: "#FFFFFF",
-        },
-        section_order = [],
-        section_visibility = {},
-        section_titles = {},
-    } = formatting || {};
+const cx = (...cls) => cls.filter(Boolean).join(" ");
 
-    const getSectionTitle = (id, defaultTitle) => section_titles[id] || defaultTitle;
-    const isVisible = (id) => section_visibility[id] !== false;
+const getFontFamily = (font) => {
+  if (font?.family) return "";
+  if (!font) return "font-sans";
+  if (font.type === "serif") return "font-serif";
+  if (font.type === "mono") return "font-mono";
+  return "font-sans";
+};
 
-    const formatDate = (dateStr) => {
-        if (!dateStr) return "";
-        const d = new Date(dateStr);
-        if (Number.isNaN(d.getTime())) return "";
-        return d.toLocaleDateString("en-US", {
-            year: "numeric",
-            month: "short",
-        });
-    };
+const normalizeLevel = (val) => {
+  if (!val) return 0;
+  const map = {
+    beginner: 1,
+    basic: 1,
+    amateur: 2,
+    elementary: 2,
+    competent: 3,
+    intermediate: 3,
+    proficient: 4,
+    advanced: 4,
+    expert: 5,
+    native: 5,
+    master: 5,
+  };
+  if (typeof val === "string") return map[val.toLowerCase()] || 3;
+  if (val > 5) return Math.round(val / 20);
+  return val;
+};
 
-    const formatDateRange = (start, end, isCurrent) => {
-        const startText = formatDate(start);
-        const endText = isCurrent ? "Present" : formatDate(end);
-        if (!startText && !endText) return "";
-        if (!startText) return endText;
-        if (!endText) return startText;
-        return `${startText} - ${endText}`;
-    };
+/* ==========================================================================
+   HELPERS
+   ========================================================================== */
 
-    const getList = (item) => {
-        if (!item) return [];
-        if (Array.isArray(item)) return item;
-        if (typeof item === 'string') return item.split(',').map(i => i.trim()).filter(Boolean);
-        return [];
-    };
+const ContactItem = ({ icon: Icon, value, accent, formatting }) => {
+  if (!value) return null;
+  const style = formatting?.personal?.iconStyle || "outline";
+  const size = 14;
 
-    const getImageSrc = () => {
-        if (!data.personal_info?.image) return null;
-        if (typeof data.personal_info.image === 'string') return data.personal_info.image;
-        if (typeof data.personal_info.image === 'object' && data.personal_info.image instanceof Blob) {
-            return URL.createObjectURL(data.personal_info.image);
-        }
-        return null;
-    };
-
-    // Styling
-    const containerStyle = {
-        fontFamily: "'Inter', 'Segoe UI', sans-serif",
-        color: colors.text,
-        backgroundColor: colors.background,
-        fontSize: `${spacing.font_size}pt`,
-        lineHeight: spacing.line_height,
-    };
-
-    const sectionHeadingStyle = {
-        color: colors.secondary,
-        fontWeight: "600",
-        textTransform: "uppercase",
-        letterSpacing: "0.1em",
-        fontSize: "0.85rem",
-        marginBottom: "1rem",
-    };
-
-    const sectionContainerStyle = {
-        marginBottom: `${spacing.section_spacing}mm`,
-    };
-
-    // Group skills logic
-    const skillsArray = Array.isArray(data?.skills)
-        ? data.skills.map((s) => (typeof s === "string" ? { name: s } : s)).filter((s) => s && s.name)
-        : [];
-    const groupedSkills = skillsArray.reduce((acc, s) => {
-        const cat = (s.category || "Other").trim() || "Other";
-        if (!acc[cat]) acc[cat] = [];
-        acc[cat].push(s);
-        return acc;
-    }, {});
-    const groupedEntries = Object.entries(groupedSkills).sort(([a], [b]) => a.localeCompare(b));
-
-    // Renderers
-    const renderSkills = () => {
-         if (!data.skills || data.skills.length === 0 || !isVisible("skills")) return null;
-         return (
-            <section style={sectionContainerStyle}>
-                <h2 style={sectionHeadingStyle}>{getSectionTitle("skills", "Skills")}</h2>
-                 <div className="space-y-4">
-                    {groupedEntries.map(([category, items]) => (
-                        <div key={category}>
-                             {category !== "Other" && (
-                                <h3 className="text-xs font-semibold uppercase tracking-wider mb-1" style={{ color: colors.accent }}>
-                                    {category}
-                                </h3>
-                            )}
-                            <ul className="space-y-1 text-sm">
-                                {items.map((s, idx) => (
-                                    <li key={idx}>
-                                         {s.name}{s.level ? <span className="text-gray-400 text-xs ml-1">({s.level})</span> : ""}
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    ))}
-                </div>
-            </section>
-         );
-    };
-
-    const renderEducation = () => (
-        data.education && data.education.length > 0 && isVisible("education") && (
-            <section style={sectionContainerStyle}>
-                <h2 style={sectionHeadingStyle}>{getSectionTitle("education", "Education")}</h2>
-                <div className="space-y-4 text-sm">
-                    {data.education.map((edu, index) => (
-                         <div key={index}>
-                            <p className="font-semibold uppercase" style={{ color: colors.primary }}>{edu.level || edu.program || edu.degree}</p>
-                            <div className="flex flex-col gap-0.5 mt-0.5">
-                                <span className="font-medium" style={{ color: colors.secondary }}>{edu.institution}</span>
-                                <span className="text-xs text-gray-500">{formatDate(edu.graduation_date || edu.end_date)}</span>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </section>
-        )
+  const renderIcon = () => {
+    if (style === "none" || !Icon) return null;
+    return (
+      <Icon
+        size={size}
+        style={{
+          color: style === "outline" ? accent : "inherit",
+          opacity: 0.8,
+        }}
+      />
     );
+  };
 
-    const renderExperience = () => (
-        data.experience && data.experience.length > 0 && isVisible("experience") && (
-            <section style={sectionContainerStyle}>
-                <h2 style={sectionHeadingStyle}>{getSectionTitle("experience", "Experience")}</h2>
-                <div className="space-y-6">
-                    {data.experience.map((exp, index) => {
-                        const techList = getList(exp.technologies);
-                        return (
-                             <div key={index}>
-                                <div className="flex justify-between items-baseline">
-                                    <h3 className="font-semibold text-lg" style={{ color: colors.primary }}>{exp.title}</h3>
-                                    <span className="text-xs text-gray-500 whitespace-nowrap ml-2">
-                                        {formatDateRange(exp.start_date, exp.end_date, exp.is_current)}
-                                    </span>
-                                </div>
-                                <p className="text-sm font-medium mb-1" style={{ color: colors.accent }}>{exp.company}</p>
-                                {exp.description && (
-                                    <div className="text-sm leading-relaxed whitespace-pre-line text-gray-600 mb-2">
-                                        {exp.description}
-                                    </div>
-                                )}
-                                {techList.length > 0 && (
-                                    <div className="text-xs mt-1 flex flex-wrap gap-2 text-gray-500">
-                                        {techList.join(" • ")}
-                                    </div>
-                                )}
-                             </div>
-                        );
-                    })}
-                </div>
-            </section>
-        )
+  return (
+    <div className="flex items-center gap-2 text-sm">
+      {renderIcon()}
+      <span className="opacity-90 hover:opacity-100 transition-opacity break-all">
+        {value}
+      </span>
+    </div>
+  );
+};
+
+/* ==========================================================================
+   SECTION HEADING
+   ========================================================================== */
+
+/* ==========================================================================
+   SECTION HEADING
+   ========================================================================== */
+
+const SectionHeading = ({ title, icon: Icon, formatting }) => {
+  const accent = formatting.colors?.accent || "#000000";
+  const style = formatting.heading?.style || "simple";
+  const caps = formatting.heading?.caps || "uppercase";
+  const align = formatting.heading?.align || "left";
+  // Force icons off for Minimal
+  const iconStyle = "none";
+
+  const fontSizeVal =
+    formatting.heading?.size === "XL"
+      ? "1.5em"
+      : formatting.heading?.size === "L"
+      ? "1.25em"
+      : formatting.heading?.size === "S"
+      ? "0.9em"
+      : "1em";
+
+  const alignClass =
+    align === "center"
+      ? "justify-center"
+      : align === "right"
+      ? "justify-end"
+      : "justify-start";
+
+  // Helper to ensure we don't render icons even if passed
+  const renderIcon = () => null;
+
+  if (style === "boxed") {
+    return (
+      <div
+        className={cx(
+          "flex items-center gap-2 px-3 py-1.5 rounded-md mb-4",
+          caps,
+          alignClass
+        )}
+        style={{
+          backgroundColor: accent,
+          color: "white",
+          fontSize: fontSizeVal,
+        }}
+      >
+        <span className="font-bold tracking-wide">{title}</span>
+      </div>
     );
+  }
 
-    const renderProjects = () => (
-        data.projects && data.projects.length > 0 && isVisible("projects") && (
-             <section style={sectionContainerStyle}>
-                <h2 style={sectionHeadingStyle}>{getSectionTitle("projects", "Projects")}</h2>
-                <div className="space-y-4">
-                    {data.projects.map((proj, index) => {
-                        const techList = getList(proj.technologies);
-                        return (
-                            <div key={index}>
-                                <div className="flex items-center gap-2 mt-1">
-                                    <h3 className="font-medium text-base" style={{ color: colors.primary }}>{proj.name}</h3>
-                                    {proj.link && (
-                                        <a href={proj.link} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-600 transition-colors">
-                                            <ExternalLink size={14} />
-                                        </a>
-                                    )}
-                                </div>
-                                {(proj.role || proj.type) && <p className="text-xs uppercase tracking-wide text-gray-400 mb-1">{[proj.role, proj.type].filter(Boolean).join(" • ")}</p>}
-                                {proj.description && <p className="text-sm leading-relaxed text-gray-600 mb-2">{proj.description}</p>}
-                                {techList.length > 0 && (
-                                     <div className="text-xs mt-1 text-gray-500">
-                                        {techList.join(" • ")}
-                                    </div>
-                                )}
-                            </div>
-                        );
-                    })}
-                </div>
-             </section>
-        )
+  if (style === "underline") {
+    return (
+      <div
+        className={cx("mb-4 flex border-b pb-2", alignClass, caps)}
+        style={{ borderColor: `${accent}40` }}
+      >
+        <div className="flex items-center gap-2">
+          <span
+            className="font-bold tracking-widest"
+            style={{ color: formatting.colors?.primary, fontSize: fontSizeVal }}
+          >
+            {title}
+          </span>
+        </div>
+      </div>
     );
+  }
 
-    const renderCertifications = () => (
-        data.certifications && data.certifications.length > 0 && isVisible("certifications") && (
-             <section style={sectionContainerStyle}>
-                <h2 style={sectionHeadingStyle}>{getSectionTitle("certifications", "Certifications")}</h2>
-                 <ul className="space-y-2 text-sm">
-                    {data.certifications.map((c, i) => (
-                        <li key={i}>
-                             <p className="font-medium" style={{ color: colors.primary }}>{c.name || c}</p>
-                             {c.issuer && <span className="text-xs text-gray-500">{c.issuer}</span>}
-                        </li>
-                    ))}
-                 </ul>
-            </section>
-        )
+  if (style === "leftLine") {
+    return (
+      <div
+        className={cx(
+          "flex items-center gap-3 mb-4 pl-3 border-l-4",
+          caps,
+          alignClass
+        )}
+        style={{ borderColor: accent, fontSize: fontSizeVal }}
+      >
+        <span
+          className="font-bold tracking-wide"
+          style={{ color: formatting.colors?.primary }}
+        >
+          {title}
+        </span>
+      </div>
     );
+  }
 
-     const renderLanguages = () => (
-        data.languages && data.languages.length > 0 && isVisible("languages") && (
-             <section style={sectionContainerStyle}>
-                 <h2 style={sectionHeadingStyle}>{getSectionTitle("languages", "Languages")}</h2>
-                <ul className="space-y-1 text-sm">
-                    {data.languages.map((lang, index) => (
-                         <li key={index} className="flex justify-between">
-                            <span className="font-medium" style={{ color: colors.primary }}>
-                                {typeof lang === 'string' ? lang : (lang.name || lang.language)}
-                            </span>
-                            {(lang.proficiency || lang.level) && (
-                                <span className="text-xs text-gray-500">{lang.proficiency || lang.level}</span>
-                            )}
-                         </li>
-                    ))}
-                </ul>
-            </section>
-        )
+  if (style === "modern") {
+    return (
+      <div
+        className={cx(
+          "flex items-center gap-3 mb-4 pl-3 py-1 border-l-4",
+          caps,
+          alignClass
+        )}
+        style={{
+          borderColor: accent,
+          background: `linear-gradient(90deg, ${accent}15 0%, transparent 100%)`,
+          fontSize: fontSizeVal,
+        }}
+      >
+        <span
+          className="font-bold tracking-wide"
+          style={{ color: formatting.colors?.primary }}
+        >
+          {title}
+        </span>
+      </div>
     );
+  }
 
-    const renderAchievements = () => (
-        data.achievements && data.achievements.length > 0 && isVisible("achievements") && (
-             <section style={sectionContainerStyle}>
-                 <h2 style={sectionHeadingStyle}>{getSectionTitle("achievements", "Achievements")}</h2>
-                <ul className="space-y-2 text-sm">
-                    {data.achievements.map((item, index) => (
-                        <li key={index}>
-                             {typeof item === 'string' ? item : (
-                                <div>
-                                    <span className="font-medium" style={{ color: colors.primary }}>{item.title}</span>
-                                    {item.description && <p className="text-xs text-gray-600 mt-0.5">{item.description}</p>}
-                                </div>
-                            )}
-                        </li>
-                    ))}
-                </ul>
-            </section>
-        )
+  if (style === "highlight") {
+    return (
+      <div className={cx("mb-4 flex", alignClass)}>
+        <div className="relative inline-block">
+          <span
+            className={cx(
+              "absolute bottom-1 left-0 w-full h-3 z-0 opacity-40 transform -rotate-1",
+              "rounded-sm"
+            )}
+            style={{ backgroundColor: accent }}
+          />
+          <div
+            className={cx("relative z-10 flex items-center gap-2 px-1", caps)}
+            style={{ fontSize: fontSizeVal }}
+          >
+            <span
+              className="font-bold tracking-wide"
+              style={{ color: formatting.colors?.text }}
+            >
+              {title}
+            </span>
+          </div>
+        </div>
+      </div>
     );
+  }
 
-    const renderVolunteer = () => (
-         data.volunteer_experience && data.volunteer_experience.length > 0 && isVisible("volunteer") && (
-            <section style={sectionContainerStyle}>
-                 <h2 style={sectionHeadingStyle}>{getSectionTitle("volunteer", "Volunteer")}</h2>
-                 <div className="space-y-3">
-                    {data.volunteer_experience.map((vol, index) => (
-                        <div key={index}>
-                            <h3 className="font-medium text-sm" style={{ color: colors.primary }}>{vol.role}</h3>
-                            <p className="text-xs italic text-gray-500">{vol.organization}</p>
-                             {vol.description && <p className="text-sm mt-0.5 text-gray-600">{vol.description}</p>}
-                        </div>
-                    ))}
-                </div>
-            </section>
-        )
+  if (style === "shading") {
+    return (
+      <div
+        className={cx(
+          "flex items-center gap-2 mb-4 px-3 py-1.5 border-b-2",
+          caps,
+          alignClass
+        )}
+        style={{
+          borderColor: accent,
+          backgroundColor: `${accent}10`,
+        }}
+      >
+        <span
+          className="font-bold tracking-wide"
+          style={{ color: formatting.colors?.text, fontSize: fontSizeVal }}
+        >
+          {title}
+        </span>
+      </div>
     );
+  }
 
-    const renderHobbies = () => (
-        data.hobbies && data.hobbies.length > 0 && isVisible("hobbies") && (
-            <section style={sectionContainerStyle}>
-                 <h2 style={sectionHeadingStyle}>{getSectionTitle("hobbies", "Interests")}</h2>
-                <p className="text-sm text-gray-600">{data.hobbies.join(", ")}</p>
-            </section>
-        )
+  if (style === "pill") {
+    return (
+      <div className={cx("mb-4 flex", alignClass)}>
+        <div
+          className={cx(
+            "inline-flex items-center gap-2 px-4 py-1.5 rounded-full border",
+            caps
+          )}
+          style={{
+            borderColor: accent,
+            backgroundColor: `${accent}08`,
+            color: formatting.colors?.text,
+            fontSize: fontSizeVal,
+          }}
+        >
+          <span className="font-bold tracking-wide">{title}</span>
+        </div>
+      </div>
     );
+  }
 
-     const renderCustomSection = (section) => {
-        if (!section || !section.items || section.items.length === 0 || !isVisible(section.id)) return null;
+  // "Simple" Default or fallback
+  return (
+    <div className={cx("mb-4 flex", alignClass)}>
+      <div className="flex items-center gap-2">
+        <span
+          className={cx("font-bold tracking-widest", caps)}
+          style={{
+            color: formatting.colors?.primary || accent,
+            fontSize: fontSizeVal,
+          }}
+        >
+          {title}
+        </span>
+      </div>
+    </div>
+  );
+};
+
+/* ==========================================================================
+   CONTENT RENDERERS
+   ========================================================================== */
+
+const renderLevelSection = (items, formatting, type) => {
+  if (!items?.length) return null;
+
+  const normalized = items.map((item) => {
+    if (typeof item === "string")
+      return { name: item, level: null, category: "General" };
+    return {
+      name: item.name || item.language,
+      level: item.level || item.proficiency || null,
+      category: item.category || "General",
+    };
+  });
+
+  const config = formatting[type] || {};
+  const accent = formatting.colors?.accent || "#000000";
+  const levelMode = config.levelMode || "text";
+  const enableBubble = config.enableBubble || false;
+
+  const renderLevelIndicator = (level, score) => {
+    if (levelMode === "hide") return null;
+    if (level == null || level === "") return null;
+
+    if (levelMode === "bar") {
+      return (
+        <div className="w-12 h-1.5 bg-gray-200 rounded-full overflow-hidden shrink-0 inline-block ml-2 align-middle">
+          <div
+            className="h-full rounded-full"
+            style={{ width: `${score * 20}%`, backgroundColor: accent }}
+          />
+        </div>
+      );
+    }
+    if (levelMode === "dots") {
+      return (
+        <div className="flex gap-0.5 shrink-0 ml-2 align-middle inline-flex">
+          {[1, 2, 3, 4, 5].map((dot) => (
+            <Circle
+              key={dot}
+              size={7}
+              className={dot <= score ? "fill-current" : "text-gray-300"}
+              style={dot <= score ? { color: accent } : {}}
+            />
+          ))}
+        </div>
+      );
+    }
+    return <span className="opacity-60 text-xs ml-1.5">({level})</span>;
+  };
+
+  const renderItem = (item, i) => {
+    const score = normalizeLevel(item.level);
+    if (enableBubble) {
+      return (
+        <div
+          key={i}
+          className="px-3 py-1.5 rounded-lg border flex items-center gap-2 mb-2 mr-2 break-inside-avoid"
+          style={{ borderColor: `${accent}40`, backgroundColor: `${accent}05` }}
+        >
+          <span className="font-medium">{item.name}</span>
+          {renderLevelIndicator(item.level, score)}
+        </div>
+      );
+    }
+    return (
+      <div key={i} className="flex items-center gap-2 min-w-[120px] mb-1">
+        <span className="font-medium">{item.name}</span>
+        {renderLevelIndicator(item.level, score)}
+      </div>
+    );
+  };
+
+  const groups = {};
+  normalized.forEach((item) => {
+    const cat = item.category || "General";
+    if (!groups[cat]) groups[cat] = [];
+    groups[cat].push(item);
+  });
+
+  return (
+    <div className="space-y-4">
+      {Object.entries(groups).map(([cat, list]) => (
+        <div key={cat}>
+          {cat !== "General" && (
+            <p className="text-xs font-bold uppercase mb-2 opacity-50 tracking-wider">
+              {cat}
+            </p>
+          )}
+          <div className="flex flex-wrap gap-x-6 gap-y-2">
+            {list.map(renderItem)}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+/* ==========================================================================
+   TIMELINE ITEM
+   ========================================================================== */
+
+const TimelineItem = ({
+  item,
+  accent,
+  showLocation = true,
+  showGrade = false,
+}) => {
+  if (!item) return null;
+
+  const range = formatRange(item.start_date, item.end_date, item.is_current);
+  const displayDate =
+    range || (typeof item.start_date === "string" ? item.start_date : "");
+  const tech =
+    typeof item.technologies === "string"
+      ? item.technologies
+          .split(",")
+          .map((t) => t.trim())
+          .filter(Boolean)
+      : (item.technologies || []).filter(Boolean);
+  const achievements =
+    typeof item.achievements === "string"
+      ? item.achievements
+          .split("\n")
+          .map((a) => a.trim())
+          .filter(Boolean)
+      : (item.achievements || []).filter(Boolean);
+  const title = item.title || item.degree || item.position;
+  const subtitle =
+    item.school ||
+    item.institution ||
+    item.organization ||
+    item.company ||
+    item.issuer;
+  const location = item.location || item.board_university;
+  const link = item.link || item.url || item.credential_url;
+  const grade = item.grade || item.gpa || item.percentage;
+
+  return (
+    <div className="mb-5 last:mb-0 break-inside-avoid">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline mb-1 gap-1">
+        <h3
+          className="font-bold text-gray-900 break-words leading-tight pr-2"
+          style={{ fontSize: "1.05em" }}
+        >
+          {title}
+        </h3>
+        {displayDate && (
+          <span className="text-sm font-medium opacity-60 shrink-0 whitespace-nowrap">
+            {displayDate}
+          </span>
+        )}
+      </div>
+
+      <div
+        className="flex flex-wrap items-center gap-x-3 text-sm mb-2 opacity-80 leading-relaxed"
+        style={{ color: accent }}
+      >
+        {subtitle && (
+          <span className="font-medium break-words">{subtitle}</span>
+        )}
+        {location && showLocation && subtitle && (
+          <span className="hidden sm:inline">•</span>
+        )}
+        {location && showLocation && (
+          <span className="break-words">{location}</span>
+        )}
+        {link && (
+          <a
+            href={link}
+            target="_blank"
+            rel="noreferrer"
+            className="text-gray-400 hover:text-gray-600 shrink-0"
+          >
+            <ExternalLink size={12} />
+          </a>
+        )}
+      </div>
+
+      {(grade || item.field) && (
+        <div className="text-xs flex flex-wrap gap-3 mb-2 opacity-70">
+          {item.field && <span>{item.field}</span>}
+          {grade && <span>Grade: {grade}</span>}
+        </div>
+      )}
+
+      {item.description && (
+        <div className="text-sm leading-relaxed mb-2 opacity-85 whitespace-pre-line break-words">
+          {item.description}
+        </div>
+      )}
+
+      {achievements.length > 0 && (
+        <ul className="text-sm list-disc pl-4 space-y-1 mb-2 opacity-85">
+          {achievements.map((a, i) => (
+            <li key={i} className="break-words">
+              {a}
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {tech.length > 0 && (
+        <div className="flex flex-wrap gap-2 mt-2">
+          {tech.map((t, i) => (
+            <span
+              key={i}
+              className="text-xs px-2 py-0.5 bg-gray-100 rounded text-gray-600"
+            >
+              {t}
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+/* ==========================================================================
+   MAIN COMPONENT
+   ========================================================================== */
+
+const MinimalImageTemplate = ({ data, formatting = {}, accentColor }) => {
+  const effectiveFormatting = {
+    ...formatting,
+    colors: {
+      ...formatting.colors,
+      accent: formatting.colors?.accent || accentColor || "#000000",
+      primary: formatting.colors?.primary || "#111827",
+      text: formatting.colors?.text || "#374151",
+    },
+  };
+
+  const accent = effectiveFormatting.colors.accent;
+  const textColor = effectiveFormatting.colors.text;
+  const primaryColor = effectiveFormatting.colors.primary;
+
+  const currentFont = effectiveFormatting.font || {};
+  const fontFamily = getFontFamily(currentFont);
+  const selectedFont = currentFont.family;
+  const fontStyle = selectedFont
+    ? { fontFamily: `'${selectedFont}', ${getFontFallback(currentFont)}` }
+    : { fontFamily: getFontFallback(currentFont) || "Inter, sans-serif" };
+
+  React.useEffect(() => {
+    if (selectedFont) {
+      const linkId = "dynamic-font-loader-minimal";
+      let link = document.getElementById(linkId);
+      if (!link) {
+        link = document.createElement("link");
+        link.id = linkId;
+        link.rel = "stylesheet";
+        document.head.appendChild(link);
+      }
+      const fontName = selectedFont.replace(/\s+/g, "+");
+      link.href = `https://fonts.googleapis.com/css2?family=${fontName}:wght@300;400;500;600;700&display=swap`;
+    }
+  }, [selectedFont]);
+
+  const spacing = effectiveFormatting.spacing || {
+    font_size: 11,
+    line_height: 1.5,
+    margin_horizontal: 14,
+    margin_vertical: 14,
+    section_spacing: 6,
+  };
+
+  const isTwoColumn = effectiveFormatting.layout?.columns === 2;
+  const mapId = (id) => (id === "custom" ? "custom_sections" : id);
+  const mappedOrder = (effectiveFormatting.section_order || []).map(mapId);
+  const mappedVisibility = Object.fromEntries(
+    Object.entries(effectiveFormatting.section_visibility || {}).map(
+      ([k, v]) => [mapId(k), v]
+    )
+  );
+  const isVisible = (id) => mappedVisibility?.[id] !== false;
+
+  const renderSectionContent = (id) => {
+    switch (id) {
+      case "summary":
+        if (!isVisible("summary")) return null;
+        if (!data.summary && !data.professional_summary) return null;
         return (
-            <section key={section.id} style={sectionContainerStyle}>
-                 <h2 style={sectionHeadingStyle}>{section.title}</h2>
-                <div className="space-y-3">
-                    {section.items.map((item, i) => (
-                        <div key={i}>
-                            <h3 className="font-bold text-sm" style={{ color: colors.primary }}>{item.title}</h3>
-                            {item.subtitle && <p className="text-xs italic text-gray-500">{item.subtitle}</p>}
-                            {item.description && <p className="text-sm leading-relaxed mt-0.5 text-gray-600">{item.description}</p>}
-                        </div>
-                    ))}
-                </div>
-            </section>
+          <p className="whitespace-pre-line break-words">
+            {data.summary || data.professional_summary}
+          </p>
         );
-    };
-
-    const renderSummary = () => (
-         isVisible("summary") && data.professional_summary && (
-            <section className="mb-8" style={{ marginBottom: `${spacing.section_spacing}mm` }}>
-                <h2 style={sectionHeadingStyle}>{getSectionTitle("summary", "Summary")}</h2>
-                <p className="text-sm leading-relaxed text-gray-600">
-                    {data.professional_summary}
-                </p>
-            </section>
-        )
-    );
-     const renderContact = () => (
-        <section className="mb-8" style={{ marginBottom: `${spacing.section_spacing}mm` }}>
-            <h2 style={sectionHeadingStyle}>
-                Contact
-            </h2>
-            <div className="space-y-1.5 text-sm">
-                {data.personal_info?.phone && (
-                    <div className="flex items-center gap-2">
-                        <Phone size={14} style={{ color: colors.accent }} />
-                        <span>{data.personal_info.phone}</span>
-                    </div>
-                )}
-                {data.personal_info?.email && (
-                    <div className="flex items-center gap-2">
-                        <Mail size={14} style={{ color: colors.accent }} />
-                        <span className="break-all">{data.personal_info.email}</span>
-                    </div>
-                )}
-                {data.personal_info?.location && (
-                    <div className="flex items-center gap-2">
-                        <MapPin size={14} style={{ color: colors.accent }} />
-                        <span>{data.personal_info.location}</span>
-                    </div>
-                )}
-                {data.personal_info?.linkedin && (
-                    <a href={data.personal_info.linkedin} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:underline">
-                        <Linkedin size={14} style={{ color: colors.accent }} />
-                        <span className="break-all text-xs text-gray-500">{data.personal_info.linkedin.replace(/^https?:\/\//, '')}</span>
-                    </a>
-                )}
-                {data.personal_info?.website && (
-                    <a href={data.personal_info.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:underline">
-                        <Globe size={14} style={{ color: colors.accent }} />
-                        <span className="break-all text-xs text-gray-500">{data.personal_info.website.replace(/^https?:\/\//, '')}</span>
-                    </a>
-                )}
-                {data.personal_info?.github && (
-                    <a href={data.personal_info.github} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:underline">
-                        <Github size={14} style={{ color: colors.accent }} />
-                        <span className="break-all text-xs text-gray-500">{data.personal_info.github.replace(/^https?:\/\//, '')}</span>
-                    </a>
-                )}
+      case "experience":
+        return data.experience?.map((item, i) => (
+          <TimelineItem key={i} item={item} accent={accent} />
+        ));
+      case "education":
+        return data.education?.map((item, i) => (
+          <TimelineItem key={i} item={item} accent={accent} showGrade={true} />
+        ));
+      case "projects":
+        return data.projects?.map((item, i) => (
+          <TimelineItem
+            key={i}
+            item={{
+              ...item,
+              title: item.name,
+              company: item.role,
+              achievements: item.highlights || item.achievements,
+            }}
+            accent={accent}
+          />
+        ));
+      case "volunteer":
+        return data.volunteer_experience?.map((item, i) => (
+          <TimelineItem
+            key={i}
+            item={{ ...item, title: item.role }}
+            accent={accent}
+          />
+        ));
+      case "skills":
+        return renderLevelSection(data.skills, effectiveFormatting, "skills");
+      case "languages":
+        return renderLevelSection(
+          data.languages,
+          effectiveFormatting,
+          "languages"
+        );
+      case "certifications":
+        if (!data.certifications?.length) return null;
+        return data.certifications.map((c, i) => (
+          <TimelineItem
+            key={i}
+            item={{
+              title: typeof c === "string" ? c : c.name,
+              subtitle: c.issuer,
+              start_date: c.issue_date,
+              end_date: c.expiry_date,
+              link: c.credential_url || c.link,
+              description: c.credential_id
+                ? `Credential ID: ${c.credential_id}`
+                : "",
+            }}
+            accent={accent}
+          />
+        ));
+      case "achievements":
+        if (!data.achievements?.length) return null;
+        return (
+          <ul className="list-disc pl-4 space-y-1">
+            {data.achievements.map((a, i) => {
+              const txt =
+                typeof a === "string"
+                  ? a
+                  : `${a.title || a.name}${
+                      a.description ? " - " + a.description : ""
+                    }`;
+              return (
+                <li key={i} className="break-words">
+                  {txt}
+                </li>
+              );
+            })}
+          </ul>
+        );
+      case "custom_sections":
+        if (!data.custom_sections?.length) return null;
+        return data.custom_sections.map((section, idx) => {
+          let rawItems = section.items || [];
+          if (typeof rawItems === "string") rawItems = rawItems.split("\n");
+          const itemsList = Array.isArray(rawItems)
+            ? rawItems.filter(Boolean)
+            : [];
+          return (
+            <div key={idx} className="mb-4 last:mb-0 break-inside-avoid">
+              <h4 className="font-bold text-sm uppercase mb-2">
+                {section.title}
+              </h4>
+              <div className="whitespace-pre-line text-sm opacity-90 break-words">
+                {itemsList.map((it, i) => (
+                  <div key={i} className="mb-1">
+                    {"• " + it}
+                  </div>
+                ))}
+              </div>
             </div>
-        </section>
-    );
+          );
+        });
+      default:
+        return null;
+    }
+  };
 
-
-    // Component Routing
-     const renderSection = (id) => {
-        if (id.startsWith("custom_")) {
-            const sectionId = id.replace("custom_", "");
-            const section = data.custom_sections?.find(s => s.id === sectionId);
-            return renderCustomSection(section);
-        }
-
-        switch(id) {
-            case "education": return renderEducation();
-            case "skills": return renderSkills();
-            case "summary": return renderSummary();
-            case "experience": return renderExperience();
-            case "projects": return renderProjects();
-            case "certifications": return renderCertifications();
-            case "languages": return renderLanguages();
-            case "achievements": return renderAchievements();
-            case "volunteer": return renderVolunteer();
-            case "hobbies": return renderHobbies();
-            // Contact is handled in sidebar/header usually for this layout
-            default: return null;
-        }
+  const SectionWrapper = ({ id }) => {
+    const defaultTitles = {
+      summary: "Professional Summary",
+      experience: "Experience",
+      education: "Education",
+      projects: "Projects",
+      skills: "Skills",
+      languages: "Languages",
+      certifications: "Certifications",
+      achievements: "Achievements",
+      volunteer: "Volunteering",
     };
-
-    // Layout
-    const defaultOrder = ["summary", "experience", "projects", "skills", "education", "certifications", "languages", "volunteer", "achievements", "hobbies"];
-    let finalOrder = section_order.length > 0 ? section_order : defaultOrder;
-    const customSectionIds = data.custom_sections?.map(s => `custom_${s.id}`) || [];
-    const allIds = [...defaultOrder, ...customSectionIds];
-    const missingSections = allIds.filter(id => !finalOrder.includes(id));
-    finalOrder = [...finalOrder, ...missingSections];
-
-    // Minimal Image: Left Col (Image, Contact, Edu, Skills), Right Col (Summary, Exp, Proj, etc)
-    const sideIds = ["education", "skills", "certifications", "languages", "achievements", "hobbies"];
-    const forceSideIds = sideIds;
-    
-    // In this specific template, the "Side" is the LEFT side.
-    // The "Main" is the Right side.
-    const gridMainIds = finalOrder.filter(id => !forceSideIds.includes(id) && id !== "personal" && id !== "contact"); 
-    const gridSideIds = finalOrder.filter(id => forceSideIds.includes(id) && id !== "contact"); // Contact is manually placed in side
+    const title =
+      effectiveFormatting.section_titles?.[id] || defaultTitles[id] || id;
+    const content = renderSectionContent(id);
+    if (!content) return null;
+    if (Array.isArray(content) && content.length === 0) return null;
+    if (
+      id === "custom_sections" &&
+      (!data.custom_sections || data.custom_sections.length === 0)
+    )
+      return null;
 
     return (
-        <div className="bg-white min-h-[1000px]" style={containerStyle}>
-            <div className={`grid ${layout.columns === 1 ? 'grid-cols-1' : 'grid-cols-3'}`}>
-                
-                {/* Left Sidebar (Col 1) */}
-                 <aside className={`${layout.columns === 1 ? 'block p-8 border-b' : 'col-span-1 border-r border-gray-200 p-8 pt-10'}`}>
-                    
-                    {/* Image */}
-                     <div className="mb-6">
-                        {getImageSrc() && (
-                             <img 
-                                src={getImageSrc()} 
-                                alt="Profile" 
-                                className="w-32 h-32 object-cover rounded-full mx-auto mb-4" 
-                                style={{ borderColor: colors.accent, borderWidth: '2px' }}
-                             />
-                        )}
-                     </div>
-
-                     {/* Name (if 1 col, or if design demands it in sidebar? Original had Name in sidebar? No, original had Name in Top of Main? Actually original had Name in Top of Main/Header area spanning 2 cols? Let's check logic)
-                      Original: "col-span-1 py-10" (Image) + "col-span-2 flex flex-col justify-center py-10 px-8" (Name)
-                      Wait, the original layout was:
-                      Grid Cols 3.
-                      Col 1: Image.
-                      Col 2 (span 2): Name/Title.
-                      Row 2: Left Sidebar (Col 1). Right Content (Col 2).
-                      
-                      Okay, so it has a Header Row, then a Content Row.
-                      My implementation below should reflect that.
-                      */}
-
-                </aside>
-                
-                 {/* Header Area (Top Right) */}
-                 <div className={`${layout.columns === 1 ? 'px-8 pb-8' : 'col-span-2 p-8 pt-10 flex flex-col justify-center'}`}>
-                    <h1 className="text-4xl font-bold tracking-widest mb-2" style={{ color: colors.primary }}>
-                        {data.personal_info?.full_name || "Your Name"}
-                    </h1>
-                     <p className="uppercase font-medium text-sm tracking-widest" style={{ color: colors.secondary }}>
-                        {data.personal_info?.profession || "Profession"}
-                    </p>
-                 </div>
-                 
-                 {/* Sidebar Content (Row 2 Col 1) */}
-                 {layout.columns !== 1 && (
-                     <aside className="col-span-1 border-r border-gray-200 p-8 pt-0 h-full">
-                         {renderContact()}
-                         {gridSideIds.map(id => renderSection(id))}
-                     </aside>
-                 )}
-
-                 {/* Main Content (Row 2 Col 2) */}
-                  <main className={`${layout.columns === 1 ? 'p-8 pt-0' : 'col-span-2 p-8 pt-0'}`}>
-                        {/* If 1 col, rendering everything here including what would be in sidebar? */}
-                        {layout.columns === 1 && (
-                            <>
-                                {renderContact()}
-                                {/* Render everything in order */}
-                                {finalOrder.filter(id => id !== "personal" && id !== "contact").map(id => renderSection(id))}
-                            </>
-                        )}
-
-                        {layout.columns !== 1 && (
-                            <div className="space-y-2">
-                                {gridMainIds.map(id => renderSection(id))}
-                            </div>
-                        )}
-                  </main>
-
-            </div>
+      <section
+        style={{ marginBottom: spacing.section_spacing * 2 }}
+        className="break-inside-avoid"
+      >
+        <SectionHeading
+          title={title}
+          formatting={effectiveFormatting}
+          icon={effectiveFormatting.section_icons?.[id]}
+        />
+        <div className="text-sm leading-relaxed" style={{ color: textColor }}>
+          {content}
         </div>
+      </section>
     );
+  };
+
+  const defaultOrder = [
+    "summary",
+    "skills",
+    "experience",
+    "education",
+    "projects",
+    "languages",
+    "certifications",
+  ];
+  const finalOrder = mappedOrder.length > 0 ? mappedOrder : defaultOrder;
+  const uniqueOrder = [...new Set(finalOrder)];
+  ["achievements", "volunteer", "custom_sections"].forEach((id) => {
+    if (!uniqueOrder.includes(id)) uniqueOrder.push(id);
+  });
+  const visibleSections = uniqueOrder.filter(isVisible);
+
+  let mainCol = [],
+    sideCol = [];
+  visibleSections.forEach((id) => {
+    const pos = effectiveFormatting.section_positions?.[id];
+    if (
+      isTwoColumn &&
+      (pos === "sidebar" ||
+        (!pos &&
+          ["skills", "languages", "certifications", "education"].includes(id)))
+    ) {
+      sideCol.push(<SectionWrapper key={id} id={id} />);
+    } else {
+      mainCol.push(<SectionWrapper key={id} id={id} />);
+    }
+  });
+
+  const contentPadding = `${spacing.margin_vertical}mm ${spacing.margin_horizontal}mm`;
+  const contactItems = [
+    { icon: Mail, value: data.email || data.personal_info?.email },
+    { icon: Phone, value: data.phone || data.personal_info?.phone },
+    { icon: MapPin, value: data.location || data.personal_info?.location },
+    { icon: Linkedin, value: data.linkedin || data.personal_info?.linkedin },
+    { icon: Github, value: data.github || data.personal_info?.github },
+    { icon: Globe, value: data.website || data.personal_info?.website },
+  ].filter((i) => i.value);
+
+  /* Header Alignment & Arrangement */
+  const imageAlign = effectiveFormatting.personal?.imageAlign || "left"; // left, center, right, hidden
+  const personAlign = effectiveFormatting.personal?.align || "left";
+  const personArrangement =
+    effectiveFormatting.personal?.arrangement || "inline";
+
+  const textAlignClass =
+    personAlign === "center"
+      ? "text-center"
+      : personAlign === "right"
+      ? "text-right"
+      : "text-left";
+
+  const contentItemsAlign =
+    personAlign === "center"
+      ? "items-center"
+      : personAlign === "right"
+      ? "items-end"
+      : "items-start";
+
+  const contactContainerClass =
+    personArrangement === "stacked"
+      ? `flex flex-col gap-1 ${contentItemsAlign}`
+      : personArrangement === "spread"
+      ? "flex w-full justify-between flex-wrap gap-y-2"
+      : `flex flex-wrap gap-x-5 gap-y-2 ${
+          personAlign === "center"
+            ? "justify-center"
+            : personAlign === "right"
+            ? "justify-end"
+            : "justify-start"
+        }`;
+
+  const renderHeader = () => {
+    if (imageAlign === "hidden") {
+      return (
+        <header
+          className={cx(
+            "mb-8 flex flex-col break-inside-avoid",
+            contentItemsAlign,
+            textAlignClass
+          )}
+        >
+          <h1
+            className="text-4xl font-bold tracking-tight mb-2 break-words"
+            style={{ color: primaryColor }}
+          >
+            {data.name || data.personal_info?.full_name || "Your Name"}
+          </h1>
+          {(data.role || data.personal_info?.profession) && (
+            <p
+              className="text-xl opacity-75 font-medium mb-4 break-words"
+              style={{ color: accent }}
+            >
+              {data.role || data.personal_info?.profession}
+            </p>
+          )}
+          <div className={cx("text-sm opacity-80 mt-1", contactContainerClass)}>
+            {contactItems.map((item, i) => (
+              <ContactItem
+                key={i}
+                {...item}
+                accent={accent}
+                formatting={effectiveFormatting}
+              />
+            ))}
+          </div>
+          <div
+            className={cx(
+              "w-12 h-1 mt-6 bg-gray-900 opacity-10 rounded",
+              personAlign === "center"
+                ? "mx-auto"
+                : personAlign === "right"
+                ? "ml-auto"
+                : ""
+            )}
+          ></div>
+        </header>
+      );
+    }
+
+    if (imageAlign === "center") {
+      return (
+        <header
+          className={cx(
+            "mb-8 flex flex-col items-center text-center break-inside-avoid"
+          )}
+        >
+          {data.image && (
+            <img
+              src={data.image}
+              alt={data.name}
+              className="w-32 h-32 rounded-full object-cover shadow-sm mb-4 shrink-0"
+              style={{ borderColor: accent, borderWidth: 2 }}
+            />
+          )}
+          <h1
+            className="text-4xl font-bold tracking-tight mb-2 break-words"
+            style={{ color: primaryColor }}
+          >
+            {data.name || data.personal_info?.full_name || "Your Name"}
+          </h1>
+          {(data.role || data.personal_info?.profession) && (
+            <p
+              className="text-xl opacity-75 font-medium mb-4 break-words"
+              style={{ color: accent }}
+            >
+              {data.role || data.personal_info?.profession}
+            </p>
+          )}
+          <div
+            className={cx(
+              "text-sm opacity-80 mt-1",
+              personArrangement === "stacked"
+                ? "flex flex-col gap-1 items-center"
+                : personArrangement === "spread"
+                ? "flex w-full justify-between flex-wrap"
+                : "flex flex-wrap justify-center gap-x-5 gap-y-2"
+            )}
+          >
+            {contactItems.map((item, i) => (
+              <ContactItem
+                key={i}
+                {...item}
+                accent={accent}
+                formatting={effectiveFormatting}
+              />
+            ))}
+          </div>
+          <div className="w-12 h-1 mt-6 bg-gray-900 opacity-10 rounded mx-auto"></div>
+        </header>
+      );
+    }
+
+    // Left or Right Row
+    const isRight = imageAlign === "right";
+    return (
+      <header
+        className={cx(
+          "mb-8 flex flex-col md:flex-row gap-8 break-inside-avoid",
+          isRight ? "md:flex-row-reverse" : ""
+        )}
+      >
+        {data.image && (
+          <div
+            className={cx(
+              "shrink-0 flex",
+              isRight ? "justify-end" : "justify-start",
+              "md:w-auto w-full justify-center"
+            )}
+          >
+            <img
+              src={data.image}
+              alt={data.name}
+              className="w-32 h-32 rounded-full object-cover shadow-sm"
+              style={{ borderColor: accent, borderWidth: 2 }}
+            />
+          </div>
+        )}
+        <div
+          className={cx(
+            "flex-1 w-full flex flex-col",
+            contentItemsAlign,
+            textAlignClass
+          )}
+        >
+          <h1
+            className="text-4xl font-bold tracking-tight mb-2 break-words"
+            style={{ color: primaryColor }}
+          >
+            {data.name || data.personal_info?.full_name || "Your Name"}
+          </h1>
+          {(data.role || data.personal_info?.profession) && (
+            <p
+              className="text-xl opacity-75 font-medium mb-4 break-words"
+              style={{ color: accent }}
+            >
+              {data.role || data.personal_info?.profession}
+            </p>
+          )}
+          <div
+            className={cx(
+              "text-sm opacity-80 mt-auto w-full",
+              contactContainerClass
+            )}
+          >
+            {contactItems.map((item, i) => (
+              <ContactItem
+                key={i}
+                {...item}
+                accent={accent}
+                formatting={effectiveFormatting}
+              />
+            ))}
+          </div>
+        </div>
+      </header>
+    );
+  };
+
+  return (
+    <div
+      className={cx("bg-white min-h-[inherit] w-full", fontFamily)}
+      style={{
+        ...fontStyle,
+        fontSize: `${spacing.font_size}pt`,
+        lineHeight: spacing.line_height,
+        padding: contentPadding,
+        color: textColor,
+      }}
+    >
+      {renderHeader()}
+
+      <div className="w-full h-px bg-gray-200 mb-8 opacity-60"></div>
+
+      {isTwoColumn ? (
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+          <div className="col-span-1 md:col-span-8 space-y-2">{mainCol}</div>
+          <div className="col-span-1 md:col-span-4 space-y-2 pt-2">
+            {sideCol}
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {mainCol} {sideCol}
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default MinimalImageTemplate;

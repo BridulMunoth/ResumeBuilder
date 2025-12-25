@@ -1,465 +1,1395 @@
 import React from "react";
-import { Mail, Phone, MapPin, Linkedin, Globe, ExternalLink, Github } from "lucide-react";
+import {
+  Mail,
+  Phone,
+  MapPin,
+  Linkedin,
+  Globe,
+  ExternalLink,
+  Github,
+  Calendar,
+  Flag,
+  Briefcase,
+  Code,
+  Award,
+  Trophy,
+  Heart,
+  Cpu,
+  Sparkles,
+  FileText,
+  Languages as LanguagesIcon,
+  BookOpen,
+  Star,
+  Circle,
+} from "lucide-react";
+import {
+  formatDateRange as formatRange,
+  getFontFallback,
+} from "./TemplateHelpers";
 
-const ProfessionalImageTemplate = ({ data, accentColor, formatting }) => {
-    // Formatting Defaults
-    const {
-        layout = { columns: 2 },
-        spacing = {
-            font_size: 10.5,
-            line_height: 1.4,
-            margin_horizontal: 10,
-            margin_vertical: 10,
-            section_spacing: 6,
-        },
-        colors = {
-            primary: "#111827",
-            secondary: "#4B5563",
-            accent: accentColor || "#2563EB",
-            text: "#374151",
-            background: "#FFFFFF",
-        },
-        section_order = [],
-        section_visibility = {},
-        section_titles = {},
-    } = formatting || {};
+/* ==========================================================================
+   UTILITIES
+   ========================================================================== */
 
-    const getSectionTitle = (id, defaultTitle) => section_titles[id] || defaultTitle;
+const cx = (...cls) => cls.filter(Boolean).join(" ");
 
-    const formatDate = (dateStr) => {
-        if (!dateStr) return "";
-        const d = new Date(dateStr);
-        if (Number.isNaN(d.getTime())) return "";
-        return d.toLocaleDateString("en-US", { year: "numeric", month: "short" });
-    };
+const getFontFamily = (font) => {
+  if (font?.family) return ""; // Let inline style handle the custom family
+  if (!font) return "font-sans";
+  if (font.type === "serif") return "font-serif";
+  if (font.type === "mono") return "font-mono";
+  return "font-sans";
+};
 
-    const formatDateRange = (start, end, isCurrent) => {
-        const startText = formatDate(start);
-        const endText = isCurrent ? "Present" : formatDate(end);
-        if (!startText && !endText) return "";
-        if (!startText) return endText;
-        if (!endText) return startText;
-        return `${startText} - ${endText}`;
-    };
+const formatFullDate = (d) => {
+  if (!d) return "";
+  const dt = new Date(d);
+  if (isNaN(dt.getTime())) return "";
+  return dt.toLocaleDateString("en-US", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+};
 
-    const getList = (item) => {
-        if (!item) return [];
-        if (Array.isArray(item)) return item;
-        if (typeof item === 'string') return item.split(',').map(i => i.trim()).filter(Boolean);
-        return [];
-    };
+const normalizeLevel = (val) => {
+  if (!val) return 0;
+  const map = {
+    beginner: 1,
+    basic: 1,
+    amateur: 2,
+    elementary: 2,
+    competent: 3,
+    intermediate: 3,
+    proficient: 4,
+    advanced: 4,
+    expert: 5,
+    native: 5,
+    master: 5,
+  };
+  if (typeof val === "string") return map[val.toLowerCase()] || 3;
+  if (val > 5) return Math.round(val / 20); // assume 100 base
+  return val;
+};
 
-    const isVisible = (id) => section_visibility[id] !== false;
+/* ==========================================================================
+   HELPERS
+   ========================================================================== */
 
-    const getImageSrc = () => {
-        if (!data.personal_info?.image) return null;
-        if (typeof data.personal_info.image === 'string') return data.personal_info.image;
-        if (typeof data.personal_info.image === 'object') return URL.createObjectURL(data.personal_info.image);
-        return null;
-    };
+const ContactItem = ({
+  icon: Icon,
+  value,
+  accent,
+  formatting,
+  forceWhiteIcon,
+}) => {
+  if (!value) return null;
 
-    // Styles
-    const containerStyle = {
-        fontFamily: "Inter, sans-serif",
-        color: colors.text,
-        fontSize: `${spacing.font_size}pt`,
-        lineHeight: spacing.line_height,
-        padding: `${spacing.margin_vertical}mm ${spacing.margin_horizontal}mm`,
-        backgroundColor: colors.background,
-    };
-    
-    const sectionContainerStyle = {
-        marginBottom: `${spacing.section_spacing}mm`,
-    };
+  const style = formatting?.personal?.iconStyle || "filled";
 
-    const headingStyle = {
-        fontSize: "0.875rem", // text-sm
-        fontWeight: 700,
-        marginBottom: "1rem",
-        textTransform: "uppercase",
-        letterSpacing: "0.05em",
-        borderBottom: `1px solid ${colors.secondary}`,
-        paddingBottom: "0.25rem",
-        color: colors.accent,
-        borderColor: colors.secondary
-    };
+  const renderIcon = () => {
+    if (style === "none" || !Icon) return null;
 
-    const subHeadingStyle = {
-        fontWeight: 600,
-        color: colors.primary,
-        fontSize: `${spacing.font_size}pt`
-    };
+    const size = 15;
+    const baseClass = "shrink-0 flex items-center justify-center shadow-sm";
 
-    const metaStyle = {
-        fontSize: "0.9em",
-        color: colors.secondary
-    };
-
-    // Renderers
-    const renderContact = () => (
-        <section style={sectionContainerStyle}>
-            <h2 style={headingStyle}>{getSectionTitle("personal", "Contact")}</h2>
-            <div className="space-y-3 text-xs">
-                {data.personal_info?.email && <div className="flex items-start gap-2"><Mail className="size-3 mt-0.5" style={{ color: colors.accent }} /> <span className="break-all">{data.personal_info.email}</span></div>}
-                {data.personal_info?.phone && <div className="flex items-start gap-2"><Phone className="size-3 mt-0.5" style={{ color: colors.accent }} /> <span>{data.personal_info.phone}</span></div>}
-                {data.personal_info?.location && <div className="flex items-start gap-2"><MapPin className="size-3 mt-0.5" style={{ color: colors.accent }} /> <span>{data.personal_info.location}</span></div>}
-                {/* Socials */}
-                {data.personal_info?.linkedin && <a href={data.personal_info.linkedin} className="flex items-start gap-2 hover:underline"><Linkedin className="size-3 mt-0.5" style={{ color: colors.accent }} /><span className="break-all">{data.personal_info.linkedin}</span></a>}
-                {data.personal_info?.website && <a href={data.personal_info.website} className="flex items-start gap-2 hover:underline"><Globe className="size-3 mt-0.5" style={{ color: colors.accent }} /><span className="break-all">{data.personal_info.website}</span></a>}
-                {data.personal_info?.github && <a href={data.personal_info.github} className="flex items-start gap-2 hover:underline"><Github className="size-3 mt-0.5" style={{ color: colors.accent }} /><span className="break-all">{data.personal_info.github}</span></a>}
+    if (forceWhiteIcon) {
+      if (style === "outline")
+        return (
+          <Icon
+            size={size}
+            className="text-white drop-shadow-md"
+            strokeWidth={2}
+          />
+        );
+      if (style === "glow")
+        return (
+          <Icon
+            size={size}
+            className="text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]"
+            strokeWidth={2}
+          />
+        );
+      if (style === "filled")
+        return (
+          <div
+            className={`${baseClass} w-7 h-7 rounded bg-white border border-black/25`}
+            style={{ color: accent }}
+          >
+            <Icon size={14} strokeWidth={2.5} />
+          </div>
+        );
+      if (style === "soft")
+        return (
+          <div
+            className={`${baseClass} w-7 h-7 rounded-full`}
+            style={{ backgroundColor: "rgba(255,255,255,0.2)", color: "white" }}
+          >
+            <Icon size={14} strokeWidth={2} />
+          </div>
+        );
+      if (style === "diamond")
+        return (
+          <div className="relative w-6 h-6 flex items-center justify-center shrink-0">
+            <div className="absolute inset-0 bg-white opacity-20 transform rotate-45 rounded-sm" />
+            <div className="relative z-10 text-white">
+              <Icon size={12} strokeWidth={2} />
             </div>
-        </section>
-    );
-
-    const renderSkills = () => {
-        if (!data.skills || data.skills.length === 0 || !isVisible("skills")) return null;
-
-        const skillsArray = Array.isArray(data.skills)
-            ? data.skills.map((s) => (typeof s === "string" ? { name: s, category: "Uncategorized" } : s)).filter((s) => s && s.name)
-            : [];
-
-        const grouped = skillsArray.reduce((acc, skill) => {
-            const cat = (skill.category || "Uncategorized").trim() || "Uncategorized";
-            if (!acc[cat]) acc[cat] = [];
-            acc[cat].push(skill);
-            return acc;
-        }, {});
-
-        return (
-            <section style={sectionContainerStyle}>
-                <h2 style={headingStyle}>{getSectionTitle("skills", "Core Skills")}</h2>
-                <div className="space-y-3 text-xs">
-                    {Object.entries(grouped).map(([category, items]) => (
-                        <div key={category}>
-                             {category !== "Uncategorized" && (
-                                <h4 className="font-bold opacity-80 mb-1" style={{ color: colors.secondary }}>{category}</h4>
-                            )}
-                            <div className="flex flex-wrap gap-1">
-                                {items.map((skill, index) => (
-                                    <span key={index} className="inline-block px-2 py-0.5 rounded bg-gray-100 text-[10px]" style={{ color: colors.text }}>
-                                        {skill.name}{skill.level ? ` (${skill.level})` : ""}
-                                    </span>
-                                ))}
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </section>
+          </div>
         );
-    };
-
-    const renderEducation = () => (
-        data.education && data.education.length > 0 && isVisible("education") && (
-            <section style={sectionContainerStyle}>
-                <h2 style={headingStyle}>{getSectionTitle("education", "Education")}</h2>
-                <div className="space-y-4">
-                    {data.education.map((edu, index) => (
-                        <div key={index}>
-                            <h3 style={subHeadingStyle}>{edu.degree}</h3>
-                            {edu.field && <p className="text-xs mb-1" style={{ color: colors.secondary }}>{edu.field}</p>}
-                            <div className="flex justify-between items-start mt-1">
-                                <p className="text-xs font-medium" style={{ color: colors.accent }}>{edu.institution}</p>
-                                <div className="text-[10px] text-right" style={{ color: colors.secondary }}>
-                                    {formatDateRange(edu.start_date, edu.end_date, edu.is_current)}
-                                </div>
-                            </div>
-                            {edu.location && <p className="text-[10px] text-gray-500">{edu.location}</p>}
-                            {(edu.grade || edu.gpa) && <p className="text-[10px] mt-0.5">Grade: {edu.grade || edu.gpa}</p>}
-                        </div>
-                    ))}
-                </div>
-            </section>
-        )
-    );
-
-    const renderSummary = () => (
-        isVisible("summary") && data.professional_summary && (
-            <section style={sectionContainerStyle}>
-                <h2 style={{...headingStyle, fontSize: "1.125rem", textTransform: 'none', border: 'none', padding: 0}}>{getSectionTitle("summary", "Professional Summary")}</h2>
-                <p className="leading-relaxed text-sm" style={{ color: colors.text }}>{data.professional_summary}</p>
-            </section>
-        )
-    );
-
-    const renderExperience = () => (
-        data.experience && data.experience.length > 0 && isVisible("experience") && (
-            <section style={sectionContainerStyle}>
-                <h2 style={{...headingStyle, fontSize: "1.125rem", textTransform: 'none', border: 'none', padding: 0}}>{getSectionTitle("experience", "Professional Experience")}</h2>
-                <div className="space-y-5">
-                    {data.experience.map((exp, index) => {
-                        const techList = getList(exp.technologies);
-                        return (
-                            <div key={index} className="relative pl-4 border-l-2" style={{ borderColor: colors.secondary + '40' }}>
-                                <div className="flex justify-between items-start mb-1">
-                                    <div>
-                                        <h3 style={subHeadingStyle}>{exp.title || exp.position}</h3>
-                                        <p className="text-sm font-medium" style={{ color: colors.accent }}>
-                                            {exp.company}
-                                            {exp.location && <span className="opacity-75 font-normal text-xs text-gray-500"> | {exp.location}</span>}
-                                        </p>
-                                    </div>
-                                    <span style={metaStyle}>
-                                        {formatDateRange(exp.start_date, exp.end_date, exp.is_current)}
-                                    </span>
-                                </div>
-                                {exp.description && (
-                                    <div className="text-sm leading-relaxed mt-2 whitespace-pre-line" style={{ color: colors.text }}>
-                                        {exp.description}
-                                    </div>
-                                )}
-                                {techList.length > 0 && (
-                                    <div className="flex flex-wrap gap-1 mt-2">
-                                        {techList.map((tech, i) => (
-                                            <span key={i} className="text-[10px] px-1.5 py-0.5 rounded border" style={{ borderColor: colors.secondary + "40", color: colors.secondary }}>
-                                                {tech}
-                                            </span>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        );
-                    })}
-                </div>
-            </section>
-        )
-    );
-    
-    const renderProjects = () => (
-        data.projects && data.projects.length > 0 && isVisible("projects") && (
-            <section style={sectionContainerStyle}>
-                <h2 style={{...headingStyle, fontSize: "1.125rem", textTransform: 'none', border: 'none', padding: 0}}>{getSectionTitle("projects", "Key Projects")}</h2>
-                <div className="space-y-4">
-                    {data.projects.map((proj, index) => {
-                        const techList = getList(proj.technologies);
-                        return (
-                            <div key={index}>
-                                <div className="flex justify-between items-start">
-                                    <div className="flex items-center gap-2">
-                                        <h3 style={subHeadingStyle}>{proj.name}</h3>
-                                        {proj.link && <a href={proj.link} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-600"><ExternalLink size={14} /></a>}
-                                    </div>
-                                    <span style={metaStyle}>{formatDateRange(proj.start_date, proj.end_date, proj.is_current)}</span>
-                                </div>
-                                {proj.type && <p className="text-xs mb-1" style={{ color: colors.accent }}>{proj.type}</p>}
-                                {proj.description && <p className="text-sm leading-relaxed mt-1" style={{ color: colors.text }}>{proj.description}</p>}
-                                {techList.length > 0 && (
-                                    <div className="flex flex-wrap gap-1 mt-1.5">
-                                        {techList.map((tech, i) => (
-                                            <span key={i} className="text-[10px] px-1.5 py-0.5 rounded border" style={{ borderColor: colors.secondary + "40", color: colors.secondary }}>
-                                                {tech}
-                                            </span>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        );
-                    })}
-                </div>
-            </section>
-        )
-    );
-    
-    const renderCertifications = () => (
-        data.certifications && data.certifications.length > 0 && isVisible("certifications") && (
-             <section style={sectionContainerStyle}>
-                <h2 style={headingStyle}>{getSectionTitle("certifications", "Certifications")}</h2>
-                 <div className="space-y-3">
-                    {data.certifications.map((cert, index) => (
-                         <div key={index} className="mb-2">
-                             <div className="flex items-start justify-between">
-                                <h3 className="font-semibold text-xs" style={{ color: colors.primary }}>{cert.name}</h3>
-                                <span className="text-[10px] text-gray-500">{formatDate(cert.date)}</span>
-                             </div>
-                             {cert.issuer && <div className="text-xs" style={{ color: colors.secondary }}>{cert.issuer}</div>}
-                         </div>
-                    ))}
-                 </div>
-            </section>
-        )
-    );
-
-    const renderLanguages = () => (
-        data.languages && data.languages.length > 0 && isVisible("languages") && (
-             <section style={sectionContainerStyle}>
-                <h2 style={headingStyle}>{getSectionTitle("languages", "Languages")}</h2>
-                <div className="space-y-1 text-xs">
-                    {data.languages.map((lang, index) => (
-                         <div key={index} className="flex justify-between">
-                            <span style={{ color: colors.primary }}>
-                                {typeof lang === 'string' ? lang : (lang.name || lang.language)}
-                            </span>
-                            {(lang.proficiency || lang.level) && (
-                                <span className="text-gray-500">{lang.proficiency || lang.level}</span>
-                            )}
-                         </div>
-                    ))}
-                </div>
-            </section>
-        )
-    );
-
-    const renderAchievements = () => (
-        data.achievements && data.achievements.length > 0 && isVisible("achievements") && (
-             <section style={sectionContainerStyle}>
-                <h2 style={headingStyle}>{getSectionTitle("achievements", "Achievements")}</h2>
-                <ul className="list-disc pl-3 text-xs space-y-2" style={{ color: colors.text }}>
-                    {data.achievements.map((item, index) => (
-                        <li key={index}>
-                             {typeof item === 'string' ? item : (
-                                <span>
-                                    <span className="font-semibold" style={{ color: colors.primary }}>{item.title}</span>
-                                    {item.date && <span className="opacity-70 ml-1">({formatDate(item.date)})</span>}
-                                    {item.description && <span className="block mt-0.5 opacity-90">{item.description}</span>}
-                                </span>
-                            )}
-                        </li>
-                    ))}
-                </ul>
-            </section>
-        )
-    );
-
-    const renderVolunteer = () => (
-         data.volunteer_experience && data.volunteer_experience.length > 0 && isVisible("volunteer") && (
-            <section style={sectionContainerStyle}>
-                <h2 style={headingStyle}>{getSectionTitle("volunteer", "Volunteer")}</h2>
-                 <div className="space-y-3">
-                    {data.volunteer_experience.map((vol, index) => (
-                        <div key={index}>
-                            <h3 className="font-semibold text-xs" style={{ color: colors.primary }}>{vol.role}</h3>
-                            <p className="text-xs mb-1" style={{ color: colors.secondary }}>{vol.organization}</p>
-                            <p className="text-[10px] text-gray-400 mb-1">
-                                {formatDateRange(vol.start_date, vol.end_date, vol.is_current)}
-                            </p>
-                             {vol.description && <p className="text-xs opacity-90 leading-relaxed">{vol.description}</p>}
-                        </div>
-                    ))}
-                </div>
-            </section>
-        )
-    );
-
-    const renderCustomSection = (section) => {
-        if (!section || !section.items || section.items.length === 0 || !isVisible(section.id)) return null;
+      if (style === "round" || style === "square")
         return (
-            <section key={section.id} style={sectionContainerStyle}>
-                <h2 style={headingStyle}>{section.title}</h2>
-                <div className="space-y-3">
-                    {section.items.map((item, i) => (
-                        <div key={i}>
-                            <div className="flex justify-between items-start">
-                                <h3 className="font-bold text-xs" style={{ color: colors.primary }}>{item.title}</h3>
-                                {item.date && <div className="text-[10px] text-gray-500">{item.date}</div>}
-                            </div>
-                            {item.subtitle && <p className="text-[10px] italic" style={{ color: colors.accent }}>{item.subtitle}</p>}
-                            {item.description && <p className="text-xs leading-relaxed mt-1" style={{ color: colors.text }}>{item.description}</p>}
-                        </div>
-                    ))}
-                </div>
-            </section>
+          <div
+            className={`${baseClass} w-6 h-6 ${
+              style === "round" ? "rounded-full" : "rounded"
+            } bg-white`}
+            style={{ color: accent }}
+          >
+            <Icon size={12} strokeWidth={2.5} />
+          </div>
         );
+      return <Icon size={size} className="text-white" />;
+    }
+
+    // Normal Mode
+    const bgSoft = `${accent}20`;
+    if (style === "outline")
+      return <Icon size={size} style={{ color: accent }} strokeWidth={2} />;
+    if (style === "glow")
+      return (
+        <Icon
+          size={size}
+          style={{ color: accent, filter: `drop-shadow(0 0 4px ${accent})` }}
+          strokeWidth={2}
+        />
+      );
+    if (style === "filled")
+      return (
+        <div
+          className={`${baseClass} w-7 h-7 rounded bg-white border border-gray-200`}
+          style={{ color: accent }}
+        >
+          <Icon size={14} strokeWidth={2} />
+        </div>
+      );
+    if (style === "soft")
+      return (
+        <div
+          className={`${baseClass} w-7 h-7 rounded-full`}
+          style={{ backgroundColor: bgSoft, color: accent }}
+        >
+          <Icon size={14} strokeWidth={2} />
+        </div>
+      );
+    if (style === "diamond")
+      return (
+        <div className="relative w-6 h-6 flex items-center justify-center shrink-0">
+          <div
+            className="absolute inset-0 opacity-20 transform rotate-45 rounded-sm"
+            style={{ backgroundColor: accent }}
+          />
+          <div className="relative z-10 text-white" style={{ color: accent }}>
+            <Icon size={12} strokeWidth={2} />
+          </div>
+        </div>
+      );
+    if (style === "round" || style === "square")
+      return (
+        <div
+          className={`${baseClass} w-6 h-6 ${
+            style === "round" ? "rounded-full" : "rounded"
+          }`}
+          style={{ backgroundColor: bgSoft, color: accent }}
+        >
+          <Icon size={12} strokeWidth={2} />
+        </div>
+      );
+    return <Icon size={size} style={{ color: accent }} />;
+  };
+
+  return (
+    <div
+      className="flex items-center gap-2.5 font-medium tracking-wide"
+      style={{
+        color: forceWhiteIcon ? "white" : "inherit",
+        textShadow: forceWhiteIcon ? "0 1px 2px rgba(0,0,0,0.1)" : "none",
+        fontSize: "0.9em",
+      }}
+    >
+      {style !== "none" && renderIcon()}
+      <span className="break-all opacity-95 hover:opacity-100 transition-opacity">
+        {value}
+      </span>
+    </div>
+  );
+};
+
+/* ==========================================================================
+   SECTION HEADING
+   ========================================================================== */
+
+const SectionHeading = ({ title, icon: Icon, formatting }) => {
+  const accent = formatting.colors?.accent || "#3B82F6";
+  const style = formatting.heading?.style || "underline";
+  const caps = formatting.heading?.caps || "capitalize";
+  const iconStyle = formatting.heading?.iconStyle || "filled";
+  const fontSizeVal =
+    formatting.heading?.size === "XL"
+      ? "1.5em"
+      : formatting.heading?.size === "L"
+      ? "1.25em"
+      : formatting.heading?.size === "S"
+      ? "0.9em"
+      : "1em";
+
+  const align = formatting.heading?.align || "left";
+  const alignClass =
+    align === "center"
+      ? "justify-center"
+      : align === "right"
+      ? "justify-end"
+      : "justify-start";
+
+  const renderIcon = () => {
+    if (!Icon || iconStyle === "none") return null;
+    if (iconStyle === "outline") {
+      return <Icon size={18} style={{ color: accent }} />;
+    }
+    return (
+      <div
+        className="p-1 rounded bg-opacity-10 mr-2"
+        style={{ backgroundColor: accent, color: "white" }}
+      >
+        <Icon size={12} className="text-white" />
+      </div>
+    );
+  };
+
+  if (style === "boxed") {
+    return (
+      <div
+        className={cx(
+          "flex items-center gap-2 px-3 py-1.5 rounded-md mb-4",
+          caps,
+          alignClass
+        )}
+        style={{
+          backgroundColor: accent,
+          color: "white",
+          fontSize: fontSizeVal,
+        }}
+      >
+        {Icon && iconStyle !== "none" && (
+          <Icon size={16} className="text-white" />
+        )}
+        <span className="font-bold tracking-wide">{title}</span>
+      </div>
+    );
+  }
+
+  if (style === "leftLine") {
+    return (
+      <div
+        className={cx(
+          "flex items-center gap-3 mb-4 pl-3 border-l-4",
+          caps,
+          alignClass
+        )}
+        style={{ borderColor: accent, fontSize: fontSizeVal }}
+      >
+        <span
+          className="font-bold tracking-wide"
+          style={{ color: formatting.colors?.text }}
+        >
+          {title}
+        </span>
+      </div>
+    );
+  }
+
+  if (style === "modern") {
+    return (
+      <div
+        className={cx(
+          "flex items-center gap-3 mb-4 pl-3 py-1 border-l-4",
+          caps,
+          alignClass
+        )}
+        style={{
+          borderColor: accent,
+          background: `linear-gradient(90deg, ${accent}15 0%, transparent 100%)`,
+          fontSize: fontSizeVal,
+        }}
+      >
+        <span
+          className="font-bold tracking-wide"
+          style={{ color: formatting.colors?.text }}
+        >
+          {title}
+        </span>
+      </div>
+    );
+  }
+
+  if (style === "highlight") {
+    return (
+      <div className={cx("mb-4 flex", alignClass)}>
+        <div className="relative inline-block">
+          <span
+            className={cx(
+              "absolute bottom-1 left-0 w-full h-3 z-0 opacity-40 transform -rotate-1",
+              "rounded-sm"
+            )}
+            style={{ backgroundColor: accent }}
+          />
+          <div
+            className={cx("relative z-10 flex items-center gap-2 px-1", caps)}
+            style={{ fontSize: fontSizeVal }}
+          >
+            {renderIcon()}
+            <span
+              className="font-bold tracking-wide"
+              style={{ color: formatting.colors?.text }}
+            >
+              {title}
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (style === "shading") {
+    return (
+      <div
+        className={cx(
+          "flex items-center gap-2 mb-4 px-3 py-1.5 border-b-2",
+          caps,
+          alignClass
+        )}
+        style={{
+          borderColor: accent,
+          backgroundColor: `${accent}10`, // 10% opacity
+        }}
+      >
+        {renderIcon()}
+        <span
+          className="font-bold tracking-wide"
+          style={{ color: formatting.colors?.text }}
+        >
+          {title}
+        </span>
+      </div>
+    );
+  }
+
+  if (style === "circleLine") {
+    return (
+      <div className={cx("flex items-center gap-3 mb-4", alignClass)}>
+        {/* Icon Circle */}
+        <div
+          className="w-6 h-6 rounded-full flex items-center justify-center shrink-0"
+          style={{ backgroundColor: accent, color: "white" }}
+        >
+          {Icon ? (
+            <Icon size={14} />
+          ) : (
+            <span className="font-bold" style={{ fontSize: "0.8em" }}>
+              #
+            </span>
+          )}
+        </div>
+        {/* Title */}
+        <span
+          className={cx("font-bold tracking-wide", caps)}
+          style={{ color: formatting.colors?.text, fontSize: fontSizeVal }}
+        >
+          {title}
+        </span>
+        {/* Line */}
+        <div
+          className="h-[2px] flex-1 opacity-20"
+          style={{ backgroundColor: formatting.colors?.text || "#000" }}
+        />
+      </div>
+    );
+  }
+
+  if (style === "diamondLine") {
+    return (
+      <div className={cx("flex items-center gap-4 mb-4", alignClass)}>
+        {/* Diamond Container */}
+        <div className="relative w-6 h-6 flex items-center justify-center shrink-0">
+          <div
+            className="absolute inset-0 transform rotate-45 rounded-sm"
+            style={{ backgroundColor: accent }}
+          />
+          <div className="relative z-10 text-white">
+            {Icon ? (
+              <Icon size={12} />
+            ) : (
+              <span className="font-bold" style={{ fontSize: "0.8em" }}>
+                #
+              </span>
+            )}
+          </div>
+        </div>
+        {/* Title */}
+        <span
+          className={cx("font-bold tracking-wide", caps)}
+          style={{ color: formatting.colors?.text, fontSize: fontSizeVal }}
+        >
+          {title}
+        </span>
+        {/* Line */}
+        <div
+          className="h-[1px] flex-1 opacity-20"
+          style={{ backgroundColor: formatting.colors?.text || "#000" }}
+        />
+      </div>
+    );
+  }
+
+  if (style === "pill") {
+    return (
+      <div className={cx("mb-4 flex", alignClass)}>
+        <div
+          className={cx(
+            "inline-flex items-center gap-2 px-4 py-1.5 rounded-full border",
+            caps
+          )}
+          style={{
+            borderColor: accent,
+            backgroundColor: `${accent}08`, // very light bg
+            color: formatting.colors?.text,
+            fontSize: fontSizeVal,
+          }}
+        >
+          {Icon && <Icon size={16} style={{ color: accent }} />}
+          <span className="font-bold tracking-wide">{title}</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Default / Underline
+  return (
+    <div className={cx("mb-3 flex", alignClass)}>
+      <div
+        className={cx("inline-flex items-center gap-2 pb-2 pr-4", caps)}
+        style={{
+          borderBottom: style === "underline" ? `2px solid ${accent}` : "none",
+          fontSize: fontSizeVal,
+        }}
+      >
+        {renderIcon()}
+        <span className="font-bold tracking-wide" style={{ color: accent }}>
+          {title}
+        </span>
+      </div>
+    </div>
+  );
+};
+
+/* ==========================================================================
+   CONTENT RENDERERS (Core Logic Reuse)
+   ========================================================================== */
+
+const renderLevelSection = (items, formatting, type) => {
+  if (!items?.length) return null;
+
+  const normalized = items.map((item) => {
+    if (typeof item === "string")
+      return { name: item, level: null, category: "General" };
+    return {
+      name: item.name || item.language,
+      level: item.level || item.proficiency || null,
+      category: item.category || "General",
+    };
+  });
+
+  const config = formatting[type] || {};
+  let layout = config.layout || "grid";
+  if (layout === "level") layout = "grid";
+  if (layout === "bubble") layout = "compact";
+
+  const levelMode = config.levelMode || "text"; // text, dots, bar, hide
+  const compactMode = config.compactMode || "bullet"; // comma, pipe, bullet
+  const enableBubble = config.enableBubble || false;
+  const subinfo = config.subinfo || "dash"; // dash, colon, bracket
+  const accent = formatting.colors?.accent || "#3B82F6";
+
+  const formatSubinfo = (level) => {
+    if (!level) return null;
+    if (subinfo === "bracket")
+      return (
+        <span
+          className="opacity-75 ml-1.5 font-normal"
+          style={{ fontSize: "0.85em" }}
+        >
+          ({level})
+        </span>
+      );
+    if (subinfo === "colon")
+      return (
+        <span
+          className="opacity-75 ml-1.5 font-normal"
+          style={{ fontSize: "0.85em" }}
+        >
+          : {level}
+        </span>
+      );
+    return (
+      <span
+        className="opacity-75 ml-1.5 font-normal"
+        style={{ fontSize: "0.85em" }}
+      >
+        – {level}
+      </span>
+    );
+  };
+
+  const renderLevelIndicator = (level, score) => {
+    if (levelMode === "hide") return null;
+    if (level == null || level === "") return null;
+
+    if (levelMode === "bar") {
+      const barWidth = enableBubble ? "w-10" : "w-12";
+      const margin = enableBubble ? "" : "ml-1.5";
+      return (
+        <div
+          className={cx(
+            barWidth,
+            "h-1.5 bg-gray-200 rounded-full overflow-hidden shrink-0 align-middle inline-block",
+            margin
+          )}
+        >
+          <div
+            className="h-full rounded-full"
+            style={{ width: `${score * 20}%`, backgroundColor: accent }}
+          />
+        </div>
+      );
+    }
+    if (levelMode === "dots") {
+      return (
+        <div
+          className={cx(
+            "flex gap-0.5 shrink-0 align-middle inline-flex",
+            enableBubble ? "" : "ml-1.5"
+          )}
+        >
+          {[1, 2, 3, 4, 5].map((dot) => (
+            <Circle
+              key={dot}
+              size={7}
+              className={dot <= score ? "fill-current" : "text-gray-300"}
+              style={dot <= score ? { color: accent } : {}}
+            />
+          ))}
+        </div>
+      );
+    }
+
+    let displayLevel = level;
+    if (
+      config.customLevels &&
+      Array.isArray(config.customLevels) &&
+      score >= 1 &&
+      score <= 5
+    ) {
+      const customLabel = config.customLevels[score - 1];
+      if (customLabel) displayLevel = customLabel;
+    }
+    return formatSubinfo(displayLevel);
+  };
+
+  // Bubble mode logic
+  if (enableBubble) {
+    const isGrid = layout === "grid";
+    const renderBubbleItem = (item, i, extraClass = "") => {
+      const score = normalizeLevel(item.level);
+      return (
+        <div
+          key={i}
+          className={cx(
+            "px-3 py-1.5 rounded-xl font-medium border flex items-center flex-wrap gap-2 shadow-sm hover:shadow transition-all",
+            extraClass
+          )}
+          style={{
+            backgroundColor: `${accent}12`,
+            borderColor: `${accent}35`,
+            color: formatting.colors?.text,
+            fontSize: "0.9em",
+          }}
+        >
+          <span className="break-words whitespace-normal leading-snug">
+            {item.name}
+          </span>
+          {renderLevelIndicator(item.level, score)}
+        </div>
+      );
     };
 
-    // Helper
-    const renderSection = (id) => {
-        if (id.startsWith("custom_")) {
-            const sectionId = id.replace("custom_", "");
-            const section = data.custom_sections?.find(s => s.id === sectionId);
-            return renderCustomSection(section);
-        }
+    if (isGrid) {
+      const groups = {};
+      normalized.forEach((item) => {
+        const cat = item.category || "General";
+        if (!groups[cat]) groups[cat] = [];
+        groups[cat].push(item);
+      });
+      const isFlat =
+        Object.keys(groups).length === 1 &&
+        Object.keys(groups)[0] === "General";
 
-        switch(id) {
-            case "education": return renderEducation();
-            case "skills": return renderSkills();
-            case "summary": return renderSummary();
-            case "experience": return renderExperience();
-            case "projects": return renderProjects();
-            case "personal": return renderContact();
-            case "certifications": return renderCertifications();
-            case "languages": return renderLanguages();
-            case "achievements": return renderAchievements();
-            case "volunteer": return renderVolunteer();
-            default: return null;
-        }
+      if (isFlat)
+        return (
+          <div className="flex flex-wrap gap-2">
+            {groups["General"].map((item, i) => renderBubbleItem(item, i))}
+          </div>
+        );
+      return (
+        <div className="space-y-4">
+          {Object.entries(groups).map(([cat, list]) => (
+            <div key={cat}>
+              <p
+                className="font-bold uppercase mb-1.5 opacity-80"
+                style={{ color: accent, fontSize: "0.85em" }}
+              >
+                {cat}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {list.map((item, i) => renderBubbleItem(item, i))}
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+    } else {
+      return (
+        <div className="flex flex-wrap gap-2">
+          {normalized.map((item, i) => renderBubbleItem(item, i))}
+        </div>
+      );
+    }
+  }
+
+  // Standard (Non-Bubble)
+  if (layout === "grid" || layout === "level") {
+    const groups = {};
+    normalized.forEach((item) => {
+      const cat = item.category || "General";
+      if (!groups[cat]) groups[cat] = [];
+      groups[cat].push(item);
+    });
+    const isFlat =
+      Object.keys(groups).length === 1 && Object.keys(groups)[0] === "General";
+
+    const renderGridItem = (item, i) => {
+      const score = normalizeLevel(item.level);
+      return (
+        <div
+          key={i}
+          className="flex flex-wrap items-center gap-1.5 min-w-[120px] max-w-full"
+        >
+          <div
+            className="w-1.5 h-1.5 rounded-full shrink-0"
+            style={{ backgroundColor: accent }}
+          />
+          <span className="font-medium break-words">{item.name}</span>
+          {renderLevelIndicator(item.level, score)}
+        </div>
+      );
     };
 
-    // Columns
-    const defaultOrder = ["skills", "education", "experience", "projects", "summary", "certifications", "languages", "achievements", "volunteer"];
-    let finalOrder = section_order.length > 0 ? section_order : defaultOrder;
-     // ensure all sections including custom
-    const customSectionIds = data.custom_sections?.map(s => `custom_${s.id}`) || [];
-    const allIds = [...defaultOrder, ...customSectionIds];
-    const missingSections = allIds.filter(id => !finalOrder.includes(id));
-    finalOrder = [...finalOrder, ...missingSections];
+    if (isFlat)
+      return (
+        <div className="flex flex-wrap gap-x-6 gap-y-2">
+          {groups["General"].map(renderGridItem)}
+        </div>
+      );
+    return (
+      <div className="space-y-4">
+        {Object.entries(groups).map(([cat, list]) => (
+          <div key={cat}>
+            <p
+              className="font-bold uppercase mb-1.5 opacity-80"
+              style={{ color: accent, fontSize: "0.85em" }}
+            >
+              {cat}
+            </p>
+            <div className="flex flex-wrap gap-x-4 gap-y-2">
+              {list.map(renderGridItem)}
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
 
-    // For Image Template, we typically use the sidebar for:
-    // Image, Contact, Skills, Education, Languages, Certifications
-    // Main content: Summary, Experience, Projects, Volunteer, Achievements, Custom
-    
-    // We can use the user's order to determine left/right if we want, but better to stick to a layout unless we implement full 2-col drag drop.
-    // Let's bucket them like ProfessionalTemplate.
-    
-    const sideIds = ["skills", "education", "personal", "languages", "certifications"];
-    const mainIds = ["summary", "experience", "projects", "achievements", "volunteer", ...customSectionIds];
-    
-    // Dynamically split finalOrder into Left/Right based on these buckets
-    // If a section is in finalOrder, we check if it belongs to left or right groups.
-    // However, if the user moves "Education" to the very bottom of section_order, it should still be in the sidebar but at the bottom of the sidebar?
-    // Or does section_order imply a linear flow?
-    // In multi-column, section_order defines the SEQUENCE. We can separate that sequence into two streams.
-    
-    const currentLeftIds = finalOrder.filter(id => sideIds.includes(id) && !id.startsWith("custom_")); // Custom sections default to main?
-    // Actually, let's allow custom sections to be in main for now.
-    const currentRightIds = finalOrder.filter(id => mainIds.includes(id) || id.startsWith("custom_"));
+  // Compact
+  if (layout === "compact") {
+    const separatorMap = {
+      comma: ", ",
+      pipe: " | ",
+      bullet: " • ",
+      newline: <br />,
+    };
+    const sep = separatorMap[compactMode] || ", ";
+    return (
+      <div className="leading-relaxed">
+        {normalized.map((item, i) => {
+          const score = normalizeLevel(item.level);
+          return (
+            <span key={i}>
+              <span className="font-medium">{item.name}</span>
+              {renderLevelIndicator(item.level, score)}
+              {i < normalized.length - 1 && (
+                <span className="text-gray-400 mx-1">{sep}</span>
+              )}
+            </span>
+          );
+        })}
+      </div>
+    );
+  }
+  return null;
+};
+
+/* ==========================================================================
+   TIMELINE ITEM
+   ========================================================================== */
+
+const TimelineItem = ({
+  item,
+  accent,
+  showLocation = true,
+  showGrade = false,
+}) => {
+  if (!item) return null;
+
+  const range = formatRange(item.start_date, item.end_date, item.is_current);
+  const displayDate =
+    range || (typeof item.start_date === "string" ? item.start_date : "");
+
+  const tech =
+    typeof item.technologies === "string"
+      ? item.technologies
+          .split(",")
+          .map((t) => t.trim())
+          .filter(Boolean)
+      : (item.technologies || []).filter(Boolean);
+
+  const achievements =
+    typeof item.achievements === "string"
+      ? item.achievements
+          .split("\n")
+          .map((a) => a.trim())
+          .filter(Boolean)
+      : (item.achievements || []).filter(Boolean);
+
+  const title = item.title || item.degree || item.position;
+  const subtitle =
+    item.company ||
+    item.school ||
+    item.institution ||
+    item.organization ||
+    item.issuer;
+  const location = item.location || item.board_university;
+  const link = item.link || item.url || item.credential_url;
+  const grade = item.grade || item.gpa || item.percentage;
+
+  return (
+    <div
+      className="timeline-item relative border-l-2 pl-4 pb-4 last:pb-0"
+      style={{ borderColor: `${accent}40` }}
+    >
+      <div
+        className="absolute -left-[5px] top-1.5 w-2.5 h-2.5 rounded-full border-2 bg-white"
+        style={{ borderColor: accent }}
+      ></div>
+
+      <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 mb-1">
+        <h3
+          className="font-bold text-gray-900 leading-tight"
+          style={{ fontSize: "1.1em" }}
+        >
+          {title}
+        </h3>
+        <div className="flex items-center gap-2">
+          {displayDate && (
+            <span
+              className="font-mono text-gray-500"
+              style={{ fontSize: "0.85em" }}
+            >
+              {displayDate}
+            </span>
+          )}
+          {link && (
+            <a
+              href={link}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex align-middle opacity-80 hover:opacity-100"
+              style={{ color: accent }}
+            >
+              <ExternalLink size={14} />
+            </a>
+          )}
+        </div>
+      </div>
+
+      <div className="flex flex-wrap items-baseline justify-between gap-x-2 mb-2">
+        <div
+          className="flex flex-wrap items-center gap-x-2 font-semibold"
+          style={{ color: accent, fontSize: "0.9em" }}
+        >
+          {subtitle && <span>{subtitle}</span>}
+          {location && showLocation && subtitle && (
+            <span className="text-gray-400 font-normal">•</span>
+          )}
+          {showLocation && location && (
+            <span
+              className="text-gray-400 font-normal"
+              style={{ fontSize: "0.85em" }}
+            >
+              {location}
+            </span>
+          )}
+        </div>
+        {item.employment_type && (
+          <span
+            className="text-gray-400 font-medium text-xs whitespace-nowrap"
+            style={{ fontSize: "0.85em" }}
+          >
+            {item.employment_type}
+          </span>
+        )}
+      </div>
+
+      <div
+        className="flex flex-wrap items-center gap-2 mb-2"
+        style={{ fontSize: "0.85em" }}
+      >
+        {showGrade && grade && (
+          <div className="text-gray-600 font-medium">Grade: {grade}</div>
+        )}
+        {item.field && <div className="text-gray-500">Field: {item.field}</div>}
+      </div>
+
+      {item.description && (
+        <div className="text-gray-700 whitespace-pre-line leading-relaxed mb-2 opacity-90">
+          {item.description}
+        </div>
+      )}
+
+      {achievements.length > 0 && (
+        <ul className="flex flex-wrap gap-x-4 gap-y-1 my-2 list-none p-0">
+          {achievements.map((a, i) => (
+            <li
+              key={i}
+              className="inline-flex items-center gap-2 text-gray-700 m-0"
+            >
+              <span
+                className="h-1.5 w-1.5 rounded-full shrink-0"
+                style={{ backgroundColor: accent }}
+              />
+              <span className="leading-tight">{a}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {tech.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mt-2">
+          {tech.map((t, i) => (
+            <span
+              key={i}
+              className="px-2 py-0.5 rounded font-medium border text-white"
+              style={{
+                fontSize: "0.8em",
+                backgroundColor: accent,
+                borderColor: accent,
+              }}
+            >
+              {t}
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+/* ==========================================================================
+   MAIN COMPONENT
+   ========================================================================== */
+
+const ProfessionalImageTemplate = ({ data, formatting = {}, accentColor }) => {
+  const effectiveFormatting = {
+    ...formatting,
+    colors: {
+      ...formatting.colors,
+      accent: formatting.colors?.accent || accentColor || "#2563EB",
+    },
+  };
+
+  const accent = effectiveFormatting.colors?.accent || "#2563EB";
+  const textColor = effectiveFormatting.colors?.text || "#4B5563";
+  const primaryColor = effectiveFormatting.colors?.primary || "#111827";
+  const secondaryColor = effectiveFormatting.colors?.secondary || "#374151";
+
+  const currentFont = effectiveFormatting.font || {};
+  const fontFamily = getFontFamily(currentFont);
+  const selectedFont = currentFont.family;
+  const fontStyle = selectedFont
+    ? { fontFamily: `'${selectedFont}', ${getFontFallback(currentFont)}` }
+    : { fontFamily: getFontFallback(currentFont) || "Georgia, serif" };
+
+  React.useEffect(() => {
+    if (selectedFont) {
+      const linkId = "dynamic-font-loader-professional-image";
+      let link = document.getElementById(linkId);
+      if (!link) {
+        link = document.createElement("link");
+        link.id = linkId;
+        link.rel = "stylesheet";
+        document.head.appendChild(link);
+      }
+      const fontName = selectedFont.replace(/\s+/g, "+");
+      link.href = `https://fonts.googleapis.com/css2?family=${fontName}:wght@300;400;500;600;700&display=swap`;
+    }
+  }, [selectedFont]);
+
+  const spacing = effectiveFormatting.spacing || {
+    font_size: 11,
+    line_height: 1.3,
+    margin_horizontal: 10,
+    margin_vertical: 10,
+    section_spacing: 6,
+  };
+  const isTwoColumn = effectiveFormatting.layout?.columns === 2;
+  const mapId = (id) => (id === "custom" ? "custom_sections" : id);
+  const mappedOrder = (effectiveFormatting.section_order || []).map(mapId);
+  const mappedVisibility = Object.fromEntries(
+    Object.entries(effectiveFormatting.section_visibility || {}).map(
+      ([k, v]) => [mapId(k), v]
+    )
+  );
+  const sectionPositions = Object.fromEntries(
+    Object.entries(effectiveFormatting.section_positions || {}).map(
+      ([k, v]) => [mapId(k), v]
+    )
+  );
+  const getSectionTitle = (id, defaultTitle) =>
+    effectiveFormatting.section_titles?.[id] || defaultTitle;
+  const isVisible = (id) => mappedVisibility?.[id] !== false;
+
+  const sectionIcons = {
+    summary: FileText,
+    experience: Briefcase,
+    education: Flag,
+    projects: Code,
+    skills: Cpu,
+    languages: LanguagesIcon,
+    certifications: Award,
+    achievements: Trophy,
+    volunteer: Heart,
+    hobbies: Sparkles,
+    custom_sections: Star,
+  };
+
+  const renderSectionContent = (id) => {
+    switch (id) {
+      case "summary":
+        if (!isVisible("summary")) return null;
+        if (!data.summary && !data.professional_summary) return null;
+        return (
+          <p
+            className="leading-relaxed whitespace-pre-line"
+            style={{ color: textColor }}
+          >
+            {data.summary || data.professional_summary}
+          </p>
+        );
+      case "experience":
+        return data.experience?.map((item, i) => (
+          <TimelineItem key={i} item={item} accent={accent} />
+        ));
+      case "education":
+        return data.education?.map((item, i) => (
+          <TimelineItem key={i} item={item} accent={accent} showGrade={true} />
+        ));
+      case "projects":
+        if (!data.projects?.length) return null;
+        return data.projects.map((item, i) => {
+          const mappedItem = {
+            ...item,
+            title: item.name || item.title,
+            company: item.role || item.company,
+            employment_type: item.type,
+            achievements: item.highlights || item.achievements || [],
+          };
+          return <TimelineItem key={i} item={mappedItem} accent={accent} />;
+        });
+      case "volunteer":
+        if (!data.volunteer_experience?.length) return null;
+        return data.volunteer_experience.map((item, i) => {
+          const mappedItem = {
+            ...item,
+            title: item.role || item.title,
+          };
+          return <TimelineItem key={i} item={mappedItem} accent={accent} />;
+        });
+      case "skills":
+        return renderLevelSection(data.skills, effectiveFormatting, "skills");
+      case "languages":
+        return renderLevelSection(
+          data.languages,
+          effectiveFormatting,
+          "languages"
+        );
+      case "certifications":
+        if (!data.certifications?.length) return null;
+        return (
+          <div className="space-y-4">
+            {data.certifications.map((c, i) => {
+              const link = c.credential_url || c.link;
+              const item = {
+                title: typeof c === "string" ? c : c.name,
+                company: (
+                  <span className="flex items-center gap-1.5 align-middle">
+                    {c.issuer}
+                    {c.link && (
+                      <a
+                        href={c.link}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="opacity-70 hover:opacity-100 transition inline-flex items-center align-middle"
+                        style={{ color: accent }}
+                        title={c.link}
+                      >
+                        <ExternalLink size={12} />
+                      </a>
+                    )}
+                  </span>
+                ),
+                start_date: c.issue_date,
+                end_date: c.expiry_date,
+                description: c.credential_id ? (
+                  <span>
+                    Credential ID: {c.credential_id}
+                    {link && (
+                      <a
+                        href={link}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex align-middle ml-1.5 opacity-80 hover:opacity-100"
+                        style={{ color: accent }}
+                        title={link}
+                      >
+                        <ExternalLink size={12} />
+                      </a>
+                    )}
+                  </span>
+                ) : undefined,
+                // link: link -- removed to avoid double linking on title
+              };
+              return <TimelineItem key={i} item={item} accent={accent} />;
+            })}
+          </div>
+        );
+      case "achievements":
+        if (!data.achievements?.length) return null;
+        return (
+          <div className="space-y-2">
+            {data.achievements.map((a, i) => {
+              if (typeof a === "string")
+                return (
+                  <div key={i} className="flex gap-2">
+                    <Trophy
+                      size={14}
+                      className="text-yellow-500 shrink-0 mt-0.5"
+                    />
+                    <span>{a}</span>
+                  </div>
+                );
+              const item = {
+                title: a.title || a.name,
+                company: a.organization || a.issuer,
+                start_date: a.start_date || a.date,
+                achievements: a.description ? [a.description] : [],
+                link: a.link,
+              };
+              if (
+                !item.company &&
+                !item.link &&
+                !item.achievements.length &&
+                !item.start_date
+              ) {
+                return (
+                  <div key={i} className="flex gap-2">
+                    <Trophy
+                      size={14}
+                      className="text-yellow-500 shrink-0 mt-0.5"
+                    />
+                    <span className="font-medium">{item.title}</span>
+                  </div>
+                );
+              }
+              return <TimelineItem key={i} item={item} accent={accent} />;
+            })}
+          </div>
+        );
+      case "hobbies":
+      case "interests":
+        return renderLevelSection(
+          data.hobbies,
+          {
+            ...effectiveFormatting,
+            [id]: { ...effectiveFormatting.interests, layout: "compact" },
+          },
+          id
+        ); // Hobbies usually compact/bubble
+      case "custom_sections":
+        if (!data.custom_sections?.length) return null;
+        return (
+          <div className="space-y-6">
+            {data.custom_sections.map((section, idx) => {
+              let rawItems = section.items || [];
+              if (typeof rawItems === "string") rawItems = rawItems.split("\n");
+              const itemsList = Array.isArray(rawItems)
+                ? rawItems.filter(Boolean)
+                : [];
+              return (
+                <div key={idx} className="space-y-3">
+                  <h4 className="font-bold text-sm uppercase tracking-wider opacity-90 border-b pb-1 mb-2 border-slate-200">
+                    {section.title || `Section ${idx + 1}`}
+                    {section.link && (
+                      <a
+                        href={section.link}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="ml-2 inline-flex align-top opacity-60 hover:opacity-100"
+                        style={{ color: accent }}
+                      >
+                        <ExternalLink size={12} />
+                      </a>
+                    )}
+                  </h4>
+                  <ul className="space-y-1.5 ml-1">
+                    {itemsList.map((itemStr, i) => (
+                      <li key={i} className="flex items-start gap-2 text-sm">
+                        <span
+                          className="mt-1.5 h-1.5 w-1.5 rounded-full shrink-0"
+                          style={{ backgroundColor: accent }}
+                        />
+                        <span className="opacity-90">{itemStr}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })}
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const SectionWrapper = ({ id }) => {
+    const title = getSectionTitle(id, id.charAt(0).toUpperCase() + id.slice(1));
+    const Icon = sectionIcons[id] || Star;
+    const content = renderSectionContent(id);
+    if (!content || (Array.isArray(content) && content.length === 0))
+      return null;
+
+    const spacingMb =
+      formatting.spacing?.section_spacing !== undefined
+        ? formatting.spacing.section_spacing * 2
+        : 24;
 
     return (
-        <div className="bg-white min-h-[1000px] relative" style={{ fontFamily: containerStyle.fontFamily }}>
-            {/* Top Bar */}
-            <div className="h-2 w-full absolute top-0 left-0" style={{ backgroundColor: colors.accent }}></div>
-
-            <div style={containerStyle}>
-                {layout.columns === 1 ? (
-                     <div className="space-y-6">
-                          {getImageSrc() && (
-                             <div className="mb-6 w-32 h-32 mx-auto">
-                                 <img src={getImageSrc()} alt="Profile" className="w-full h-full object-cover rounded-full shadow-md" />
-                             </div>
-                         )}
-                        {/* Header Info - Center format for single column */}
-                        <header className="text-center pb-6 border-b" style={{ borderColor: colors.secondary }}>
-                            <h1 className="text-3xl font-bold mb-2" style={{ color: colors.primary }}>{data.personal_info?.full_name || "Your Name"}</h1>
-                            {data.personal_info?.profession && <p className="text-lg font-medium" style={{ color: colors.secondary }}>{data.personal_info.profession}</p>}
-                        </header>
-                        {/* Contact/Personal is now in the loop if in section_order */}
-                        {finalOrder.map(id => renderSection(id))}
-                     </div>
-                ) : (
-                    <div className="grid grid-cols-12 gap-8">
-                         {/* Sidebar (3 cols) */}
-                        <div className="col-span-3 space-y-6 border-r pr-4" style={{ borderColor: colors.secondary + '20' }}>
-                            {getImageSrc() && (
-                                <div className="mb-6">
-                                    <img src={getImageSrc()} alt="Profile" className="w-full aspect-square object-cover rounded-lg shadow-md" />
-                                </div>
-                            )}
-                            {/* Contact is now part of the loop via 'personal' ID */}
-                            {currentLeftIds.map(id => renderSection(id))}
-                        </div>
-
-                         {/* Main (9 cols) */}
-                        <div className="col-span-9 space-y-6">
-                            <header className="pb-6 border-b" style={{ borderColor: colors.secondary }}>
-                                <h1 className="text-3xl font-bold mb-2" style={{ color: colors.primary }}>{data.personal_info?.full_name || "Your Name"}</h1>
-                                {data.personal_info?.profession && <p className="text-lg font-medium" style={{ color: colors.secondary }}>{data.personal_info.profession}</p>}
-                            </header>
-
-                            {currentRightIds.map(id => renderSection(id))}
-                        </div>
-                    </div>
-                )}
-            </div>
-        </div>
+      <section style={{ marginBottom: spacingMb }}>
+        <SectionHeading
+          title={title}
+          icon={Icon}
+          formatting={effectiveFormatting}
+        />
+        <div style={{ color: textColor }}>{content}</div>
+      </section>
     );
-}
+  };
+
+  const defaultOrder = [
+    "summary",
+    "skills",
+    "experience",
+    "projects",
+    "education",
+    "languages",
+    "achievements",
+    "custom_sections",
+    "hobbies",
+  ];
+  let allSections = mappedOrder.length ? mappedOrder : defaultOrder;
+  const ensureIfHasData = (id, hasData) => {
+    if (hasData && !allSections.includes(id)) allSections.push(id);
+  };
+
+  ensureIfHasData(
+    "achievements",
+    Array.isArray(data.achievements) && data.achievements.length > 0
+  );
+  ensureIfHasData(
+    "custom_sections",
+    Array.isArray(data.custom_sections) && data.custom_sections.length > 0
+  );
+
+  const visibleSections = allSections.filter((id) => isVisible(id));
+
+  let mainColNodes = [];
+  let sidebarNodes = [];
+
+  const renderNodes = () => {
+    if (isTwoColumn) {
+      visibleSections.forEach((id) => {
+        const pos = sectionPositions[id];
+        // Sidebar default candidates
+        const isSidebarDefault = [
+          "skills",
+          "languages",
+          "interests",
+          "hobbies",
+          "certifications",
+          "achievements",
+        ].includes(id);
+        if (pos === "sidebar" || (!pos && isSidebarDefault)) {
+          sidebarNodes.push(<SectionWrapper key={id} id={id} />);
+        } else {
+          mainColNodes.push(<SectionWrapper key={id} id={id} />);
+        }
+      });
+    } else {
+      mainColNodes = visibleSections.map((id) => (
+        <SectionWrapper key={id} id={id} />
+      ));
+    }
+  };
+  renderNodes();
+
+  // Header Logic
+  const personal = effectiveFormatting.personal || {};
+  const personalAlign = personal.align || "left";
+  const personalArrangement = personal.arrangement || "grid";
+  const contactItems = [
+    { icon: Mail, value: data.email || data.personal_info?.email },
+    { icon: Phone, value: data.phone || data.personal_info?.phone },
+    { icon: MapPin, value: data.location || data.personal_info?.location },
+    { icon: Linkedin, value: data.linkedin || data.personal_info?.linkedin },
+    { icon: Github, value: data.github || data.personal_info?.github },
+    { icon: Globe, value: data.website || data.personal_info?.website },
+    {
+      icon: Calendar,
+      value: formatFullDate(
+        data.date_of_birth || data.personal_info?.date_of_birth
+      ),
+    },
+    { icon: Flag, value: data.nationality || data.personal_info?.nationality },
+  ].filter((item) => item.value);
+
+  const contentPadding = spacing.margin_horizontal
+    ? `${spacing.margin_vertical}mm ${spacing.margin_horizontal}mm ${spacing.margin_vertical}mm max(${spacing.margin_horizontal}mm, 20mm)`
+    : "20px 20px 20px 24mm";
+
+  return (
+    <div
+      className={cx("bg-white min-h-[inherit] resume-font-root", fontFamily)}
+      style={{
+        ...fontStyle,
+        fontSize: `${spacing.font_size}pt`,
+        lineHeight: spacing.line_height,
+      }}
+    >
+      {/* Accent Bar - Full Width */}
+      <div className="h-1.5 w-full" style={{ backgroundColor: accent }}></div>
+
+      <div style={{ padding: contentPadding }}>
+        {/* Header With Image */}
+        <header
+          className="mb-8 pb-6 border-b"
+          style={{ borderColor: `${secondaryColor}40` }}
+        >
+          <div className="flex gap-8 items-start">
+            {data.image && (
+              <div className="shrink-0">
+                <img
+                  src={data.image}
+                  alt="Profile"
+                  className="w-32 h-32 rounded-full object-cover shadow-sm border-2"
+                  style={{ borderColor: accent }}
+                />
+              </div>
+            )}
+
+            <div className="flex-1 pt-1">
+              <h1
+                className="text-3xl font-bold mb-2"
+                style={{ color: primaryColor }}
+              >
+                {data.name || data.personal_info?.full_name || "Your Name"}
+              </h1>
+              {(data.role || data.personal_info?.profession) && (
+                <p
+                  className="text-lg font-medium"
+                  style={{ color: secondaryColor }}
+                >
+                  {data.role || data.personal_info?.profession}
+                </p>
+              )}
+
+              <div
+                className={cx(
+                  "mt-4 text-sm",
+                  personalArrangement === "grid" && "grid grid-cols-2 gap-3",
+                  personalArrangement === "inline" &&
+                    "flex flex-wrap gap-x-6 gap-y-2",
+                  personalArrangement === "stacked" && "flex flex-col gap-2"
+                )}
+                style={{ color: textColor }}
+              >
+                {contactItems.map((item, i) => (
+                  <ContactItem
+                    key={i}
+                    icon={item.icon}
+                    value={item.value}
+                    accent={accent}
+                    formatting={effectiveFormatting}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <div className="mt-8">
+          {isTwoColumn ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="col-span-1 space-y-6 md:order-1 order-2">
+                {sidebarNodes}
+              </div>
+              <div className="col-span-2 space-y-6 md:order-2 order-1">
+                {mainColNodes}
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-6">{mainColNodes}</div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default ProfessionalImageTemplate;
