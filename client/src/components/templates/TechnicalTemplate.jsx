@@ -1070,7 +1070,10 @@ const TechnicalTemplate = ({ data, formatting = {} }) => {
 
   const PersonalBlock = () => (
     <div className="space-y-3">
-      <h1 className="text-2xl font-extrabold" style={{ color: formatting.colors?.primary || "#111827" }}>
+      <h1
+        className="text-2xl font-extrabold"
+        style={{ color: formatting.colors?.primary || "#111827" }}
+      >
         {data.name || data.personal_info?.full_name || "Your Name"}
       </h1>
       {(data.role || data.personal_info?.profession) && (
@@ -1082,12 +1085,26 @@ const TechnicalTemplate = ({ data, formatting = {} }) => {
         {[
           { icon: Mail, value: data.email || data.personal_info?.email },
           { icon: Phone, value: data.phone || data.personal_info?.phone },
-          { icon: MapPin, value: data.location || data.personal_info?.location },
-          { icon: Linkedin, value: data.linkedin || data.personal_info?.linkedin },
+          {
+            icon: MapPin,
+            value: data.location || data.personal_info?.location,
+          },
+          {
+            icon: Linkedin,
+            value: data.linkedin || data.personal_info?.linkedin,
+          },
           { icon: Github, value: data.github || data.personal_info?.github },
           { icon: Globe, value: data.website || data.personal_info?.website },
-          { icon: Flag, value: data.nationality || data.personal_info?.nationality },
-          { icon: Calendar, value: formatFullDate(data.date_of_birth || data.personal_info?.date_of_birth) },
+          {
+            icon: Flag,
+            value: data.nationality || data.personal_info?.nationality,
+          },
+          {
+            icon: Calendar,
+            value: formatFullDate(
+              data.date_of_birth || data.personal_info?.date_of_birth
+            ),
+          },
         ]
           .filter((item) => item.value)
           .map((item, i) => (
@@ -1100,7 +1117,10 @@ const TechnicalTemplate = ({ data, formatting = {} }) => {
             />
           ))}
       </div>
-      <div className="h-px w-full opacity-30" style={{ backgroundColor: `${formatting.colors?.secondary}30` }} />
+      <div
+        className="h-px w-full opacity-30"
+        style={{ backgroundColor: `${formatting.colors?.secondary}30` }}
+      />
     </div>
   );
 
@@ -1317,6 +1337,7 @@ const TechnicalTemplate = ({ data, formatting = {} }) => {
         return renderLevelSection(data.languages, formatting, "languages");
 
       case "certifications":
+        if (!data.certifications?.length) return null;
         return (
           <div className="space-y-4">
             {data.certifications?.map((c, i) => {
