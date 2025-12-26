@@ -1,0 +1,28 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "server": "nodemon server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "A **Node.js + Express backend** for building and managing resumes with **AI-assisted content generation**.   Includes secure authentication, resume CRUD operations, AI endpoints for enhancement and data extraction, and image upload via Multer + ImageKit.   MongoDB is used for data persistence.",
+  "dependencies": {
+    "@imagekit/nodejs": "^7.1.1",
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.19.2",
+    "multer": "^2.0.2",
+    "openai": "^6.8.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}
